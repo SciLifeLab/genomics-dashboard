@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>Genomics Production Dashboard</title>
+		<script type="text/javascript" src="d3/d3.v3.js"></script>
+        <script src="d3/box.js"></script>
+		<script type="text/javascript" src="dashboard.js"></script>
+        <link rel="stylesheet" type="text/css" href="dashboard.css">
+	</head>
+	<body>
+
+		<div id="header">
+            <h1 id="title">Genomics Process status</h1>
+            <span id="date"></span> - <em>Data for the previous 12 weeks</em>
+        </div>
+        <div id="demand_bc" class="barchart_panel">
+            <h2>Customer demand - projects/week</h2>            
+        </div>
+        <div id="ongoing_bc" class="barchart_panel">
+            <h2>Ongoing projects today</h2>            
+        </div>
+        <div id="total_del_times" class="times_panel">
+			<h2>Total delivery times - <span id="total_legend">All projects</span></h2>
+			<div id="total_rc">
+				<h3>Run chart</h3>
+				<!--<h3 id="total_rc_legend">All projects</h3>-->
+			</div>
+			<div id="total_bp" class="boxplot_panel">
+				<h3>Variability</h3>
+				<!--<h3 id="total_bp_legend">All projects</h3>-->
+			</div>
+		</div>
+        <br class="clear">
+		<div id="rec_ctrl_del_times" class="times_panel">
+			<h2 id="rec_ctrl_legend">Rec control delivery times - All projects</h2>
+			<div id="rec_ctrl_rc">
+				<h3>Run chart</h3>
+				<!--<h3 id="rec_ctrl_rc_legend">All projects</h3>-->
+			</div>
+			<div id="rec_ctrl_bp" class="boxplot_panel">
+				<h3>Variability</h3>
+				<!--<h3 id="rec_ctrl_bp_legend">All projects</h3>-->
+			</div>
+		</div>
+		<div id="lib_prep_del_times" class="times_panel">
+			<h2 id="lib_prep_legend">Lib prep delivery times - Lib prep projects</h2>
+			<div id="lib_prep_rc">
+				<h3>Run chart</h3>
+				<!--<h3 id="lib_prep_rc_legend">All projects</h3>-->
+			</div>
+			<div id="lib_prep_bp" class="boxplot_panel">
+				<h3>Variability</h3>
+				<!--<h3 id="lib_prep_bp_legend">All projects</h3>-->
+			</div>
+		</div>
+		<div id="seq_del_times" class="times_panel">
+			<h2>Sequencing delivery times - <span id="seq_legend">All projects</span></h2>
+			<div id="seq_rc">
+				<h3>Run chart</h3>
+				<!--<h3 id="seq_rc_legend">All projects</h3>-->
+			</div>
+			<div id="seq_bp" class="boxplot_panel">
+				<h3>Variability</h3>
+				<!--<h3 id="seq_bp_legend">All projects</h3>-->
+			</div>
+		</div>
+
+		<script type="text/javascript">
+            var today = new Date(); // today
+            //var today = new Date("2013-05-20");
+			//var threeMonths = new Date( today.getTime() - 3 * 30 * 1000*60*60*24);
+			var twelveWeeks = new Date( today.getTime() - 12 * 7 * 1000*60*60*24);
+			
+			////var startKey = "Arrival date";
+			//var startKey = "Queue date";
+			//var endKey = "All samples sequenced";
+			////var endKey = "Finished date";
+			
+			var panelHeights = 300;
+			var rcWidth = 350;
+
+            var applDataUrl = "http://genomics-dashboard.scilifelab.se/getCouchDbData.php?view=KPI_applications?group_level=2";
+				
+            var dateStr = today.getFullYear() + "-" + today.getMonth() + "-" + today.getDate();    
+            var dateStr = today.toDateString();    
+			d3.select("#date")
+                .text(dateStr);
+            var appl_json;
+			var pf_json;
+            d3.json(applDataUrl, function(json) {
+				appl_json = json;
+				console.log(appl_json); //Log output to console
+                
+                /* 
+                 * Nest d3.json call to be sure all data is loaded before drawing all panels
+                 */
+				// preparation for both data sets
+				var pfDataUrl = "http://genomics-dashboard.scilifelab.se/getCouchDbData.php?view=KPI?group_level=2";
+				console.log("About to call d3.json again");
+				d3.json(pfDataUrl, function(json) {
+					pf_json = json;
+					console.log(pf_json); //Log output to console
+					
+					drawProcessPanels(appl_json, pf_json, today, twelveWeeks, panelHeights, rcWidth);
+				});
+				
+//				// only one data set
+//                drawProcessPanels(appl_json, today, twelveWeeks, panelHeights, rcWidth);
+				
+
+                
+			});
+		</script>
+
+
+	</body>
+</html>
