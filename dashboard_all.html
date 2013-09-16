@@ -80,8 +80,8 @@
 			var panelHeights = 300;
 			var rcWidth = 350;
 
-            //var applDataUrl = "http://genomics-dashboard.scilifelab.se/getCouchDbData.php?view=KPI_applications?group_level=2";
-			var applDataUrl ="getCouchDbData.php?db=projects&design=process_flow&view=KPI_applications&group_level=2";
+			var applDataUrl ="getCouchDbData.php?db=projects&design=process_flow&view=KPI_applications&group_level=3";
+			//var applDataUrl ="getCouchDbData.php?db=projects&design=test&view=KPI_applications&group_level=3";
 				
             var dateStr = today.getFullYear() + "-" + today.getMonth() + "-" + today.getDate();    
             var dateStr = today.toDateString();    
@@ -91,18 +91,18 @@
 			var pf_json;
             d3.json(applDataUrl, function(json) {
 				appl_json = json;
-				console.log(appl_json); //Log output to console
+				//console.log(appl_json); //Log output to console
                 
                 /* 
                  * Nest d3.json call to be sure all data is loaded before drawing all panels
                  */
 				// preparation for both data sets
-				//var pfDataUrl = "http://genomics-dashboard.scilifelab.se/getCouchDbData.php?view=KPI?group_level=2";
-				var pfDataUrl ="getCouchDbData.php?db=projects&design=process_flow&view=KPI&group_level=2";
-				console.log("About to call d3.json again");
+				var pfDataUrl ="getCouchDbData.php?db=projects&design=process_flow&view=KPI&group_level=3";
+				//var pfDataUrl ="getCouchDbData.php?db=projects&design=test&view=KPI&group_level=3";
+				//console.log("About to call d3.json again");
 				d3.json(pfDataUrl, function(json) {
 					pf_json = json;
-					console.log(pf_json); //Log output to console
+					//console.log(pf_json); //Log output to console
 					
 					drawProcessPanels(appl_json, pf_json, today, twelveWeeks, panelHeights, rcWidth);
 				});

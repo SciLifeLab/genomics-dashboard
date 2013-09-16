@@ -53,7 +53,9 @@ function generateRunchartDataset (jsonview, dateRangeStart, dateRangeEnd, dateFr
                     var startDate = new Date(dates[dateFromKey]);
                     var totalQF = daydiff(startDate, finishedDate);
                     //console.log("finished date: " + finishedDate + ", totalQF: " + totalQF);
-                    dataArray.push([ totalQF, k[1], finishedDate ]);
+                    
+                    //dataArray.push([ totalQF, k[1], finishedDate ]); /*  timediff, Project name, finished date*/
+                    dataArray.push([ totalQF, k[1], finishedDate, k[2] ]);  /*  Testing for link out to genomics-status: timediff, Project name, finished date, Project Id*/
                 }
                 
             }
@@ -214,7 +216,7 @@ function generateBarchartDataset (jsonview, cmpDate) {
             step = "no step";
         }                        
         
-        console.log("LibPrep: " + libPrepProj + ", cmpDate: " + cmpDateStr + ", key: " + k + ", dates: " + [arrivalDate, queueDate, libQCDate, allSeqDate] + ", step: " + step);
+        //console.log("LibPrep: " + libPrepProj + ", cmpDate: " + cmpDateStr + ", key: " + k + ", dates: " + [arrivalDate, queueDate, libQCDate, allSeqDate] + ", step: " + step);
         //console.log(dataArray);
         
     }
@@ -416,7 +418,7 @@ function drawRunChart(dataset, divID, clines, width, height, padding, maxY) {
             ;	
 
        })
-       .on("mouseout", function() { //Remove the tooltip
+       .on("mouseout", function(d) { //Remove the tooltip
             d3.select(this)
               .attr("r", 4)
               .attr("fill", "black")
@@ -424,6 +426,11 @@ function drawRunChart(dataset, divID, clines, width, height, padding, maxY) {
                d3.select("#tooltip1").remove();
                d3.select("#tooltip2").remove();
                d3.select("#tooltip3").remove();
+       })
+       .on("click", function(d) {
+                var projID = d[4];
+                var url = "http://genomics-status.scilifelab.se/projects/" + projID;
+                window.open(url, "genomics-status");
        })
     ;
     // Add line (needs sorted array for lines to make sense)
