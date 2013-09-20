@@ -104,9 +104,16 @@ circle {
   font-family: sans-serif;
   font-size: 11pt;
   fill: white;
-  
 }
-#total_rc, #rec_ctrl_rc, #lib_prep_rc, #seq_rc {
+#fs_prog_bc h2 {
+    margin-bottom: 5px;
+}
+#fs_prog_bc p {
+    /*margin-bottom: 5px;*/
+    margin-top: 5px;
+}
+
+#total_rc, #rec_ctrl_rc, #lib_prep_rc, #seq_rc, #fs_ws_rc, #data_del_rc {
   float: left;
   margin-top: 0px;
   margin-bottom: 30px;
