@@ -482,7 +482,7 @@ function drawRunChart(dataset, divID, clines, width, height, padding, maxY) {
             .attr("y", height - 20)
             .attr("x", width)
             .attr("class", "axis_label")
-            .text("# projects");
+            .text("project #");
         
     }
     
@@ -547,7 +547,7 @@ function drawRunChart(dataset, divID, clines, width, height, padding, maxY) {
  * @param {String} divID Id of DOM div to where plot should reside
  * @param plotHeight plot height
  */
-function drawBoxPlot(dataset, divID, plotHeight, maxY) {
+function drawBoxPlot(dataset, divID, plotHeight, maxY, bottom_margin) {
     var margin = {top: 30, right: 50, bottom: 30, left: 50},
         width = 120 - margin.left - margin.right,
         //height = 450 - margin.top - margin.bottom;
@@ -677,12 +677,14 @@ function drawBarchartPlot(dataset, divID, width, height, bottom_padding, maxY) {
        //})
        ;
     
+    var smallFormat = d3.format(".00r");
     //Create labels
     svg.selectAll("text")
        .data(dataset, key)		//Bind data with custom key function
        .enter()
        .append("text")
        .text(function(d) {
+            if(d.value < 1) { return smallFormat(d.value); }
             return d.value;
        })
        .attr("class", "bar_label")
@@ -695,7 +697,38 @@ function drawBarchartPlot(dataset, divID, width, height, bottom_padding, maxY) {
             return (height - bottom_padding) - yScale(d.value) + 19;
        })
        ;
-    
+    // Check if there is info about total data set size, and if so add text to show that   
+    var hasTotal = function(dSet) {
+        for (var i = 0; i < dSet.length; i++) {
+            if(dSet[i].total) { return true; }    
+        }
+        return false;
+    }
+    if(hasTotal(dataset)) {
+        console.log("We have total");
+        svg.selectAll("text")
+           .data(dataset, key)		//Bind data with custom key function
+           .enter()
+           .append("text")
+           .text(function(d) {
+                //if(d.value < 1) { return smallFormat(d.value); }
+                var totStr = "(" + d.total + ")";
+                console.log("TotStr: " + totStr);
+                return totStr;
+           })
+           .attr("class", "bar_label")
+           .attr("text-anchor", "middle")
+           .attr("x", function(d, i) {
+                return xScale(i) + xScale.rangeBand() / 2;
+           })
+           .attr("y", function(d) {
+                //return (height - bottom_padding) - yScale(d.value) + 14;
+                return (height - bottom_padding) - yScale(d.value) + 19;
+           })
+           .attr("dy", 10)
+           ;
+        
+    }
     //Define X axis
     var xAxis = d3.svg.axis()
                       .scale(xScale)
@@ -739,7 +772,7 @@ function drawProcessPanels(appl_json, pf_json, plotDate, startDate, height, rc_w
     //console.log(pf_json);
     var totalRcDataset = generateRunchartDataset(appl_json, startDate, plotDate, startKey, endKey);
     //console.log(totalRcDataset);
-    drawRunChart(totalRcDataset, "total_rc", [6, 10], rc_width, height, 30);
+    drawRunChart(totalRcDataset, "total_rc", [6, 4, 10], rc_width, height, 30);
     var totalBpDataset = generateBoxDataset(appl_json, startDate, plotDate, startKey, endKey);
     //console.log(totalBpDataset);
     drawBoxPlot(totalBpDataset, "total_bp", height);
@@ -761,7 +794,7 @@ function drawProcessPanels(appl_json, pf_json, plotDate, startDate, height, rc_w
     var recCtrlBpDataset = generateBoxDataset(appl_json, startDate, plotDate, "Arrival date", "Queue date");
     drawBoxPlot(recCtrlBpDataset, "rec_ctrl_bp", height, maxStepY);
     
-    drawRunChart(libPrepDataset, "lib_prep_rc", [3], rc_width, height, 30, maxStepY);
+    drawRunChart(libPrepDataset, "lib_prep_rc", [2.5], rc_width, height, 30, maxStepY);
     var libPrepBpDataset = generateBoxDataset(appl_json, startDate, plotDate, "Queue date", "QC library finished", "Finished library", true);
     drawBoxPlot(libPrepBpDataset, "lib_prep_bp", height, maxStepY);
     
@@ -805,7 +838,7 @@ function drawProcessPanels(appl_json, pf_json, plotDate, startDate, height, rc_w
     window.setInterval(function(){
         switch(setNo) {
             case 1:
-                drawRunChart(totalRcDataset, "total_rc", [6, 10], rc_width, height, 30);
+                drawRunChart(totalRcDataset, "total_rc", [6, 4, 10], rc_width, height, 30);
                 drawBoxPlot(totalBpDataset, "total_bp", height);
                 d3.select("#total_legend").attr("style", "color: default").text("All projects");
                 
@@ -816,20 +849,20 @@ function drawProcessPanels(appl_json, pf_json, plotDate, startDate, height, rc_w
                 setNo++;
                 break;
             case 2:
-                drawRunChart(totalRcLPDataset, "total_rc", [6, 10], rc_width, height, 30);
+                drawRunChart(totalRcLPDataset, "total_rc", [6, 4, 10], rc_width, height, 30);
                 drawBoxPlot(totalBpLPDataset, "total_bp", height);
                 d3.select("#total_legend").attr("style", "color: orange").text("Lib prep projects");
                 setNo++;
                 break;
             case 3:
-                drawRunChart(totalRcFLDataset, "total_rc", [6, 10], rc_width, height, 30);
+                drawRunChart(totalRcFLDataset, "total_rc", [6, 4, 10], rc_width, height, 30);
                 drawBoxPlot(totalBpFLDataset, "total_bp", height);
                 d3.select("#total_legend").attr("style", "color: green").text("Finished library projects");
                 setNo++;
                 //setNo = 1;
                 break;
             case 4:
-                drawRunChart(totalRcMiSeqDataset, "total_rc", [6, 10], rc_width, height, 30);
+                drawRunChart(totalRcMiSeqDataset, "total_rc", [6, 4, 10], rc_width, height, 30);
                 drawBoxPlot(totalBpMiSeqDataset, "total_bp", height);
                 d3.select("#total_legend").attr("style", "color: orange").text("MiSeq projects");
                 
@@ -840,7 +873,7 @@ function drawProcessPanels(appl_json, pf_json, plotDate, startDate, height, rc_w
                 
                 break;
             case 5:
-                drawRunChart(totalRcHiSeqDataset, "total_rc", [6, 10], rc_width, height, 30);
+                drawRunChart(totalRcHiSeqDataset, "total_rc", [6, 4, 10], rc_width, height, 30);
                 drawBoxPlot(totalBpHiSeqDataset, "total_bp", height);
                 d3.select("#total_legend").attr("style", "color: green").text("HiSeq projects");
                 

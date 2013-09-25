@@ -52,9 +52,8 @@ function generateFailedProgressedDataset (jsonview, cmpDate) {
         var k = rows[i]["key"];
         var openDate = new Date(k[0]);
         var failed = rows[i]["value"] == "False";
-        
-        //console.log("in rows");
-        //if ((arrivalDate > cmpDate) || (finishedDate < cmpDate)) {
+        if(rows[i]["value"] == null) { continue; }
+
         if ((openDate > cmpDate) || (openDate < week12Date)) {
             continue;
         }
@@ -118,7 +117,7 @@ function generateWorksetFailureDataset (jsonview, dateRangeStart, dateRangeEnd, 
             var date = new Date(keys[2]);
             var ws = keys[0];
             if (date < dateRangeStart || date > dateRangeEnd) {
-                console.log("skipping ws: " + ws + ", date: " + date);
+                //console.log("skipping ws: " + ws + ", date: " + date);
                 continue;
             }
             if(ws != currWS) {
@@ -244,7 +243,7 @@ function drawFailedLpRunChart(dataset, divID, clines, width, height, padding, ma
     if(maxY == undefined) {
         maxY = d3.max(dataset, function(d) { return d[1]; });
     }
-    console.log("maxY val: " + maxY)
+    //console.log("maxY val: " + maxY)
     var xScale = d3.scale.linear()
             .domain([0, dataset.length])
             .range([padding, width - padding * 2]);
@@ -493,7 +492,7 @@ function drawDeliveredDataRunChart(dataset, divID, clines, width, height, paddin
     if(maxY == undefined) {
         maxY = d3.max(dataset, function(d) { return d[1]; });
     }
-    console.log("maxY val: " + maxY)
+    //console.log("maxY val: " + maxY)
     var xScale = d3.scale.linear()
             .domain([0, dataset.length])
             .range([padding, width - padding * 2]);

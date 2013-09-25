@@ -69,12 +69,12 @@
         <br class="clear">
         
         <!--"Problem panels"-->
-        <div id="fs_prog_bc" class="barchart_panel">
+        <div id="fs_prog_bc" class="barchart_panel" style="display: none">
             <h2>Rec control</h2>
             <p>fraction failed samples progressed</p>
         </div>
 
-		<div id="failed_samples_per_workset"  class="times_panel">
+		<div id="failed_samples_per_workset"  class="times_panel" style="display: none">
 			<h2>Lib prep - #failed samples/workset</h2>
 			<div id="fs_ws_rc">
 				<h3>Run chart</h3>
@@ -84,7 +84,7 @@
 				<!--<h3 id="seq_bp_legend">All projects</h3>-->
 			</div>
 		</div>
-		<div id="data_delivered"  class="times_panel">
+		<div id="data_delivered"  class="times_panel" style="display: none">
 			<h2>Seq - data delivered / data ordered</h2>
 			<div id="data_del_rc">
 				<h3>Run chart</h3>
@@ -138,33 +138,35 @@
 //                drawProcessPanels(appl_json, today, twelveWeeks, panelHeights, rcWidth);
 			});
             // trying out stuff for problem KPIs.
-            var failedProgUrl = "getCouchDbData.php?db=projects&design=kpi_external&view=KPI1&reduce=false";
-            d3.json(failedProgUrl, function(json){
-                var fpDataset = generateFailedProgressedDataset(json, today);
-                drawBarchartPlot(fpDataset, "fs_prog_bc", 500, panelHeights, 30);
-            });
-            
-            var wsFailRateUrl = "getCouchDbData.php?db=projects&design=kpi_external&view=KPI2&reduce=false";
-            d3.json(wsFailRateUrl, function(json){
-                console.log("Workset failrate dataset:");
-                console.log(json);
-                var d = generateWorksetFailureDataset (json, twelveWeeks, today);
-                console.log(d);
-                drawFailedLpRunChart(d, "fs_ws_rc", [], rcWidth, panelHeights, 30);
-                var bd = generateGenericBoxDataset(d, 1);
-                console.log(bd);
-                drawBoxPlot(bd, "fs_ws_bp", panelHeights);
-            });
-            
-            var delDataUrl = "getCouchDbData.php?db=projects&design=kpi_external&view=KPI3_1&reduce=false";
-            d3.json(delDataUrl, function(json){
-                var delDataDataset = generateDeliveredDataDataset (json, twelveWeeks, today);
-                console.log("Data del dataset");
-                console.log(delDataDataset);
-                drawDeliveredDataRunChart(delDataDataset, "data_del_rc", [], rcWidth, panelHeights, 30);
-                var bd = generateGenericBoxDataset(delDataDataset, 1);
-                drawBoxPlot(bd, "data_del_bp", panelHeights);
-            });
+            //var failedProgUrl = "getCouchDbData.php?db=projects&design=kpi_external&view=KPI1&reduce=false";
+            //d3.json(failedProgUrl, function(json){
+            //    //console.log(json);
+            //    var fpDataset = generateFailedProgressedDataset(json, today);
+            //    console.log(fpDataset);
+            //    drawBarchartPlot(fpDataset, "fs_prog_bc", 500, panelHeights, 30);
+            //});
+            //
+            //var wsFailRateUrl = "getCouchDbData.php?db=projects&design=kpi_external&view=KPI2&reduce=false";
+            //d3.json(wsFailRateUrl, function(json){
+            //    //console.log("Workset failrate dataset:");
+            //    //console.log(json);
+            //    var d = generateWorksetFailureDataset (json, twelveWeeks, today);
+            //    //console.log(d);
+            //    drawFailedLpRunChart(d, "fs_ws_rc", [], rcWidth, panelHeights, 30);
+            //    var bd = generateGenericBoxDataset(d, 1);
+            //    //console.log(bd);
+            //    drawBoxPlot(bd, "fs_ws_bp", panelHeights);
+            //});
+            //
+            //var delDataUrl = "getCouchDbData.php?db=projects&design=kpi_external&view=KPI3_1&reduce=false";
+            //d3.json(delDataUrl, function(json){
+            //    var delDataDataset = generateDeliveredDataDataset (json, twelveWeeks, today);
+            //    //console.log("Data del dataset");
+            //    //console.log(delDataDataset);
+            //    drawDeliveredDataRunChart(delDataDataset, "data_del_rc", [], rcWidth, panelHeights, 30);
+            //    var bd = generateGenericBoxDataset(delDataDataset, 1);
+            //    drawBoxPlot(bd, "data_del_bp", panelHeights);
+            //});
 		</script>
 
 
