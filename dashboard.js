@@ -801,7 +801,7 @@ function drawProcessPanels(appl_json, pf_json, plotDate, startDate, height, rc_w
     drawBoxPlot(libPrepBpDataset, "lib_prep_bp", height, maxStepY);
     
     drawRunChart(seqDataset, "seq_rc", [3], rc_width, height, 30, maxStepY);
-    var seqBpDataset = generateBoxDataset(appl_json, startDate, plotDate, "QC library finished", "All samples sequenced");
+    var seqBpDataset = generateBoxDataset(pf_json, startDate, plotDate, "QC library finished", "All samples sequenced");
     drawBoxPlot(seqBpDataset, "seq_bp", height, maxStepY);
     
     // total times subsets
