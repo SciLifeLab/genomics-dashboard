@@ -859,7 +859,7 @@ function drawProcessPanels(appl_json, pf_json, plotDate, startDate, height, rc_w
             case 3:
                 drawRunChart(totalRcFLDataset, "total_rc", [6, 4, 10], rc_width, height, 30);
                 drawBoxPlot(totalBpFLDataset, "total_bp", height);
-                d3.select("#total_legend").attr("style", "color: green").text("Finished library projects");
+                d3.select("#total_legend").attr("style", "color: orange").text("Finished library projects");
                 setNo++;
                 //setNo = 1;
                 break;
@@ -877,11 +877,11 @@ function drawProcessPanels(appl_json, pf_json, plotDate, startDate, height, rc_w
             case 5:
                 drawRunChart(totalRcHiSeqDataset, "total_rc", [6, 4, 10], rc_width, height, 30);
                 drawBoxPlot(totalBpHiSeqDataset, "total_bp", height);
-                d3.select("#total_legend").attr("style", "color: green").text("HiSeq projects");
+                d3.select("#total_legend").attr("style", "color: orange").text("HiSeq projects");
                 
                 drawRunChart(seqHiSeqDataset, "seq_rc", [3], rc_width, height, 30, maxStepY);
                 drawBoxPlot(seqBpHiSeqDataset, "seq_bp", height, maxStepY);
-                d3.select("#seq_legend").attr("style", "color: green").text("HiSeq projects");
+                d3.select("#seq_legend").attr("style", "color: orange").text("HiSeq projects");
                 setNo = 1;
                 
                 break;
