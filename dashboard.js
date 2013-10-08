@@ -548,8 +548,8 @@ function drawRunChart(dataset, divID, clines, width, height, padding, maxY) {
  * @param plotHeight plot height
  */
 function drawBoxPlot(dataset, divID, plotHeight, maxY, bottom_margin) {
-    var margin = {top: 30, right: 50, bottom: 30, left: 50},
-        width = 120 - margin.left - margin.right,
+    var margin = {top: 30, right: 20, bottom: 30, left: 20},
+        width = 60 - margin.left - margin.right,
         //height = 450 - margin.top - margin.bottom;
         //height = 400 - margin.top - margin.bottom;
         height = plotHeight - margin.top - margin.bottom;
@@ -766,8 +766,10 @@ function drawProcessPanels(appl_json, pf_json, plotDate, startDate, height, rc_w
     
     var maxY = Math.max(maxD, maxO);
     
-    drawBarchartPlot(demandDataset, "demand_bc", 500, height, 30, maxY);
-    drawBarchartPlot(ongoingDataset, "ongoing_bc", 500, height, 30, maxY);
+    //drawBarchartPlot(demandDataset, "demand_bc", 500, height, 30, maxY);
+    //drawBarchartPlot(ongoingDataset, "ongoing_bc", 500, height, 30, maxY);
+    drawBarchartPlot(demandDataset, "demand_bc", (rc_width + 110), height, 30, maxY);
+    drawBarchartPlot(ongoingDataset, "ongoing_bc", (rc_width + 110), height, 30, maxY);
     
     //console.log(pf_json);
     var totalRcDataset = generateRunchartDataset(appl_json, startDate, plotDate, startKey, endKey);
@@ -799,7 +801,7 @@ function drawProcessPanels(appl_json, pf_json, plotDate, startDate, height, rc_w
     drawBoxPlot(libPrepBpDataset, "lib_prep_bp", height, maxStepY);
     
     drawRunChart(seqDataset, "seq_rc", [3], rc_width, height, 30, maxStepY);
-    var seqBpDataset = generateBoxDataset(appl_json, startDate, plotDate, "QC library finished", "All samples sequenced");
+    var seqBpDataset = generateBoxDataset(pf_json, startDate, plotDate, "QC library finished", "All samples sequenced");
     drawBoxPlot(seqBpDataset, "seq_bp", height, maxStepY);
     
     // total times subsets
