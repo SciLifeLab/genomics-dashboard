@@ -54,7 +54,8 @@ circle {
 .ucl_line {
     fill: none;
     /*stroke-width: 2px;*/
-    stroke: teal;
+    /*stroke: teal;*/
+    stroke: orange;
 }
 
 .box {
