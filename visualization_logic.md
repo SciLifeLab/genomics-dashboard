@@ -3,7 +3,7 @@
 ## Map-reduce views
 The visualizations depend on a number of *statusdb* Couchdb map-reduce views from in the form of json strings accessible through a url on the form:
 
-`http://<user>:<password>@tools.scilifelab.se:5984/<database>/_design/<design>/_view/<view>[?group_level=<n>]`
+`http://<user>:<password>@tools.scilifelab.se:5984/<database>/_design/<design>/_view/<view>?[group_level=<n>][reduce=false]`
 
 ### KPI_applications
 
@@ -87,8 +87,89 @@ The visualizations depend on a number of *statusdb* Couchdb map-reduce views fro
     	unless there is a 0000-00-00 date
     		return 0000-00-00
 
+###KPI1
 
-## Customer demand
+|parameter  | value                             |
+|---------  |-----------------------------------|
+|database   | project                           |
+|design     | kpi_external                      |
+|view       | KPI1 ([sofa view](http://tools.scilifelab.se:5984/_utils/database.html?projects/_design/kpi_external/_view/KPI1))           |
+|reduce| false ([json](http://tools.scilifelab.se:5984/projects/_design/kpi_external/_view/KPI1?reduce=false))                                 |
+
+
+
+####Map function simplified pseudo code
+    For each project of type "Production"
+    	For each sample    	
+    		For each lib prep    			
+    			if sample_run_metrics && dillution_and_pooling_start_date
+    		
+    	    	Emit:
+    			[
+    				dillution_and_pooling_start_date,  
+    				application, 
+    				sample
+    			]:
+    			incoming_QC_status /** True || False */
+
+###KPI2
+
+|parameter  | value                             |
+|---------  |-----------------------------------|
+|database   | project                           |
+|design     | kpi_external                      |
+|view       | KPI2 ([sofa view](http://tools.scilifelab.se:5984/_utils/database.html?projects/_design/kpi_external/_view/KPI2))           |
+|reduce| false ([json](http://tools.scilifelab.se:5984/projects/_design/kpi_external/_view/KPI2?reduce=false))                                 |
+
+
+
+####Map function simplified pseudo code
+    For each project of type "Production"
+    	For each sample  	
+    		For each lib prep
+    			
+    			if workset_setup
+    		
+    	    	Emit:
+    			[
+    				workset_setup, 
+    				application, 
+    				"library validation"->start_date, 
+    				sample
+    			]:
+    			prep_status /** PASSED || FAILED */
+###KPI3_1
+
+|parameter  | value                             |
+|---------  |-----------------------------------|
+|database   | project                           |
+|design     | kpi_external                      |
+|view       | KPI3_1 ([sofa view](http://tools.scilifelab.se:5984/_utils/database.html?projects/_design/kpi_external/_view/KPI3_1))           |
+|reduce| false ([json](http://tools.scilifelab.se:5984/projects/_design/kpi_external/_view/KPI3_1?reduce=false))                                 |
+
+
+
+####Map function simplified pseudo code
+    For each project of type "Production"
+    	ordered = sequencing_platform * sequence_units_ordered_(lanes) * "platform amount factor"
+    	delivered = Sum of m_reads_sequenced For each sample  	
+    		
+    	Emit:
+    	[
+    		sequencing_finished, // date 
+    		project_name, 
+    	]:
+    	[
+    		sequencing_platform,
+    		sequence_units_ordered_(lanes),
+    		ordered, // amount
+    		samples, // no. of
+    		delivered,
+    		delivered/ordered
+    	]
+
+## Dataset generation
+### Customer demand barchart
 **View**: KPI_applications
 
 **Function**: generateDemandDataset(data, cmpDate)
@@ -96,7 +177,7 @@ The visualizations depend on a number of *statusdb* Couchdb map-reduce views fro
 Bins projects on Arrival date in three 4-week bins until cpmDate. Returns weekly averages for each bin
  
 
-## Ongoing projects today
+### Ongoing projects today barchart
 **View**: KPI_applications
 
 **Function**: generateBarchartDataset(data, cmpDate)
@@ -111,7 +192,7 @@ Bins projects to these process steps depending on presence of dates
 
 Returns number of projects for each bin
 
-## Total delivery times
+### Total delivery times runchart & boxplot
 
 **Function runchart**: generateRunchartDataset (jsonview, dateRangeStart, dateRangeEnd, dateFromKey, dateToKey, filter, inverseSelection)
 
@@ -125,14 +206,14 @@ Calculates the time difference in days between *dateFromKey* and *dateToKey* for
 
 Returns a list of time diff
 
-### Stratifications
-#### All projects
+#### Stratifications
+##### All projects
 **View**: KPI_applications
 
 	dateRangeStart: Arrival date
 	dateRangeEnd: All samples sequenced
 
-#### Library prep projects
+##### Library prep projects
 **View**: KPI_applications
 
 	dateRangeStart: Arrival date
@@ -140,7 +221,7 @@ Returns a list of time diff
 	filter: Finished library
 	inverseSelection: true
 
-#### Finished library project
+##### Finished library project
 **View**: KPI_applications
 
 	dateRangeStart: Arrival date
@@ -148,21 +229,21 @@ Returns a list of time diff
 	filter: Finished library
 	inverseSelection: false
 	
-#### HiSeq projects
+##### HiSeq projects
 **View**: KPI
 
 	dateRangeStart: Arrival date
 	dateRangeEnd: All samples sequenced
 	filter: HiSeq
 	
-#### MiSeq projects
+##### MiSeq projects
 **View**: KPI
 
 	dateRangeStart: Arrival date
 	dateRangeEnd: All samples sequenced
 	filter: MiSeq
 
-## Rec control delivery times
+### Rec control delivery times runchart & boxplot
 **Function runchart**: generateRunchartDataset (jsonview, dateRangeStart, dateRangeEnd, dateFromKey, dateToKey, filter, inverseSelection). **See *Total delivery times* above**
 
 **Function boxplot**: generateBoxDataset (jsonview, dateRangeStart, dateRangeEnd, dateFromKey, dateToKey, filter, inverseSelection) **See *Total delivery times* above**
@@ -173,7 +254,7 @@ Returns a list of time diff
 	dateRangeEnd: Queue date
 
 
-## Lib prep delivery times
+### Lib prep delivery times runchart & boxplot
 **Function runchart**: generateRunchartDataset (jsonview, dateRangeStart, dateRangeEnd, dateFromKey, dateToKey, filter, inverseSelection). **See *Total delivery times* above**
 
 **Function boxplot**: generateBoxDataset (jsonview, dateRangeStart, dateRangeEnd, dateFromKey, dateToKey, filter, inverseSelection) **See *Total delivery times* above**
@@ -183,34 +264,62 @@ Returns a list of time diff
 	dateRangeStart: Queue date
 	dateRangeEnd: QC library finished
 
-## Sequencing delivery times
+### Sequencing delivery times runchart & boxplot
 **Function runchart**: generateRunchartDataset (jsonview, dateRangeStart, dateRangeEnd, dateFromKey, dateToKey, filter, inverseSelection). **See *Total delivery times* above**
 
 **Function boxplot**: generateBoxDataset (jsonview, dateRangeStart, dateRangeEnd, dateFromKey, dateToKey, filter, inverseSelection) **See *Total delivery times* above**
 
-### Stratifications
-#### All projects
+#### Stratifications
+##### All projects
 **View**: KPI
 
 	dateRangeStart: Arrival date
 	dateRangeEnd: All samples sequenced
 
-#### HiSeq projects
+##### HiSeq projects
 **View**: KPI
 
 	dateRangeStart: Arrival date
 	dateRangeEnd: All samples sequenced
 	filter: HiSeq
 	
-#### MiSeq projects
+##### MiSeq projects
 **View**: KPI
 
 	dateRangeStart: Arrival date
 	dateRangeEnd: All samples sequenced
 	filter: MiSeq
 
-## Reception control - number of failed samples that are progressed
-## Library prep - fraction failed samples/workset
-## Seq - data delivered / data ordered
+### Reception control - number of failed samples that are progressed barchart
+**View**: KPI1
+
+**Function**: generateFailedProgressedDataset(data, cmpDate)
+
+Bins samples on sequencing_start date in three 4-week bins until cpmDate. Returns (#samples failed in rec ctrl that has a sequencing start date)/(all samples with sequencing start date) for each bin
+
+### Library prep - fraction failed samples/workset runchart & boxplot
+**View**: KPI2
+
+**Function**: generateWorksetFailureDataset (jsonview, dateRangeStart, dateRangeEnd, filter)
+
+Calculates the fraction of failed samples for worksets active between *dateRangeStart* and *dateRangeEnd* [that has *filter* as the first value in the json key].
+
+Returns list of [fraction failed, workset, date, total number of samples]
+
+**Function**: generateGenericBoxDataset (dataset, index)
+Returns a list of values that has *index* in the specified *dataset* (a list of lists)
+
+ 
+### Seq - data delivered / data ordered runchart & boxplot
+**View**: KPI3_1
+
+**Function**: generateDeliveredDataDataset (jsonview, dateRangeStart, dateRangeEnd)
+
+Selects data for projects active between *dateRangeStart* and *dateRangeEnd*.
+
+Returns list of [fraction delivered, project name, date, platform, ordered lanes, # samples, data amount delivered]
+
+**Function**: generateGenericBoxDataset (dataset, index) **See *Library prep - fraction failed samples/workset* above**
+
 
 
