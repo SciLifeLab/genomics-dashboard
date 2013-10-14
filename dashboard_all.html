@@ -181,18 +181,18 @@
                 drawBoxPlot(bd, "data_del_bp", panelHeights);
             });
             
-            window.setInterval(function() {
-                //console.log("in cycling function");
-                problems_displayed = (d3.select("#problem_panels").attr("style") == "display: block");
-                if(problems_displayed) {
-                    d3.select("#problem_panels").attr("style", "display: none");
-                    d3.select("#status_panels").attr("style", "display: block");
-                } else {
-                    d3.select("#status_panels").attr("style", "display: none");
-                    d3.select("#problem_panels").attr("style", "display: block");
-                    
-                }
-            }, 120000);
+            //window.setInterval(function() {
+            //    //console.log("in cycling function");
+            //    problems_displayed = (d3.select("#problem_panels").attr("style") == "display: block");
+            //    if(problems_displayed) {
+            //        d3.select("#problem_panels").attr("style", "display: none");
+            //        d3.select("#status_panels").attr("style", "display: block");
+            //    } else {
+            //        d3.select("#status_panels").attr("style", "display: none");
+            //        d3.select("#problem_panels").attr("style", "display: block");
+            //        
+            //    }
+            //}, 120000);
 
  
 		</script>
