@@ -70,7 +70,8 @@
             <br class="clear">
         </div>
         <!--"Problem panels"-->
-        <div id="problem_panels"  style="display: none">
+        <!--<div id="problem_panels"  style="display: none">-->
+        <div id="problem_panels"  style="display: block">
             <div id="fs_prog_bc" class="barchart_panel">
                 <h2>Rec control</h2>
                 <p>samples progressed failed in rec ctrl</p>
@@ -101,7 +102,9 @@
             // if so, reload window
             var oneHour = 1000*60*60;
             window.setTimeout(function() {
+                    if (new Date().getHours() == 7) {  // re-load window sometime between 7 and 8
                         window.location.reload();
+                    }
                 },
                 //20000
                 oneHour
@@ -115,7 +118,8 @@
 			
 			//var panelHeights = 300;
 			//var rcWidth = 350;
-			var panelHeights = (winHeight - 305) / 2;
+			//var panelHeights = (winHeight - 305) / 2;
+			var panelHeights = (winHeight - 305) / 3.6;
 			var rcWidth = (winWidth - 440) / 3;
 
 			var applDataUrl ="getCouchDbData.php?db=projects&design=process_flow&view=KPI_applications&group_level=3";
