@@ -151,6 +151,7 @@ function generateBarchartDataset (jsonview, cmpDate) {
     var queueKey = "Queue date";
     var libQCKey = "QC library finished";
     var allSeqKey = "All samples sequenced";
+    var closeKey = "Close date";
     //var finishedKey = "Finished date";
 
     /**
@@ -189,18 +190,29 @@ function generateBarchartDataset (jsonview, cmpDate) {
         var queueDate = dates[queueKey];
         var libQCDate = dates[libQCKey];
         var allSeqDate = dates[allSeqKey];
+        var closeDate = dates[closeKey];
         //var finishedDate = new Date(dates[finishedKey]);
         
         //console.log("in rows");
                 
         var step;
-        if ((arrivalDate > cmpDateStr) || (arrivalDate == "0000-00-00") ) {
-            console.log(cmpDateStr + " Skipping " + arrivalDate);
+        if(arrivalDate != "0000-00-00" && arrivalDate < "2013-07-01") { // remove old data
             continue;
-        } // proj w arrival date before cmp date
+        }
+        if((closeDate != "0000-00-00") && (closeDate < cmpDateStr)) { // closed projects
+            // console.log(cmpDateStr + " Skipping closed: " + k[1] + " " + closeDate);
+            continue;
+        }
+        if ((arrivalDate > cmpDateStr) || (arrivalDate == "0000-00-00") ) { // proj w arrival date after cmp date
+            //console.log(cmpDateStr + " Skipping " + arrivalDate);
+            continue;
+        } 
         if ( (queueDate == "0000-00-00") || cmpDateStr < queueDate) { 
             if (allSeqDate != "0000-00-00" && cmpDateStr > allSeqDate) { // to handle data without a queue date but where seq is finished
                 step = "no step";
+            } else if (libQCDate != "0000-00-00") { // missing queue date, seq is not finished, but libQC passed => seq
+                seq.value++;
+                step = "seq";
             } else {
                 recCtrl.value++;
                 step = "rec ctrl";
