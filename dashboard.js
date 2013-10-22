@@ -200,11 +200,11 @@ function generateBarchartDataset (jsonview, cmpDate) {
             continue;
         }
         if((closeDate != "0000-00-00") && (closeDate < cmpDateStr)) { // closed projects
-            console.log(cmpDateStr + " Skipping closed: " + k[1] + " " + closeDate);
+            // console.log(cmpDateStr + " Skipping closed: " + k[1] + " " + closeDate);
             continue;
         }
         if ((arrivalDate > cmpDateStr) || (arrivalDate == "0000-00-00") ) { // proj w arrival date after cmp date
-            console.log(cmpDateStr + " Skipping " + arrivalDate);
+            //console.log(cmpDateStr + " Skipping " + arrivalDate);
             continue;
         } 
         if ( (queueDate == "0000-00-00") || cmpDateStr < queueDate) { 
