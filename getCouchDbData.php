@@ -37,8 +37,9 @@
     // set up curl and call couchDb view
 
     $base_url = "http://$user_password@tools.scilifelab.se:5984";
-    //$base_url = "http://localhost:5984";
-    ////"projects/_design/kpi_external/_view/";
+    if(isset($_GET['dev'])) {
+        $base_url = "http://$user_password@tools-dev.scilifelab.se:5984";
+    }
 
     $url = "$base_url/$dbStr/_design/$designStr/_view/$viewStr";
     if(isset($reduceStr)) {
