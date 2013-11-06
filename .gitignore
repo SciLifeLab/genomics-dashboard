@@ -1,7 +1,9 @@
 *.komodoproject
 .komodotools
+*.txt
 Notes.txt
 user_cred.txt
+*.json
 d3/
 getLocalData.php
 *.*_prev
