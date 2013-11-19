@@ -5,8 +5,10 @@
 		<title>Genomics Production Dashboard</title>
 		<script type="text/javascript" src="d3/d3.v3.js"></script>
         <script type="text/javascript" src="d3/box.js"></script>
+	    <script type="text/javascript" src="d3/colorbrewer.js"></script>
 		<script type="text/javascript" src="dashboard.js"></script>
 		<script type="text/javascript" src="dashboard_problems.js"></script>
+		<script type="text/javascript" src="stack.js"></script>
         <link rel="stylesheet" type="text/css" href="dashboard.css">
 	</head>
 	<body>
@@ -17,11 +19,38 @@
         </div>
         <div id="status_panels">
             <div id="demand_bc" class="barchart_panel">
-                <h2>Customer demand - projects/week</h2>            
+                <h2>Customer demand</h2>
+				<div id="demand_bc_plot">
+					<h3>projects/week</h3>
+				</div>
             </div>
-            <div id="ongoing_bc" class="barchart_panel">
-                <h2>Ongoing projects today</h2>            
+			<!--Queue panels -->
+			<div id="queue">
+				<h2>Queue</h2>
+				<div id="load_charts">
+					<div id="queue_sample_load">
+						<h3>Samples</h3>
+						<h4>Lib prep</h4>
+					</div>
+					<div id="queue_lane_load">
+						<h3>Lanes</h3>
+						<div id="queue_lane_load_lp">
+							<h4>Lib prep</h4>
+						</div>
+						<div id="queue_lane_load_fl">
+							<h4>Fin lib</h4>            
+						</div>
+					</div>
+				</div>
+			</div>
+            <!--Ongoing panels -> change to load-->
+			<div id="ongoing_bc" class="barchart_panel">
+                <h2>Currently ongoing</h2>
+				<div id="ongoing_bc_plot">
+					<h3># projects</h3>
+				</div>
             </div>
+            <br class="clear">
             <div id="total_del_times" class="times_panel">
                 <h2>Total delivery times - <span id="total_legend">All projects</span></h2>
                 <div id="total_rc">
@@ -33,7 +62,6 @@
                     <!--<h3 id="total_bp_legend">All projects</h3>-->
                 </div>
             </div>
-            <br class="clear">
             <div id="rec_ctrl_del_times" class="times_panel">
                 <h2 id="rec_ctrl_legend">Rec control delivery times - All projects</h2>
                 <div id="rec_ctrl_rc">
@@ -113,10 +141,12 @@
             var winHeight = window.innerHeight;
             console.log("w: " + winWidth + ", h: " + winHeight);
 			
-			//var panelHeights = 300;
-			//var rcWidth = 350;
-			var panelHeights = (winHeight - 305) / 2;
-			var rcWidth = (winWidth - 440) / 3;
+			//var panelHeights = (winHeight - 305) / 2;
+			var panelHeights = (winHeight - 200) / 2;
+						
+			//var rcWidth = (winWidth - 440) / 3;
+			var rcWidth = (winWidth - 460) / 4;
+			var drawWidth = (winWidth - 470);
 
 			var applDataUrl ="getCouchDbData.php?db=projects&design=process_flow&view=KPI_applications&group_level=3";
 			//var applDataUrl ="getCouchDbData.php?db=projects&design=process_flow&view=KPI_applications&group_level=3&dev";
@@ -141,7 +171,8 @@
 				d3.json(pfDataUrl, function(json) {
 					pf_json = json;
 					//console.log(pf_json); //Log output to console
-					drawProcessPanels(appl_json, pf_json, today, twelveWeeks, panelHeights, rcWidth);
+					//drawProcessPanels(appl_json, pf_json, today, twelveWeeks, panelHeights, rcWidth);
+					drawProcessPanels(appl_json, pf_json, today, twelveWeeks, panelHeights, drawWidth);
 				});
 				
 //				// only one data set
@@ -178,6 +209,30 @@
                 var bd = generateGenericBoxDataset(delDataDataset, 1);
                 drawBoxPlot(bd, "data_del_bp", panelHeights);
             });
+			
+			/** Load stacks */
+			var queueLaneLoadUrl = "getCouchDbData.php?db=projects&design=process_flow&view=KPI_appl_pf_dates_sampl_lanes&reduce=false";
+			d3.json(queueLaneLoadUrl, function(json){
+				//console.log(json);
+				
+				var sampleQueue = generateQueueSampleStackDataset(json, today);
+				var libprepLaneQueue = generateQueueLaneLPStackDataset(json, today);
+				var finlibLaneQueue = generateQueueLaneFLStackDataset(json, today);
+				//var laneLoadLibprep = generateLibprepLaneLoadDataset(json, today); // for things to come...
+				//var seqLoad = generateSeqLoadDataset(json, today); // for things to come...
+
+				/** 3 bar panels on the upper half.
+				 *  However, give these load bars more space than the demand and ongoing bar charts
+				 *  Note that the drawing code for demand and ongoing bar panels are in dashboard.js
+				 */ 
+				var bar_width = drawWidth / 2; 				
+
+				drawStackedBars (sampleQueue, "queue_sample_load", bar_width/2, panelHeights, "samples");
+				drawStackedBars (libprepLaneQueue, "queue_lane_load_lp", bar_width/4, panelHeights, "lanes");
+				drawStackedBars (finlibLaneQueue, "queue_lane_load_fl", bar_width/4, panelHeights, "lanes");
+				//drawStackedBars(laneLoadLibprep, "libprep_lane_load", w, h, "lanes"); // for things to come...
+				//drawStackedBars (seqLoad, "seq_load", w, h, "lanes"); // for things to come...
+			});
             
             //window.setInterval(function() {
             //    //console.log("in cycling function");
