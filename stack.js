@@ -559,37 +559,17 @@ function drawStackedBars (dataset, divID, width, height, unit, padding) {
       .append("svg:g")
         .attr("transform", "translate(" + p[3] + "," + (h - p[2]) + ")");
     
-    // My new code, trying to get it to work...
-    //var zCol = d3.scale.ordinal().range(colorbrewer.PuBu[9]);
-    //var queueLaneLoadUrl = "getCouchDbData.php?db=projects&design=process_flow&view=KPI_appl_pf_dates_sampl_lanes&reduce=false";
-    //d3.json(queueLaneLoadUrl, function(json){
-        //console.log(json);
-        var o = dataset;
-        //var pids = getProjIDList(o, "Platform");
-        ////console.log(o);
-        ////console.log(pids);
-        
-        // Dataset should now be in layers from the start
-        //// Transpose the data into layers by project.
-        //var projLayers = d3.layout.stack()(pids.map(function(pid) {
-        //    return o.map(function(d) { 
-        //        //console.log(d);                       
-        //            return {'x': d.Platform, 'y': +d[pid]}; // Fixat? (gammal kopierad kod, måste förstå vad som avses. Rätt datastruktur?)
-        //    });
-        //}));
-        
-        //console.log(projLayers);
         
         // Compute the x-domain (by platform) and y-domain (by top).
         //x.domain(projLayers[0].map(function(d) { return d.x; }));
         //y.domain([0, d3.max(projLayers[projLayers.length - 1], function(d) { return d.y0 + d.y; })]);
-        x.domain(o[0].map(function(d) { return d.x; }));
-        y.domain([0, d3.max(o[o.length - 1], function(d) { return d.y0 + d.y; })]);
+        x.domain(dataset[0].map(function(d) { return d.x; }));
+        y.domain([0, d3.max(dataset[dataset.length - 1], function(d) { return d.y0 + d.y; })]);
     
         // Add a group for each project.
         var project = svg.selectAll("g.project")
             //.data(projLayers)
-            .data(o)
+            .data(dataset)
           .enter().append("svg:g")
             .attr("class", "project")
             .style("fill", function(d, i) {
@@ -682,6 +662,35 @@ function drawStackedBars (dataset, divID, width, height, unit, padding) {
             .attr("dy", ".71em")
             .text(function(d) { return d; })
             ;
+        
+        
+        var tmp = x.domain();
+        //console.log(tmp);
+        var num_projects = numProjects(dataset, tmp);
+        var num_units = numUnits(dataset, tmp, unit);
+        var totals = totalY(dataset, tmp);
+        
+        var loadText = svg.selectAll("g.load_label")
+            .data(x.domain())
+            .enter().append("svg:text")
+            .attr("class", ".load_label")
+            .attr("x", function(d) { return x(d) + x.rangeBand() / 2; })
+            //.attr("y", function(d) { return -y(d.y0) - 10; })
+            //.attr("y", function(d) { return -100; })
+            .attr("y", function(d) { return -y(totals[d]) - 10; })
+            .attr("text-anchor", "middle")
+            //.attr("dy", ".71em")
+            //.text(function(d) { return d; })
+            .text(function(d) {
+                var t = num_projects[d] + " proj";
+                if(unit == "samples") {
+                    t += "/" + num_units[d] + " WS";
+                }
+                return t;
+                
+                })
+            ;        
+
         // Add y-axis rules.
         var rule = svg.selectAll("g.rule")
             .data(y.ticks(5))
@@ -705,4 +714,61 @@ function drawStackedBars (dataset, divID, width, height, unit, padding) {
             
     //});
     
+}
+
+function numProjects(dataset, domain) {
+    var num_projects = {};
+    for (var i = 0; i < domain.length; i++) {
+        num_projects[domain[i]] = 0;
+    }
+    //console.log(num_projects);
+    for(var i = 0; i < dataset.length; i++) {
+        for (var j = 0; j < dataset[i].length; j++) {
+            var obj = dataset[i][j];
+            if(obj.y != 0) { num_projects[obj.x]++; }
+        }
+    }
+    //console.log(num_projects);
+    return num_projects;
+}
+
+function numUnits(dataset, domain, unit) {
+    var num_u = {};
+    for (var i = 0; i < domain.length; i++) {
+        num_u[domain[i]] = 0;
+    }
+    //console.log(num_u);
+    for(var i = 0; i < dataset.length; i++) {
+        for (var j = 0; j < dataset[i].length; j++) {
+            var obj = dataset[i][j];
+            if(obj.y != 0) { num_u[obj.x] += obj.y; }
+        }
+    }
+    for (c in num_u) {
+        if (unit == "samples") { // convert samples to worksets
+            if (num_u[c] != 0) {
+                num_u[c] = Math.ceil(num_u[c]/96);
+            }
+        } else { // round off lane counts to one digit
+            num_u[c] = parseFloat(num_u[c]).toFixed(1);
+        }
+        
+    }
+    //console.log(num_u);
+    return num_u;
+}
+function totalY(dataset, domain) {
+    var tot = {};
+    for (var i = 0; i < domain.length; i++) {
+        tot[domain[i]] = 0;
+    }
+    //console.log(num_projects);
+    for(var i = 0; i < dataset.length; i++) {
+        for (var j = 0; j < dataset[i].length; j++) {
+            var obj = dataset[i][j];
+            tot[obj.x] += obj.y;
+        }
+    }
+    //console.log(tot);
+    return tot;
 }
