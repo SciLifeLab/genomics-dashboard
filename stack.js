@@ -526,7 +526,7 @@ function drawStackedBars (dataset, divID, width, height, unit, padding) {
         //h = 500,
         w = width,
         h = height,
-        p = [20, 0, 30, 30], // t, r, b, l
+        p = [30, 0, 30, 30], // t, r, b, l
         x = d3.scale.ordinal().rangeRoundBands([0, w - p[1] - p[3]]),
         y = d3.scale.linear().range([0, h - p[0] - p[2]]),
         parse = d3.time.format("%m/%Y").parse,
@@ -677,20 +677,37 @@ function drawStackedBars (dataset, divID, width, height, unit, padding) {
             .attr("x", function(d) { return x(d) + x.rangeBand() / 2; })
             //.attr("y", function(d) { return -y(d.y0) - 10; })
             //.attr("y", function(d) { return -100; })
-            .attr("y", function(d) { return -y(totals[d]) - 10; })
+            .attr("y", function(d) { return -y(totals[d]) - 5; })
             .attr("text-anchor", "middle")
             //.attr("dy", ".71em")
             //.text(function(d) { return d; })
             .text(function(d) {
                 var t = num_projects[d] + " proj";
-                if(unit == "samples") {
-                    t += "/" + num_units[d] + " WS";
-                }
-                return t;
-                
-                })
+                //if(unit == "samples") {
+                //    t += "/" + num_units[d] + " WS";
+                //}
+                return t;                
+            })
             ;        
-
+        if (unit == "samples"){
+        var loadText2 = svg.selectAll("g.load_label")
+            .data(x.domain())
+            .enter().append("svg:text")
+            .attr("class", ".load_label")
+            .attr("x", function(d) { return x(d) + x.rangeBand() / 2; })
+            //.attr("y", function(d) { return -y(d.y0) - 10; })
+            //.attr("y", function(d) { return -100; })
+            .attr("y", function(d) { return -y(totals[d]) - 15; })
+            .attr("text-anchor", "middle")
+            //.attr("dy", ".71em")
+            //.text(function(d) { return d; })
+            .text(function(d) {
+                var t = num_units[d] + " WS";
+                return t;                
+            })
+            ;        
+        }
+        
         // Add y-axis rules.
         var rule = svg.selectAll("g.rule")
             .data(y.ticks(5))
