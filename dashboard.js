@@ -28,6 +28,7 @@ function dateValueSort(a, b){
 function generateRunchartDataset (jsonview, dateRangeStart, dateRangeEnd, dateFromKey, dateToKey, filter, inverseSelection) {
         var dataArray = [];
         var rows = jsonview["rows"];
+        var emit_id = "P680"; // for debugging for a particular project eg if(k[2] == emit_id)
         
         //var j = 0; // counter for data points that make it into the data array NOT USED
         for (var i = 0; i < rows.length; i++) {
@@ -58,6 +59,10 @@ function generateRunchartDataset (jsonview, dateRangeStart, dateRangeEnd, dateFr
                     dataArray.push([ totalQF, k[1], finishedDate, k[2] ]);  /*  Testing for link out to genomics-status: timediff, Project name, finished date, Project Id*/
                 }
                 
+            }
+            // debugging code
+            if(k[2] == emit_id) {
+                console.log(k[1] + ", " + dateFromKey + ": " +dates[dateFromKey] + ", " + dateToKey + ": " + dates[dateToKey]);
             }
         }
         dataArray.sort(dateValueSort);
@@ -769,6 +774,7 @@ function drawProcessPanels(appl_json, pf_json, plotDate, startDate, height, rc_w
     // keys for total time calculation
     var startKey = "Queue date";
     var endKey = "All samples sequenced";
+    //var endKey = "Close date";
     
     var demandDataset = generateDemandDataset(appl_json, plotDate);
     var ongoingDataset = generateBarchartDataset(appl_json, plotDate);
