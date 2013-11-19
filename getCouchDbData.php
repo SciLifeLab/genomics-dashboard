@@ -40,6 +40,9 @@
     if(isset($_GET['dev'])) {
         $base_url = "http://$user_password@tools-dev.scilifelab.se:5984";
     }
+    if(isset($_GET['local'])) {
+        $base_url = "http://localhost:5984";
+    }
 
     $url = "$base_url/$dbStr/_design/$designStr/_view/$viewStr";
     if(isset($reduceStr)) {
