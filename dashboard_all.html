@@ -147,8 +147,9 @@
 			//var rcWidth = (winWidth - 440) / 3;
 			var rcWidth = (winWidth - 460) / 4;
 			var drawWidth = (winWidth - 470);
-
-			var applDataUrl ="getCouchDbData.php?db=projects&design=process_flow&view=KPI_applications&group_level=3";
+            
+            var dbSource = "local" // local, dev or ""
+			var applDataUrl ="getCouchDbData.php?db=projects&design=process_flow&view=KPI_applications&group_level=3&dbSource";
 			//var applDataUrl ="getCouchDbData.php?db=projects&design=process_flow&view=KPI_applications&group_level=3&dev";
 				
             var dateStr = today.getFullYear() + "-" + today.getMonth() + "-" + today.getDate();    
@@ -165,7 +166,7 @@
                  * Nest d3.json call to be sure all data is loaded before drawing all panels
                  */
 				// preparation for both data sets
-				var pfDataUrl ="getCouchDbData.php?db=projects&design=process_flow&view=KPI&group_level=3";
+				var pfDataUrl ="getCouchDbData.php?db=projects&design=process_flow&view=KPI&group_level=3&dbSource";
 				//var pfDataUrl ="getCouchDbData.php?db=projects&design=test&view=KPI&group_level=3";
 				//console.log("About to call d3.json again");
 				d3.json(pfDataUrl, function(json) {
@@ -179,7 +180,7 @@
 //                drawProcessPanels(appl_json, today, twelveWeeks, panelHeights, rcWidth);
 			});
             // trying out stuff for problem KPIs.
-            var failedProgUrl = "getCouchDbData.php?db=projects&design=kpi_external&view=KPI1&reduce=false";
+            var failedProgUrl = "getCouchDbData.php?db=projects&design=kpi_external&view=KPI1&reduce=false&dbSource";
             d3.json(failedProgUrl, function(json){
                 //console.log(json);
                 var fpDataset = generateFailedProgressedDataset(json, today);
@@ -188,7 +189,7 @@
                 drawBarchartPlot(fpDataset, "fs_prog_bc", (rcWidth + 110), panelHeights, 30);
             });
             
-            var wsFailRateUrl = "getCouchDbData.php?db=projects&design=kpi_external&view=KPI2&reduce=false";
+            var wsFailRateUrl = "getCouchDbData.php?db=projects&design=kpi_external&view=KPI2&reduce=false&dbSource";
             d3.json(wsFailRateUrl, function(json){
                 //console.log("Workset failrate dataset:");
                 //console.log(json);
@@ -200,7 +201,7 @@
                 drawBoxPlot(bd, "fs_ws_bp", panelHeights);
             });
             
-            var delDataUrl = "getCouchDbData.php?db=projects&design=kpi_external&view=KPI3_1&reduce=false";
+            var delDataUrl = "getCouchDbData.php?db=projects&design=kpi_external&view=KPI3_1&reduce=false&dbSource";
             d3.json(delDataUrl, function(json){
                 var delDataDataset = generateDeliveredDataDataset (json, twelveWeeks, today);
                 //console.log("Data del dataset");
@@ -211,7 +212,7 @@
             });
 			
 			/** Load stacks */
-			var queueLaneLoadUrl = "getCouchDbData.php?db=projects&design=process_flow&view=KPI_appl_pf_dates_sampl_lanes&reduce=false";
+			var queueLaneLoadUrl = "getCouchDbData.php?db=projects&design=process_flow&view=KPI_appl_pf_dates_sampl_lanes&reduce=false&dbSource";
 			d3.json(queueLaneLoadUrl, function(json){
 				//console.log(json);
 				
