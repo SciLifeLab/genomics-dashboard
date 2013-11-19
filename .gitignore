@@ -7,6 +7,7 @@ user_cred.txt
 d3/
 getLocalData.php
 *.*_prev
+*_prev.*
 update_test.html
 crimea.csv
 crimea_orig.csv
