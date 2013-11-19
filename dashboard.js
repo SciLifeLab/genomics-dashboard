@@ -349,7 +349,8 @@ function drawRunChart(dataset, divID, clines, width, height, padding, maxY) {
     }
     var xScale = d3.scale.linear()
             .domain([0, dataset.length])
-            .range([padding, width - padding * 2]);
+            //.range([padding, width - padding * 2]);
+            .range([padding, width - padding * 0.5]);
     
     var yScale = d3.scale.linear()
             //.domain([0, d3.max(dataset, function(d) { return d[1]; })])
@@ -497,7 +498,8 @@ function drawRunChart(dataset, divID, clines, width, height, padding, maxY) {
         // x axis label
         svg.append("text")
             //.attr("transform", "rotate(-90)")
-            .attr("y", height - 20)
+            //.attr("y", height - 20)
+            .attr("y", height - 3)
             .attr("x", width)
             .attr("class", "axis_label")
             .text("project #");
