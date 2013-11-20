@@ -627,13 +627,13 @@ function drawStackedBars (dataset, divID, width, height, unit, padding) {
                  var num_lanes = d.y;
                  //Create the tooltip label
                  svg.append("text")
-                   .attr("id", "tooltip1")
+                   .attr("id", "tooltipA")
                    .attr("x", xPosition)
                    .attr("y", yPosition)
                  .text(d.pid)
                  ;
                  svg.append("text")
-                   .attr("id", "tooltip2")
+                   .attr("id", "tooltipB")
                    .attr("x", xPosition)
                    .attr("y", yPosition + 13)
                  .text(parseFloat(d.y).toFixed(fixedDigits) + " " + unit)
@@ -651,8 +651,8 @@ function drawStackedBars (dataset, divID, width, height, unit, padding) {
                  //  .attr("r", 4)
                  //  .attr("fill", "black")
                  //  ;
-                    d3.select("#tooltip1").remove();
-                    d3.select("#tooltip2").remove();
+                    d3.select("#tooltipA").remove();
+                    d3.select("#tooltipB").remove();
                     //d3.select("#tooltip3").remove();
             })
             .on("click", function(d) {
