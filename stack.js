@@ -25,6 +25,11 @@ function generateQueueLaneLPStackDataset(json, cmpDate) {
         }
         
         var v = rows[i]["value"];
+        
+        // skip samples already done, but where dates are missing in lims
+        var seqFinishedDate = v["All samples sequenced"];
+        if (seqFinishedDate != "0000-00-00") { continue; }
+        
         var queueDate = v["Queue date"];
         var prepStartDate = v["Lib prep start"];
         // this is for libprep projects
@@ -119,6 +124,8 @@ function generateQueueLaneFLStackDataset(json, cmpDate) {
         }
         
         var v = rows[i]["value"];
+        var seqFinishedDate = v["All samples sequenced"];
+        if (seqFinishedDate != "0000-00-00") { continue; }
         var queueDate = v["Queue date"];
         //var prepStartDate = v["Lib prep start"];
         var seqStartDate = v["Sequencing start"];
@@ -220,6 +227,11 @@ function generateQueueSampleStackDataset(json, cmpDate) {
         //if(applCat != "SeqCap" && applCat != "Other") { continue; }
         
         var v = rows[i]["value"];
+        
+        // skip samples already done, but where dates are missing in lims
+        var seqFinishedDate = v["All samples sequenced"];
+        if (seqFinishedDate != "0000-00-00") { continue; }
+
         var queueDate = v["Queue date"];
         var prepStartDate = v["Lib prep start"];
         // this is for libprep projects
