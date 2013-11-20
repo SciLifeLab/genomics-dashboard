@@ -421,7 +421,8 @@ function drawRunChart(dataset, divID, clines, width, height, padding, maxY) {
               .attr("id", "tooltip1")
               .attr("x", xPosition)
               .attr("y", yPosition)
-            .text(d[2])
+            //.text(d[2])
+            .text(d[4])
             ;
             svg.append("text")
               .attr("id", "tooltip2")
