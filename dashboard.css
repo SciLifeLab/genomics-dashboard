@@ -282,7 +282,7 @@ circle {
   /*fill: #FFF;*/
   shape-rendering: crispEdges;
 }
-#queue svg #tooltip1, #tooltip2 {
+#queue svg #tooltipA, #tooltipB {
   /*fill: #FFC978;*/
   /*fill: #FFC447;*/
   fill: #333;
