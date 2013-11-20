@@ -284,9 +284,8 @@ circle {
 }
 #queue svg #tooltip1, #tooltip2 {
   /*fill: #FFC978;*/
-  fill: #FFC447;
-  /*fill: none;*/
-  /*stroke: #FFC978;*/
+  /*fill: #FFC447;*/
+  fill: #333;
   stroke: none;
 }
 #queue_sample_load {
