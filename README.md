@@ -15,6 +15,7 @@ A directory `d3` must be added containing:
 
 - [d3.v3.js](http://d3js.org/d3.v3.zip)
 - [box.js](http://bl.ocks.org/mbostock/4061502) 
+- [colorbrewer.js](https://github.com/mbostock/d3/blob/master/lib/colorbrewer/colorbrewer.js)
 
 Additional info
 ---------------
