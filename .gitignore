@@ -1,8 +1,16 @@
 *.komodoproject
 .komodotools
+*.txt
 Notes.txt
 user_cred.txt
+*.json
 d3/
 getLocalData.php
 *.*_prev
+*_prev.*
 update_test.html
+crimea.csv
+crimea_orig.csv
+data structure.txt
+new_map-reduce_funct.js
+stack_test.html

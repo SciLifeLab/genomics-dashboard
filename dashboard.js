@@ -28,6 +28,7 @@ function dateValueSort(a, b){
 function generateRunchartDataset (jsonview, dateRangeStart, dateRangeEnd, dateFromKey, dateToKey, filter, inverseSelection) {
         var dataArray = [];
         var rows = jsonview["rows"];
+        var emit_id = "P680"; // for debugging for a particular project eg if(k[2] == emit_id)
         
         //var j = 0; // counter for data points that make it into the data array NOT USED
         for (var i = 0; i < rows.length; i++) {
@@ -58,6 +59,10 @@ function generateRunchartDataset (jsonview, dateRangeStart, dateRangeEnd, dateFr
                     dataArray.push([ totalQF, k[1], finishedDate, k[2] ]);  /*  Testing for link out to genomics-status: timediff, Project name, finished date, Project Id*/
                 }
                 
+            }
+            // debugging code
+            if(k[2] == emit_id) {
+                console.log(k[1] + ", " + dateFromKey + ": " +dates[dateFromKey] + ", " + dateToKey + ": " + dates[dateToKey]);
             }
         }
         dataArray.sort(dateValueSort);
@@ -250,7 +255,8 @@ function generateDemandDataset (jsonview, cmpDate) {
     //var allSeqKey = "All samples sequenced";
     //var finishedKey = "Finished date";
 
-    var dateFormat = d3.time.format("%Y-%m-%d");
+    //var dateFormat = d3.time.format("%Y-%m-%d");
+    var dateFormat = d3.time.format("%d/%m");
 
     var week12Date = new Date(cmpDate - 12 * 7 * day);
     var week8Date = new Date(cmpDate - 8 * 7 * day);
@@ -343,7 +349,8 @@ function drawRunChart(dataset, divID, clines, width, height, padding, maxY) {
     }
     var xScale = d3.scale.linear()
             .domain([0, dataset.length])
-            .range([padding, width - padding * 2]);
+            //.range([padding, width - padding * 2]);
+            .range([padding, width - padding * 0.5]);
     
     var yScale = d3.scale.linear()
             //.domain([0, d3.max(dataset, function(d) { return d[1]; })])
@@ -414,7 +421,8 @@ function drawRunChart(dataset, divID, clines, width, height, padding, maxY) {
               .attr("id", "tooltip1")
               .attr("x", xPosition)
               .attr("y", yPosition)
-            .text(d[2])
+            //.text(d[2])
+            .text(d[4])
             ;
             svg.append("text")
               .attr("id", "tooltip2")
@@ -491,7 +499,8 @@ function drawRunChart(dataset, divID, clines, width, height, padding, maxY) {
         // x axis label
         svg.append("text")
             //.attr("transform", "rotate(-90)")
-            .attr("y", height - 20)
+            //.attr("y", height - 20)
+            .attr("y", height - 3)
             .attr("x", width)
             .attr("class", "axis_label")
             .text("project #");
@@ -765,10 +774,21 @@ function drawBarchartPlot(dataset, divID, width, height, bottom_padding, maxY) {
  * @param rc_width runchart plot widths
  */
 //function drawProcessPanels(appl_json, plotDate, startDate, height, rc_width){
-function drawProcessPanels(appl_json, pf_json, plotDate, startDate, height, rc_width){
+//function drawProcessPanels(appl_json, pf_json, plotDate, startDate, height, rc_width){
+function drawProcessPanels(appl_json, pf_json, plotDate, startDate, height, draw_width){
     // keys for total time calculation
     var startKey = "Queue date";
     var endKey = "All samples sequenced";
+    //var endKey = "Close date";
+
+    var rc_width = draw_width / 4; // 4 run chart panels on the lower half
+
+    /** 3 bar panels on the upper half.
+     *  However, give the demand and ongoing charts less space than the load bars
+     *  Note that the drawing call for the load bars are in dashboard_all.html 
+     */
+    var bar_width = draw_width / 4;
+
     
     var demandDataset = generateDemandDataset(appl_json, plotDate);
     var ongoingDataset = generateBarchartDataset(appl_json, plotDate);
@@ -778,18 +798,18 @@ function drawProcessPanels(appl_json, pf_json, plotDate, startDate, height, rc_w
     
     var maxY = Math.max(maxD, maxO);
     
-    //drawBarchartPlot(demandDataset, "demand_bc", 500, height, 30, maxY);
-    //drawBarchartPlot(ongoingDataset, "ongoing_bc", 500, height, 30, maxY);
-    drawBarchartPlot(demandDataset, "demand_bc", (rc_width + 110), height, 30, maxY);
-    drawBarchartPlot(ongoingDataset, "ongoing_bc", (rc_width + 110), height, 30, maxY);
+    //drawBarchartPlot(demandDataset, "demand_bc", (rc_width + 110), height, 30, maxY);
+    //drawBarchartPlot(ongoingDataset, "ongoing_bc", (rc_width + 110), height, 30, maxY);
+
+    //drawBarchartPlot(demandDataset, "demand_bc", (bar_width + 110), height, 30, maxY);
+    drawBarchartPlot(demandDataset, "demand_bc_plot", (bar_width + 110), height, 30, maxY);
     
-    //console.log(pf_json);
+    //drawBarchartPlot(ongoingDataset, "ongoing_bc", (bar_width + 110), height, 30, maxY);
+    drawBarchartPlot(ongoingDataset, "ongoing_bc_plot", (bar_width + 110), height, 30, maxY);
+    
+    /** Total delivery times data set */
     var totalRcDataset = generateRunchartDataset(appl_json, startDate, plotDate, startKey, endKey);
     //console.log(totalRcDataset);
-    drawRunChart(totalRcDataset, "total_rc", [6, 4, 10], rc_width, height, 30);
-    var totalBpDataset = generateBoxDataset(appl_json, startDate, plotDate, startKey, endKey);
-    //console.log(totalBpDataset);
-    drawBoxPlot(totalBpDataset, "total_bp", height);
     
     /** Step time datasets for all projects */
     var recCtrlDataset = generateRunchartDataset(appl_json, startDate, plotDate, "Arrival date", "Queue date");
@@ -799,11 +819,17 @@ function drawProcessPanels(appl_json, pf_json, plotDate, startDate, height, rc_w
     var seqDataset = generateRunchartDataset(pf_json, startDate, plotDate, "QC library finished", "All samples sequenced"); 
     
     // get highest value in these data sets to set a common scale
+    var maxTot = d3.max(totalRcDataset, function(d) {return d[1];});
     var maxRC = d3.max(recCtrlDataset, function(d) {return d[1];});
     var maxLP = d3.max(libPrepDataset, function(d) {return d[1];});
     var maxSeq = d3.max(seqDataset, function(d) {return d[1];});
-    maxStepY = Math.max(maxRC, maxLP, maxSeq)
+    maxStepY = Math.max(maxTot, maxRC, maxLP, maxSeq)
 
+    drawRunChart(totalRcDataset, "total_rc", [6, 4, 10], rc_width, height, 30);
+    var totalBpDataset = generateBoxDataset(appl_json, startDate, plotDate, startKey, endKey);
+    //console.log(totalBpDataset);
+    drawBoxPlot(totalBpDataset, "total_bp", height);
+    
     drawRunChart(recCtrlDataset, "rec_ctrl_rc", [2], rc_width, height, 30, maxStepY);
     var recCtrlBpDataset = generateBoxDataset(appl_json, startDate, plotDate, "Arrival date", "Queue date");
     drawBoxPlot(recCtrlBpDataset, "rec_ctrl_bp", height, maxStepY);
