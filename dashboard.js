@@ -172,7 +172,8 @@ function generateBarchartDataset (jsonview, cmpDate) {
     //var rawDataQC = { step: "Raw data QC", value: 0 };
 
     //var dataArray = [recCtrl, libPrep, seq, rawDataQC];
-    var dataArray = [recCtrl, libPrep, seq];
+    //var dataArray = [recCtrl, libPrep, seq];
+    var dataArray = [recCtrl]; // only show recCtrl -- quick fix, should really take away all code below that counts other stuff 
 
 
     var rows = jsonview["rows"];
@@ -789,23 +790,29 @@ function drawProcessPanels(appl_json, pf_json, plotDate, startDate, height, draw
      */
     var bar_width = draw_width / 4;
 
-    
-    var demandDataset = generateDemandDataset(appl_json, plotDate);
+    //Demand removed from dashboard    
+    //var demandDataset = generateDemandDataset(appl_json, plotDate);
+
     var ongoingDataset = generateBarchartDataset(appl_json, plotDate);
     //console.log(demandDataset);
-    var maxD = d3.max(demandDataset, function(d) { return d.value });
-    var maxO = d3.max(ongoingDataset, function(d) { return d.value });
     
-    var maxY = Math.max(maxD, maxO);
+    // Demand removed from dashboard 
+    //var maxD = d3.max(demandDataset, function(d) { return d.value });
+    
+    var maxO = d3.max(ongoingDataset, function(d) { return d.value });
+    // not really needed any longer    
+    //var maxY = Math.max(maxD, maxO);
+    var maxY = Math.max(maxO);
     
     //drawBarchartPlot(demandDataset, "demand_bc", (rc_width + 110), height, 30, maxY);
     //drawBarchartPlot(ongoingDataset, "ongoing_bc", (rc_width + 110), height, 30, maxY);
 
+    // Demand removed from dashboard
     //drawBarchartPlot(demandDataset, "demand_bc", (bar_width + 110), height, 30, maxY);
-    drawBarchartPlot(demandDataset, "demand_bc_plot", (bar_width + 110), height, 30, maxY);
+    //drawBarchartPlot(demandDataset, "demand_bc_plot", (bar_width + 110), height, 30, maxY);
     
     //drawBarchartPlot(ongoingDataset, "ongoing_bc", (bar_width + 110), height, 30, maxY);
-    drawBarchartPlot(ongoingDataset, "ongoing_bc_plot", (bar_width + 110), height, 30, maxY);
+    drawBarchartPlot(ongoingDataset, "ongoing_bc_plot", (bar_width / 4), height, 30, maxY);
     
     /** Total delivery times data set */
     var totalRcDataset = generateRunchartDataset(appl_json, startDate, plotDate, startKey, endKey);

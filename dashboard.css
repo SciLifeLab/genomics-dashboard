@@ -282,7 +282,8 @@ circle {
   /*fill: #FFF;*/
   shape-rendering: crispEdges;
 }
-#queue svg #tooltipA, #tooltipB {
+/*#queue svg #tooltipA, #tooltipB {*/
+svg #tooltipA, #tooltipB { 
   /*fill: #FFC978;*/
   /*fill: #FFC447;*/
   fill: #333;
@@ -307,6 +308,55 @@ circle {
     margin-right: 0px;
 }
 
-
+#ongoing {
+    float: left;
+}
+#ongoing_load_charts {
+  float: left;
+  margin-left: 0px;
+  background-image: linear-gradient(bottom, rgb(21,21,21) 18%, rgb(93,93,93) 59%);
+  background-image: -o-linear-gradient(bottom, rgb(21,21,21) 18%, rgb(93,93,93) 59%);
+  background-image: -moz-linear-gradient(bottom, rgb(21,21,21) 18%, rgb(93,93,93) 59%);
+  background-image: -webkit-linear-gradient(bottom, rgb(21,21,21) 18%, rgb(93,93,93) 59%);
+  background-image: -ms-linear-gradient(bottom, rgb(21,21,21) 18%, rgb(93,93,93) 59%);  
+  background-image: -webkit-gradient(
+      linear,
+      left bottom,
+      left top,
+      color-stop(0.18, rgb(21,21,21)),
+      color-stop(0.59, rgb(93,93,93))
+  );
+    
+}
+#ongoing svg {
+  /*width: 200px;*/
+  /*height: 500px;*/
+  /*border: solid 1px #ccc;*/
+  font: 10px sans-serif;
+  fill: #CCC;
+  /*fill: #FFF;*/
+  shape-rendering: crispEdges;
+}
   
+#libprep_load{
+    float: left;
+    margin-top: 0px;
 
+}
+#libprep_sample_load,
+#libprep_lane_load{
+    float: left;
+    margin-top: 0px;
+    margin-left: 0px;
+}
+
+#seq_load{
+    float: left;
+    margin-left: 30px;
+}
+#seq_load_stack{
+    float: left;
+    margin-top: 0px;
+    margin-left: 0px;
+    margin-right: 10px;
+}
