@@ -319,6 +319,7 @@ function generateLibprepSampleLoadDataset(json, cmpDate) {
         var queueDate = v["Queue date"];
         var prepStartDate = v["Lib prep start"];
         var libQCDate = v["QC library finished"];
+        //console.log("app cat: " + applCat + ", pid: " + pid + ", sample: " + sampleID + ", " + prepStartDate + "-" + libQCDate);
         // this is for libprep projects
         if (prepStartDate != "0000-00-00" &&
             prepStartDate <= cmpDateStr &&
