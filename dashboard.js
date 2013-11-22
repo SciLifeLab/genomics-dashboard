@@ -60,9 +60,9 @@ function generateRunchartDataset (jsonview, dateRangeStart, dateRangeEnd, dateFr
                 
             }
             // debugging code
-            if(k[2] == emit_id) {
-                console.log(k[1] + ", " + dateFromKey + ": " +dates[dateFromKey] + ", " + dateToKey + ": " + dates[dateToKey]);
-            }
+            //if(k[2] == emit_id) {
+            //    console.log(k[1] + ", " + dateFromKey + ": " +dates[dateFromKey] + ", " + dateToKey + ": " + dates[dateToKey]);
+            //}
         }
         dataArray.sort(dateValueSort);
         for (var j = 0; j < dataArray.length; j++) {
