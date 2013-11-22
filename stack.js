@@ -319,6 +319,7 @@ function generateLibprepSampleLoadDataset(json, cmpDate) {
         var queueDate = v["Queue date"];
         var prepStartDate = v["Lib prep start"];
         var libQCDate = v["QC library finished"];
+        //console.log("app cat: " + applCat + ", pid: " + pid + ", sample: " + sampleID + ", " + prepStartDate + "-" + libQCDate);
         // this is for libprep projects
         if (prepStartDate != "0000-00-00" &&
             prepStartDate <= cmpDateStr &&
@@ -362,6 +363,16 @@ function generateLibprepSampleLoadDataset(json, cmpDate) {
             dataArray[i][j]["y0"] = tot[a];
             tot[a] += dataArray[i][j]["y"];
         }
+    }
+    if (dataArray.length == 0 ) {
+        dataArray = [
+                        [
+                            { x: "DNA", y: 0, y0: 0, pid: "Px", projName: "empty", queueDate: "0000-00-00"},
+                            { x: "RNA", y: 0, y0: 0, pid: "Px", projName: "empty", queueDate: "0000-00-00"},
+                            { x: "SeqCap", y: 0, y0: 0, pid: "Px", projName: "empty", queueDate: "0000-00-00"},
+                            { x: "Other", y: 0, y0: 0, pid: "Px", projName: "empty", queueDate: "0000-00-00"}
+                        ]
+                    ];
     }
     return dataArray;
 }
@@ -445,6 +456,14 @@ function generateLibprepLaneLoadDataset(json, cmpDate) {
         }
     }
     //console.log(dataArray);
+    if (dataArray.length == 0 ) {
+        dataArray = [
+                        [
+                            { x: "HiSeq", y: 0, y0: 0, pid: "Px", projName: "empty", queueDate: "0000-00-00"},
+                            { x: "MiSeq", y: 0, y0: 0, pid: "Px", projName: "empty", queueDate: "0000-00-00"}
+                        ]
+                    ];
+    }
     
     return dataArray;
 }
