@@ -55,7 +55,6 @@ function generateRunchartDataset (jsonview, dateRangeStart, dateRangeEnd, dateFr
                     var totalQF = daydiff(startDate, finishedDate);
                     //console.log("finished date: " + finishedDate + ", totalQF: " + totalQF);
                     
-                    //dataArray.push([ totalQF, k[1], finishedDate ]); /*  timediff, Project name, finished date*/
                     dataArray.push([ totalQF, k[1], finishedDate, k[2] ]);  /*  Testing for link out to genomics-status: timediff, Project name, finished date, Project Id*/
                 }
                 
@@ -99,9 +98,6 @@ function generateBoxDataset (jsonview, dateRangeStart, dateRangeEnd, dateFromKey
                     if(k[0] == null || k[0].indexOf(filter) != -1 ) { continue; }
                 }
             }
-            //if(filter) {
-            //    if(k[0].indexOf(filter) == -1 ) { continue; } // NOTE! Current data structure is [seq platform || application, project name].
-            //}
             var dates = rows[i]["value"];
             var finishedDate = new Date(dates[dateToKey]);
             //console.log("finished date: " + dates[endKey] + " -> " + finishedDate);
@@ -234,8 +230,6 @@ function generateBarchartDataset (jsonview, cmpDate) {
             step = "no step";
         }                        
         
-        //console.log("LibPrep: " + libPrepProj + ", cmpDate: " + cmpDateStr + ", key: " + k + ", dates: " + [arrivalDate, queueDate, libQCDate, allSeqDate] + ", step: " + step);
-        //console.log(dataArray);
         
     }
     return dataArray;
@@ -251,26 +245,17 @@ function generateBarchartDataset (jsonview, cmpDate) {
 function generateDemandDataset (jsonview, cmpDate) {
     // Key strings in indata
     var arrivalKey = "Arrival date";
-    //var queueKey = "Queue date";
-    //var libQCKey = "QC library finished";
-    //var allSeqKey = "All samples sequenced";
-    //var finishedKey = "Finished date";
 
-    //var dateFormat = d3.time.format("%Y-%m-%d");
     var dateFormat = d3.time.format("%d/%m");
 
     var week12Date = new Date(cmpDate - 12 * 7 * day);
     var week8Date = new Date(cmpDate - 8 * 7 * day);
     var week4Date = new Date(cmpDate - 4 * 7 * day);
     
-    //var twelve = { key: "12", value: 0 };					
-    //var eight = { key: "8", value: 0 };					
-    //var four = { key: "4", value: 0 };
     var twelve = { key: dateFormat(week12Date) + " - " + dateFormat(new Date(week8Date - day)), value: 0 };					
     var eight = { key: dateFormat(week8Date) + " - " + dateFormat(new Date(week4Date - day)), value: 0 };					
     var four = { key: dateFormat(week4Date) + " - " + dateFormat(cmpDate), value: 0 };
 
-    //var dataArray = [recCtrl, libPrep, seq, rawDataQC];
     var dataArray = [twelve, eight, four];
     
 
@@ -281,13 +266,6 @@ function generateDemandDataset (jsonview, cmpDate) {
         var k = rows[i]["key"];
         var dates = rows[i]["value"];
         var arrivalDate = new Date(dates[arrivalKey]);
-        //var queueDate = new Date(dates[queueKey]);
-        //var libQCDate = new Date(dates[libQCKey]);
-        //var allSeqDate = new Date(dates[allSeqKey]);
-        //var finishedDate = new Date(dates[finishedKey]);
-        
-        //console.log("in rows");
-        //if ((arrivalDate > cmpDate) || (finishedDate < cmpDate)) {
         if ((arrivalDate > cmpDate) || (arrivalDate < week12Date)) {
             continue;
         }
@@ -299,12 +277,7 @@ function generateDemandDataset (jsonview, cmpDate) {
             //console.log("cmpdate: " + cmpDate + "libQCDate: " + libQCDate);
         } else if (arrivalDate <= cmpDate) {
             four.value++;
-            //console.log("cmpdate: " + cmpDate + "allSeqDate: " + allSeqDate);
-        //} else if (cmpDate < finishedDate) {
-        //    rawDataQC.value++;
-        //    //console.log("cmpdate: " + cmpDate + "finishedDate: " + finishedDate);
         }
-        //console.log(dataArray);
     }
     // calculate weekly averages
     four.value /= 4;
@@ -337,8 +310,6 @@ function drawRunChart(dataset, divID, clines, width, height, padding, maxY) {
     // DOM id for data line
     var dataLineID = divID + "data_line";
     
-    //console.log("svgID: " + svgID);
-    //console.log("dataLineID: " + dataLineID);
     
     // Time format
     var dateFormat = d3.time.format("%Y-%m-%d");
@@ -350,7 +321,6 @@ function drawRunChart(dataset, divID, clines, width, height, padding, maxY) {
     }
     var xScale = d3.scale.linear()
             .domain([0, dataset.length])
-            //.range([padding, width - padding * 2]);
             .range([padding, width - padding * 0.5]);
     
     var yScale = d3.scale.linear()
@@ -372,10 +342,6 @@ function drawRunChart(dataset, divID, clines, width, height, padding, maxY) {
     
     // Get SVG element (or create a new if not existing)
     var svg = d3.select("#" + svgID);
-    //if (svgID == "total_rcSVG") {
-    //    console.log("selectd svg");
-    //    console.log(svg[0][0]);        
-    //}
     var newchart = false;
     //if(svg == undefined) {
     if(svg[0][0] == null) {
@@ -386,8 +352,6 @@ function drawRunChart(dataset, divID, clines, width, height, padding, maxY) {
                     .attr("width", width)
                     .attr("height", height)
                     .attr("id", svgID);
-        //console.log("appended svg:")
-        //console.log(typeof(svg[0][0]));        
     }
 
 
@@ -492,15 +456,12 @@ function drawRunChart(dataset, divID, clines, width, height, padding, maxY) {
     if(newchart) {
         // y axis label
         svg.append("text")
-            //.attr("transform", "rotate(-90)")
             .attr("y", padding - 10 )
             .attr("x", padding)
             .attr("class", "axis_label")
             .text("days");
         // x axis label
         svg.append("text")
-            //.attr("transform", "rotate(-90)")
-            //.attr("y", height - 20)
             .attr("y", height - 3)
             .attr("x", width)
             .attr("class", "axis_label")
@@ -600,12 +561,6 @@ function drawBoxPlot(dataset, divID, plotHeight, maxY, bottom_margin) {
 
         // Get SVG element (or create a new if not existing)
     var svg = d3.select("#" + svgID);
-    //if (divID == "total_bp") {
-    //    console.log("selected svg in boxplot");
-    //    console.log(svg);
-    //    console.log(svg[0][0]);
-    //    
-    //}
     var newchart = false;
     if(svg[0][0] == null) {
         newchart = true;
@@ -790,29 +745,15 @@ function drawProcessPanels(appl_json, pf_json, plotDate, startDate, height, draw
      */
     var bar_width = draw_width / 4;
 
-    //Demand removed from dashboard    
-    //var demandDataset = generateDemandDataset(appl_json, plotDate);
 
     var ongoingDataset = generateBarchartDataset(appl_json, plotDate);
     //console.log(demandDataset);
     
-    // Demand removed from dashboard 
-    //var maxD = d3.max(demandDataset, function(d) { return d.value });
     
-    var maxO = d3.max(ongoingDataset, function(d) { return d.value });
-    // not really needed any longer    
-    //var maxY = Math.max(maxD, maxO);
-    var maxY = Math.max(maxO);
-    
-    //drawBarchartPlot(demandDataset, "demand_bc", (rc_width + 110), height, 30, maxY);
-    //drawBarchartPlot(ongoingDataset, "ongoing_bc", (rc_width + 110), height, 30, maxY);
-
-    // Demand removed from dashboard
-    //drawBarchartPlot(demandDataset, "demand_bc", (bar_width + 110), height, 30, maxY);
-    //drawBarchartPlot(demandDataset, "demand_bc_plot", (bar_width + 110), height, 30, maxY);
+    //var maxY = d3.max(ongoingDataset, function(d) { return d.value });
     
     //drawBarchartPlot(ongoingDataset, "ongoing_bc", (bar_width + 110), height, 30, maxY);
-    drawBarchartPlot(ongoingDataset, "ongoing_bc_plot", (bar_width / 4), height, 30, maxY);
+    drawBarchartPlot(ongoingDataset, "ongoing_bc_plot", (bar_width / 4), height, 30);
     
     /** Total delivery times data set */
     var totalRcDataset = generateRunchartDataset(appl_json, startDate, plotDate, startKey, endKey);
@@ -821,8 +762,6 @@ function drawProcessPanels(appl_json, pf_json, plotDate, startDate, height, draw
     /** Step time datasets for all projects */
     var recCtrlDataset = generateRunchartDataset(appl_json, startDate, plotDate, "Arrival date", "Queue date");
     var libPrepDataset = generateRunchartDataset(appl_json, startDate, plotDate, "Queue date", "QC library finished", "Finished library", true); 
-    /** Something wrong with seq data set, same as total delivery times*/
-    //var seqDataset = generateRunchartDataset(appl_json, startDate, plotDate, "QC library finished", "All samples sequenced"); 
     var seqDataset = generateRunchartDataset(pf_json, startDate, plotDate, "QC library finished", "All samples sequenced"); 
     
     // get highest value in these data sets to set a common scale

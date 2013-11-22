@@ -35,7 +35,6 @@ function generateQueueLaneLPStackDataset(json, cmpDate) {
         // this is for libprep projects
         if (queueDate != "0000-00-00" &&
             queueDate <= cmpDateStr &&
-            //prepStartDate != "0000-00-00") {
             prepStartDate == "0000-00-00") {
             //console.log(pf + ", " + pid + ", " + v["Lanes"]);
 
@@ -83,17 +82,6 @@ function generateQueueLaneLPStackDataset(json, cmpDate) {
     }
     //console.log(dataArray);
     
-    // this bit too be replaced
-    //for (platform in pfBins) {
-    //    var pfo = {Platform: platform};
-    //    for(projID in pfBins[platform]) {
-    //        pfo[projID] = pfBins[platform][projID];
-    //    }
-    //    dataArray.push(pfo);
-    //
-    //}
-    
-    //return pfBins;
     return dataArray;
 }
 
@@ -132,7 +120,6 @@ function generateQueueLaneFLStackDataset(json, cmpDate) {
         // this is for libprep projects
         if (queueDate != "0000-00-00" &&
             queueDate <= cmpDateStr &&
-            //prepStartDate != "0000-00-00") {
             seqStartDate == "0000-00-00") {
             //console.log(pf + ", " + pid + ", " + v["Lanes"]);
 
@@ -200,9 +187,7 @@ function generateQueueSampleStackDataset(json, cmpDate) {
     
     var projects = {};
     // loop through each sample and add upp lane load per project
-    //console.log("About to loop through json array")
     for (var i = 0; i < rows.length; i++) {
-        //console.log("looping through json array: 1");
         var k = rows[i]["key"];
         var pid = k[0];
         var pn = k[1];
@@ -223,8 +208,6 @@ function generateQueueSampleStackDataset(json, cmpDate) {
         } else {
             applCat = "Other";
         }
-        //console.log("Appl cat: " + applCat)
-        //if(applCat != "SeqCap" && applCat != "Other") { continue; }
         
         var v = rows[i]["value"];
         
@@ -283,17 +266,7 @@ function generateQueueSampleStackDataset(json, cmpDate) {
         }
     }
     //console.log(dataArray);
-    
-    // this bit too be replaced
-    //for (platform in pfBins) {
-    //    var pfo = {Platform: platform};
-    //    for(projID in pfBins[platform]) {
-    //        pfo[projID] = pfBins[platform][projID];
-    //    }
-    //    dataArray.push(pfo);
-    //
-    //}
-    
+        
     //return pfBins;
     return dataArray;
 }
@@ -315,9 +288,7 @@ function generateLibprepSampleLoadDataset(json, cmpDate) {
     
     var projects = {};
     // loop through each sample and add upp lane load per project
-    //console.log("About to loop through json array")
     for (var i = 0; i < rows.length; i++) {
-        //console.log("looping through json array: 1");
         var k = rows[i]["key"];
         var pid = k[0];
         var pn = k[1];
@@ -338,8 +309,6 @@ function generateLibprepSampleLoadDataset(json, cmpDate) {
         } else {
             applCat = "Other";
         }
-        //console.log("Appl cat: " + applCat)
-        //if(applCat != "SeqCap" && applCat != "Other") { continue; }
         
         var v = rows[i]["value"];
         
@@ -357,9 +326,6 @@ function generateLibprepSampleLoadDataset(json, cmpDate) {
             //console.log("To add - app cat: " + applCat + ", pid: " + pid + ", sample: " + sampleID);
             // initialize a value for the project for all applications if it doesn't exist in applBins
             if(applBins[applCat][pid] == undefined) {
-                //for (c in cat) {
-                //    applBins[c][pid] = 0;
-                //}
                 for (var j = 0; j < cat.length; j++) {
                     applBins[cat[j]][pid] = 0;
                 }
@@ -379,7 +345,6 @@ function generateLibprepSampleLoadDataset(json, cmpDate) {
     // put into "layer structure", sort & then add up y0's
     for (var projID in applBins["DNA"]) {
         var projArr = [];
-        //for (c in cat) {
         for (i = 0; i < cat.length; i++) {
              var o = { x: cat[i], y: applBins[cat[i]][projID], pid: projID, projName: projects[projID]["projName"], queueDate: projects[projID]["queueDate"] };
             projArr.push(o);
@@ -398,19 +363,6 @@ function generateLibprepSampleLoadDataset(json, cmpDate) {
             tot[a] += dataArray[i][j]["y"];
         }
     }
-    //console.log(dataArray);
-    
-    // this bit too be replaced
-    //for (platform in pfBins) {
-    //    var pfo = {Platform: platform};
-    //    for(projID in pfBins[platform]) {
-    //        pfo[projID] = pfBins[platform][projID];
-    //    }
-    //    dataArray.push(pfo);
-    //
-    //}
-    
-    //return pfBins;
     return dataArray;
 }
 
@@ -423,9 +375,7 @@ function generateLibprepLaneLoadDataset(json, cmpDate) {
     var rows = json["rows"];
     var pfBins = {};
     var projects = {};
-    // loop through each sample and add upp lane load per project
     for (var i = 0; i < rows.length; i++) {
-        //console.log("looping through json array: 1");
         var k = rows[i]["key"];
         var pid = k[0];
         var pn = k[1];
@@ -446,14 +396,9 @@ function generateLibprepLaneLoadDataset(json, cmpDate) {
         var prepStartDate = v["Lib prep start"];
         //console.log(prepStartDate);
         var libQCDate = v["QC library finished"];
-        //var seqDoneDate = v["All samples sequenced"];
         // this is for libprep projects
-        //if(prepStartDate != "0000-00-00") {
-        //    console.log(prepStartDate + "-" + libQCDate)
-        //}
         if (prepStartDate != "0000-00-00" &&
             prepStartDate <= cmpDateStr &&
-            //prepStartDate != "0000-00-00") {
             libQCDate == "0000-00-00") {
             //console.log(pf + ", " + pid + ", " + v["Lanes"]);
 
@@ -533,17 +478,11 @@ function generateSeqLoadDataset(json, cmpDate) {
         
         var v = rows[i]["value"];
         var queueDate = v["Queue date"];
-        //var prepStartDate = v["Lib prep start"];
         var libQCDate = v["QC library finished"];
         var seqDoneDate = v["All samples sequenced"];
-        //if (appl == "Finished library") {
-        //    console.log(sid + ": " + libQCDate + "-" + seqDoneDate);
-        //}
         
-        //if(libQCDate != "0000-00-00") { console.log(libQCDate + "-" + seqDoneDate)}
         if (libQCDate != "0000-00-00" &&
             libQCDate <= cmpDateStr &&
-            //prepStartDate != "0000-00-00") {
             seqDoneDate == "0000-00-00") {
             //console.log(pf + ", " + pid + ", " + v["Lanes"]);
 
@@ -594,22 +533,6 @@ function generateSeqLoadDataset(json, cmpDate) {
     return dataArray;
 }
 
-
-// not needed as we construct the layers from the start 
-//function getProjIDList(dataset, catKey) {
-//    var resArr = [];
-//    //for (var i = 0; i < dataset.length; i++) {
-//    //    for (key in dataset[i]) {
-//    //        if (key == catKey) { continue; }
-//    //        resArr.push(key);
-//    //    }
-//    //}
-//    for (key in dataset[0]) {
-//        if (key == catKey) { continue; }
-//        resArr.push(key);
-//    }
-//    return resArr;
-//}
 
 function sortByPlatform (a, b) {
     aPf = "";
@@ -669,6 +592,11 @@ function drawStackedBars (dataset, divID, width, height, unit, padding) {
     var fixedDigits = 1;
     if (unit == "samples") { fixedDigits = 0; }
     
+    /**
+     * Not really using these colour schemes at the moment
+     * Will leave the code in for my bad old memory, if they are to be
+     * used later on
+     */    
     // color scales
     // use colorbrewer color schemes
     // number of colors to use. NB! not all schemes have the same number of colors, see colorbrewer.js
@@ -679,13 +607,11 @@ function drawStackedBars (dataset, divID, width, height, unit, padding) {
     var color_scheme = colorbrewer.Blues[num_colors]; // array of colors defined in colorbrewer.js
     //var num_colors = 20; // also used in svg color code functions below
     //var color_scheme = d3.scale.category20c(); // array of colors defined in d3.js
-    
-    
+       
     //z = d3.scale.ordinal().range(["lightpink", "darkgray", "lightblue"]);
     //var z = d3.scale.ordinal().range(colorbrewer.PuBu[3]);
     var z = d3.scale.ordinal().range(color_scheme); // this takes an array of colors as argument
     
-    //var svg = d3.select("body").append("svg:svg")
     var svg = d3.select("#" + divID).append("svg:svg")
         .attr("width", w)
         .attr("height", h)
@@ -694,8 +620,6 @@ function drawStackedBars (dataset, divID, width, height, unit, padding) {
     
         
         // Compute the x-domain (by platform) and y-domain (by top).
-        //x.domain(projLayers[0].map(function(d) { return d.x; }));
-        //y.domain([0, d3.max(projLayers[projLayers.length - 1], function(d) { return d.y0 + d.y; })]);
         x.domain(dataset[0].map(function(d) { return d.x; }));
         y.domain([0, d3.max(dataset[dataset.length - 1], function(d) { return d.y0 + d.y; })]);
     
@@ -743,8 +667,6 @@ function drawStackedBars (dataset, divID, width, height, unit, padding) {
                  //  ;
                  var xPosition = x(d.x) + 10;
                  var yPosition = -y(d.y0) - y(d.y)/2; // position for offset value (y0) + half hight of layer
-                 //var yPosition = event.clientY;
-                 //console.log(yPosition);
                  var num_lanes = d.y;
                  //Create the tooltip label
                  svg.append("text")
@@ -759,20 +681,9 @@ function drawStackedBars (dataset, divID, width, height, unit, padding) {
                    .attr("y", yPosition + 13)
                  .text(parseFloat(d.y).toFixed(fixedDigits) + " " + unit)
                  ;
-                 //svg.append("text")
-                 //  .attr("id", "tooltip3")
-                 //  .attr("x", xPosition)
-                 //  .attr("y", yPosition + 26)
-                 //.text(d[1] + " days")
-                 ;	
-     
             })
             .on("mouseout", function(d) { //Remove the tooltip
-                 //d3.select(this)
-                 //  .attr("r", 4)
-                 //  .attr("fill", "black")
-                 //  ;
-                    d3.select("#tooltipA").remove();
+                   d3.select("#tooltipA").remove();
                     d3.select("#tooltipB").remove();
                     //d3.select("#tooltip3").remove();
             })
@@ -781,7 +692,6 @@ function drawStackedBars (dataset, divID, width, height, unit, padding) {
                      var url = "http://genomics-status.scilifelab.se/projects/" + projID;
                      window.open(url, "genomics-status");
             })
-             // end copied code
             ;
         
         //console.log(x.domain());
@@ -808,37 +718,31 @@ function drawStackedBars (dataset, divID, width, height, unit, padding) {
             .enter().append("svg:text")
             .attr("class", ".load_label")
             .attr("x", function(d) { return x(d) + x.rangeBand() / 2; })
-            //.attr("y", function(d) { return -y(d.y0) - 10; })
-            //.attr("y", function(d) { return -100; })
-            .attr("y", function(d) { return -y(totals[d]) - 5; })
+           .attr("y", function(d) { return -y(totals[d]) - 5; })
             .attr("text-anchor", "middle")
             //.attr("dy", ".71em")
-            //.text(function(d) { return d; })
             .text(function(d) {
                 var t = num_projects[d] + " proj";
-                //if(unit == "samples") {
-                //    t += "/" + num_units[d] + " WS";
-                //}
                 return t;                
             })
             ;        
         if (unit == "samples"){
-        var loadText2 = svg.selectAll("g.load_label")
-            .data(x.domain())
-            .enter().append("svg:text")
-            .attr("class", ".load_label")
-            .attr("x", function(d) { return x(d) + x.rangeBand() / 2; })
-            //.attr("y", function(d) { return -y(d.y0) - 10; })
-            //.attr("y", function(d) { return -100; })
-            .attr("y", function(d) { return -y(totals[d]) - 15; })
-            .attr("text-anchor", "middle")
-            //.attr("dy", ".71em")
-            //.text(function(d) { return d; })
-            .text(function(d) {
-                var t = num_units[d] + " WS";
-                return t;                
-            })
-            ;        
+            var loadText2 = svg.selectAll("g.load_label")
+                .data(x.domain())
+                .enter().append("svg:text")
+                .attr("class", ".load_label")
+                .attr("x", function(d) { return x(d) + x.rangeBand() / 2; })
+                //.attr("y", function(d) { return -y(d.y0) - 10; })
+                //.attr("y", function(d) { return -100; })
+                .attr("y", function(d) { return -y(totals[d]) - 15; })
+                .attr("text-anchor", "middle")
+                //.attr("dy", ".71em")
+                //.text(function(d) { return d; })
+                .text(function(d) {
+                    var t = num_units[d] + " WS";
+                    return t;                
+                })
+                ;        
         }
         
         // Add y-axis rules.
@@ -848,6 +752,7 @@ function drawStackedBars (dataset, divID, width, height, unit, padding) {
             .attr("class", "rule")
             .attr("transform", function(d) { return "translate(0," + -y(d) + ")"; });
         
+        // horizontal lines. Add?
         //rule.append("svg:line")
         //    .attr("x2", w - p[1] - p[3])
         //    .style("stroke", function(d) { return d ? "#fff" : "#000"; })
