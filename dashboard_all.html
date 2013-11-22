@@ -18,12 +18,14 @@
             <span id="date"></span> - <em>Data for the previous 12 weeks</em>
         </div>
         <div id="status_panels">
-            <div id="demand_bc" class="barchart_panel">
-                <h2>Customer demand</h2>
-				<div id="demand_bc_plot">
-					<h3>projects/week</h3>
+            <!--Old ongoing panel - change to only show rec ctrl-->
+			<div id="ongoing_bc" class="barchart_panel">
+                <h2>Rec Ctrl</h2>
+				<div id="ongoing_bc_plot">
+					<h3># projects</h3>
 				</div>
             </div>
+            
 			<!--Queue panels -->
 			<div id="queue">
 				<h2>Queue</h2>
@@ -44,13 +46,28 @@
 				</div>
 			</div>
             <!--Ongoing panels -> change to load-->
-			<div id="ongoing_bc" class="barchart_panel">
-                <h2>Currently ongoing</h2>
-				<div id="ongoing_bc_plot">
-					<h3># projects</h3>
-				</div>
+            <div id="ongoing">
+                <h2>Ongoing</h2>
+                <div id="ongoing_load_charts">
+                    <div id="libprep_load">
+                        <h3>Lib prep</h3>
+                        <div id="libprep_sample_load">
+                            <h4>Sample load</h4>
+                        </div>
+                        <div id="libprep_lane_load">
+                            <h4>Lane load</h4>
+                        </div>
+                    </div>
+                    <div id="seq_load">
+                        <h3>Sequencing</h3>                       
+                        <div id="seq_load_stack">
+                            <h4>Lane load</h4>
+                        </div>
+                    </div>
+                </div>
             </div>
             <br class="clear">
+            <!--Delivery time run charts-->
             <div id="total_del_times" class="times_panel">
                 <h2>Total delivery times - <span id="total_legend">All projects</span></h2>
                 <div id="total_rc">
@@ -146,11 +163,10 @@
 						
 			//var rcWidth = (winWidth - 440) / 3;
 			var rcWidth = (winWidth - 460) / 4;
-			var drawWidth = (winWidth - 470);
+			var drawWidth = (winWidth - 500);
             
             var dbSource = "" // local, dev or "" (=tools)
 			var applDataUrl ="getCouchDbData.php?db=projects&design=process_flow&view=KPI_applications&group_level=3&" + dbSource;
-			//var applDataUrl ="getCouchDbData.php?db=projects&design=process_flow&view=KPI_applications&group_level=3&dev";
 			
             console.log(applDataUrl);	
             var dateStr = today.getFullYear() + "-" + today.getMonth() + "-" + today.getDate();    
@@ -168,17 +184,13 @@
                  */
 				// preparation for both data sets
 				var pfDataUrl ="getCouchDbData.php?db=projects&design=process_flow&view=KPI&group_level=3&" + dbSource;
-				//var pfDataUrl ="getCouchDbData.php?db=projects&design=test&view=KPI&group_level=3";
 				//console.log("About to call d3.json again");
 				d3.json(pfDataUrl, function(json) {
 					pf_json = json;
 					//console.log(pf_json); //Log output to console
-					//drawProcessPanels(appl_json, pf_json, today, twelveWeeks, panelHeights, rcWidth);
 					drawProcessPanels(appl_json, pf_json, today, twelveWeeks, panelHeights, drawWidth);
 				});
 				
-//				// only one data set
-//                drawProcessPanels(appl_json, today, twelveWeeks, panelHeights, rcWidth);
 			});
             // trying out stuff for problem KPIs.
             var failedProgUrl = "getCouchDbData.php?db=projects&design=kpi_external&view=KPI1&reduce=false&" + dbSource;
@@ -220,22 +232,29 @@
 				var sampleQueue = generateQueueSampleStackDataset(json, today);
 				var libprepLaneQueue = generateQueueLaneLPStackDataset(json, today);
 				var finlibLaneQueue = generateQueueLaneFLStackDataset(json, today);
-				//var laneLoadLibprep = generateLibprepLaneLoadDataset(json, today); // for things to come...
-				//var seqLoad = generateSeqLoadDataset(json, today); // for things to come...
+                var sampleLoadLibprep = generateLibprepSampleLoadDataset(json, today);
+                var laneLoadLibprep = generateLibprepLaneLoadDataset(json, today);
+                var seqLoad = generateSeqLoadDataset(json, today);
 
 				/** 3 bar panels on the upper half.
 				 *  However, give these load bars more space than the demand and ongoing bar charts
 				 *  Note that the drawing code for demand and ongoing bar panels are in dashboard.js
 				 */ 
-				var bar_width = drawWidth / 2; 				
+				var bar_width = drawWidth / 1.8; 				
+				var ongoing_bar_width = drawWidth / 1.8; 				
 
 				drawStackedBars (sampleQueue, "queue_sample_load", bar_width/2, panelHeights, "samples");
 				drawStackedBars (libprepLaneQueue, "queue_lane_load_lp", bar_width/4, panelHeights, "lanes");
 				drawStackedBars (finlibLaneQueue, "queue_lane_load_fl", bar_width/4, panelHeights, "lanes");
-				//drawStackedBars(laneLoadLibprep, "libprep_lane_load", w, h, "lanes"); // for things to come...
-				//drawStackedBars (seqLoad, "seq_load", w, h, "lanes"); // for things to come...
+                drawStackedBars(sampleLoadLibprep, "libprep_sample_load", ongoing_bar_width/2, panelHeights, "samples");
+                drawStackedBars(laneLoadLibprep, "libprep_lane_load", ongoing_bar_width/4, panelHeights, "lanes");
+                drawStackedBars (seqLoad, "seq_load_stack", ongoing_bar_width/4, panelHeights, "lanes");
 			});
             
+            /**
+             * Code for cycling between showing status kpis and problem kpis
+             * Not used at the moment
+             */
             //window.setInterval(function() {
             //    //console.log("in cycling function");
             //    problems_displayed = (d3.select("#problem_panels").attr("style") == "display: block");
