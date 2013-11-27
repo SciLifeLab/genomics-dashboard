@@ -498,9 +498,17 @@ function generateSeqLoadDataset(json, cmpDate) {
         var v = rows[i]["value"];
         var queueDate = v["Queue date"];
         var libQCDate = v["QC library finished"];
+        var seqStartDate = v["Sequencing start"];
         var seqDoneDate = v["All samples sequenced"];
+
+        // The start date of the process step depends on if project is libprep or fin lib
+        var stepStartDate = libQCDate;
+        if(appl == "Finished library") {
+            stepStartDate = seqStartDate;
+        }
         
-        if (libQCDate != "0000-00-00" &&
+        //if (libQCDate != "0000-00-00" &&
+        if (stepStartDate != "0000-00-00" &&
             libQCDate <= cmpDateStr &&
             seqDoneDate == "0000-00-00") {
             //console.log(pf + ", " + pid + ", " + v["Lanes"]);
