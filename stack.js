@@ -507,7 +507,6 @@ function generateSeqLoadDataset(json, cmpDate) {
             stepStartDate = seqStartDate;
         }
         
-        //if (libQCDate != "0000-00-00" &&
         if (stepStartDate != "0000-00-00" &&
             libQCDate <= cmpDateStr &&
             seqDoneDate == "0000-00-00") {
