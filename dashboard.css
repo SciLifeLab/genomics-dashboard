@@ -254,8 +254,8 @@ circle {
 /*Queue stacked bar panels*/
 #queue {
   float: left;
-  margin-left: 40px;
-  margin-right: 40px;
+  margin-left: 20px;
+  margin-right: 20px;
 }
 #load_charts {
   float: left;
@@ -298,6 +298,11 @@ svg #tooltipA, #tooltipB {
     float: left;
     margin-top: 0px;
     margin-right: 10px;
+    margin-left: 5px;
+    padding-left: 5px;
+    border-left-width: 1px;
+    border-left-color: white;
+    border-left-style: solid;
 }
 
 #queue_lane_load_lp,
@@ -352,7 +357,12 @@ svg #tooltipA, #tooltipB {
 
 #seq_load{
     float: left;
-    margin-left: 30px;
+    margin-left: 5px;
+    padding-left: 5px;
+    border-left-width: 1px;
+    border-left-color: white;
+    border-left-style: solid;
+    
 }
 #seq_load_stack{
     float: left;
