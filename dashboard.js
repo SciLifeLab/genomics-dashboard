@@ -874,6 +874,7 @@ function drawBarchartPlot(dataset, divID, width, height, bottom_padding, maxY) {
        .enter()
        .append("text")
        .text(function(d) {
+            if(d.value == 0) { return ""; }
             if(d.value < 1) { return smallFormat(d.value); }
             return d.value;
        })
@@ -895,7 +896,8 @@ function drawBarchartPlot(dataset, divID, width, height, bottom_padding, maxY) {
         return false;
     }
     if(hasTotal(dataset)) {
-        console.log("We have total");
+        //console.log("We have total");
+        //console.log(dataset);
         svg.selectAll("text")
            .data(dataset, key)		//Bind data with custom key function
            .enter()
