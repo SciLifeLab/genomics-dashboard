@@ -192,37 +192,37 @@
 				});
 				
 			});
-            // trying out stuff for problem KPIs.
-            var failedProgUrl = "getCouchDbData.php?db=projects&design=kpi_external&view=KPI1&reduce=false&" + dbSource;
-            d3.json(failedProgUrl, function(json){
-                //console.log(json);
-                var fpDataset = generateFailedProgressedDataset(json, today);
-                //console.log(fpDataset);
-                //drawBarchartPlot(fpDataset, "fs_prog_bc", 500, panelHeights, 30);
-                drawBarchartPlot(fpDataset, "fs_prog_bc", (rcWidth + 110), panelHeights, 30);
-            });
-            
-            var wsFailRateUrl = "getCouchDbData.php?db=projects&design=kpi_external&view=KPI2&reduce=false&" + dbSource;
-            d3.json(wsFailRateUrl, function(json){
-                //console.log("Workset failrate dataset:");
-                //console.log(json);
-                var d = generateWorksetFailureDataset (json, twelveWeeks, today);
-                //console.log(d);
-                drawFailedLpRunChart(d, "fs_ws_rc", [], rcWidth, panelHeights, 30);
-                var bd = generateGenericBoxDataset(d, 1);
-                //console.log(bd);
-                drawBoxPlot(bd, "fs_ws_bp", panelHeights);
-            });
-            
-            var delDataUrl = "getCouchDbData.php?db=projects&design=kpi_external&view=KPI3_1&reduce=false&" + dbSource;
-            d3.json(delDataUrl, function(json){
-                var delDataDataset = generateDeliveredDataDataset (json, twelveWeeks, today);
-                //console.log("Data del dataset");
-                //console.log(delDataDataset);
-                drawDeliveredDataRunChart(delDataDataset, "data_del_rc", [], rcWidth, panelHeights, 30);
-                var bd = generateGenericBoxDataset(delDataDataset, 1);
-                drawBoxPlot(bd, "data_del_bp", panelHeights);
-            });
+            // Problem KPIs. Not shown at the moment
+            //var failedProgUrl = "getCouchDbData.php?db=projects&design=kpi_external&view=KPI1&reduce=false&" + dbSource;
+            //d3.json(failedProgUrl, function(json){
+            //    //console.log(json);
+            //    var fpDataset = generateFailedProgressedDataset(json, today);
+            //    //console.log(fpDataset);
+            //    //drawBarchartPlot(fpDataset, "fs_prog_bc", 500, panelHeights, 30);
+            //    drawBarchartPlot(fpDataset, "fs_prog_bc", (rcWidth + 110), panelHeights, 30);
+            //});
+            //
+            //var wsFailRateUrl = "getCouchDbData.php?db=projects&design=kpi_external&view=KPI2&reduce=false&" + dbSource;
+            //d3.json(wsFailRateUrl, function(json){
+            //    //console.log("Workset failrate dataset:");
+            //    //console.log(json);
+            //    var d = generateWorksetFailureDataset (json, twelveWeeks, today);
+            //    //console.log(d);
+            //    drawFailedLpRunChart(d, "fs_ws_rc", [], rcWidth, panelHeights, 30);
+            //    var bd = generateGenericBoxDataset(d, 1);
+            //    //console.log(bd);
+            //    drawBoxPlot(bd, "fs_ws_bp", panelHeights);
+            //});
+            //
+            //var delDataUrl = "getCouchDbData.php?db=projects&design=kpi_external&view=KPI3_1&reduce=false&" + dbSource;
+            //d3.json(delDataUrl, function(json){
+            //    var delDataDataset = generateDeliveredDataDataset (json, twelveWeeks, today);
+            //    //console.log("Data del dataset");
+            //    //console.log(delDataDataset);
+            //    drawDeliveredDataRunChart(delDataDataset, "data_del_rc", [], rcWidth, panelHeights, 30);
+            //    var bd = generateGenericBoxDataset(delDataDataset, 1);
+            //    drawBoxPlot(bd, "data_del_bp", panelHeights);
+            //});
 			
 			/** Load stacks */
 			var queueLaneLoadUrl = "getCouchDbData.php?db=projects&design=process_flow&view=KPI_appl_pf_dates_sampl_lanes&reduce=false&" + dbSource;
