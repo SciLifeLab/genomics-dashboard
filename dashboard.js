@@ -1061,7 +1061,6 @@ function drawProcessPanels(appl_json, pf_json, plotDate, startDate, height, draw
      */
     var bar_width = draw_width / 4;
 
-
     //var ongoingDataset = generateBarchartDataset(appl_json, plotDate);
     var ongoingDataset = generateRecCtrlBarchartDataset(appl_json, plotDate); // new split on application
     //console.log(demandDataset);
