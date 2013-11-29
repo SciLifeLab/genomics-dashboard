@@ -165,7 +165,7 @@
 			var rcWidth = (winWidth - 460) / 4;
 			var drawWidth = (winWidth - 500);
             
-            var dbSource = "" // local, dev or "" (=tools)
+            var dbSource = "local" // local, dev or "" (=tools)
 			var applDataUrl ="getCouchDbData.php?db=projects&design=process_flow&view=KPI_applications&group_level=3&" + dbSource;
 			
             console.log(applDataUrl);	
@@ -227,7 +227,12 @@
 			/** Load stacks */
 			var queueLaneLoadUrl = "getCouchDbData.php?db=projects&design=process_flow&view=KPI_appl_pf_dates_sampl_lanes&reduce=false&" + dbSource;
 			d3.json(queueLaneLoadUrl, function(json){
-				//console.log(json);
+                console.log("Drawing load stacks")
+                console.log(json);
+
+                var reduced = reduceToProject(json);
+                console.log(reduced);
+
 				
 				var sampleQueue = generateQueueSampleStackDataset(json, today);
 				var libprepLaneQueue = generateQueueLaneLPStackDataset(json, today);
