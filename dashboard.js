@@ -14,7 +14,108 @@ function dateValueSort(a, b){
             return datediff;
         }
 }
+/**
+ * Datastructure KPI_appl_pf_dates_sampl_lanes (2013-11-29)
+    { "rows": [
+            {
+                "key": [
+                    "Pxxx", "Production", "Metagenome", "HiSeq 2000/2500 High Output", "Pxxx_101"   
+                ],
+                "value: {
+                    "Arrival date":"2013-07-03",
+                    "Rec Ctrl start":"2013-07-18",
+                    "Queue date":"2013-07-17",
+                    "Lib prep start":"2013-09-26",
+                    "QC library finished":"2013-10-03",
+                    "Sequencing start":"2013-10-08",
+                    "All samples sequenced":"2013-10-20",
+                    "Close date":"2013-11-11",
+                    "Samples":1,
+                    "Lanes":0.066666666666666665741
+                }
+            },
+            {
+                ...
+            }
+        ]
+    }
+ */
+function reduceToProject(jsonview) {
+    var rows = jsonview["rows"];
+    var projects = {};
+    
+    
+    // Loop through all samples
+    for (var i = 0; i < rows.length; i++) {
+        //console.log("looping through json array: 1");
+        var keys = rows[i]["key"];
+        var values = rows[i]["value"];
+        var pid = keys[0]; // project id
+        var type = keys[1]; // type = Production || Applications
+        var appl = keys[2]; // application
+        var pf = keys[3]; // platform
+        var sid = keys[4]; // sample id
+        if(projects[pid] == undefined) { // new project, initialize with keys
+            projects[pid] = {
+                                "type": type,
+                                "appl": appl,
+                                "pf": pf,
+                            }
+            for (var valKey in values) {
+                projects[pid][valKey] = values[valKey]; // intialize all data for proj with values of first sample
+            }
+        } else {
+            // update data with appropriat date, or sum up lanes or samples
+            for (var valKey in values) {
+                var currVal = values[valKey];
+                if(valKey == "Samples" || valKey == "Lanes") {
+                    projects[pid][valKey] += values[valKey];
+                } else if (valKey.indexOf("start") != -1 ) { // get earliest start dates
+                    if (currVal < projects[pid][valKey]) { projects[pid][valKey] = currVal; } // handles 0000-00-00 as well
+                } else { // get latest done dates, except 0000-00-00
+                    if (currVal == "0000-00-00") {
+                        projects[pid][valKey] = "0000-00-00";
+                    } else if (currVal > projects[pid][valKey]) {
+                        projects[pid][valKey] = currVal;
+                    }
+                }
+            }
+        }
+    }
 
+    var outRows = [];
+    
+    // go through all projects and put in original structure
+    for (var pid in projects) {
+        var newKey = [
+            pid,
+            projects[pid]["type"],
+            projects[pid]["appl"],
+            projects[pid]["pf"]
+        ];
+        var newValue = {
+            "Arrival date":projects[pid]["Arrival date"],
+            "Rec Ctrl start":projects[pid]["Rec Ctrl start"],
+            "Queue date":projects[pid]["Queue date"],
+            "Lib prep start":projects[pid]["Lib prep start"],
+            "QC library finished":projects[pid]["QC library finished"],
+            "Sequencing start":projects[pid]["Sequencing start"],
+            "All samples sequenced":projects[pid]["All samples sequenced"],
+            "Close date":projects[pid]["Close date"],
+            "Samples":projects[pid]["Samples"],
+            "Lanes":projects[pid]["Lanes"]
+        };
+        
+        var newRow = {
+            "key": newKey,
+            "value": newValue
+        }
+        outRows.push(newRow);
+    }
+
+    return { "rows": outRows };
+    
+}
 /**
  * Generates a dataset for runchart line plot over time from a couchdb view
  * @param {Object} jsonview		A parsed json stream
