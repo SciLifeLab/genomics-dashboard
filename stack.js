@@ -189,11 +189,13 @@ function generateQueueSampleStackDataset(json, cmpDate) {
     // loop through each sample and add upp lane load per project
     for (var i = 0; i < rows.length; i++) {
         var k = rows[i]["key"];
+        //console.log(k)
         var pid = k[0];
-        var pn = k[1];
+        var type = k[1];
         var appl = k[2];
         var sampleID = k[4];
         if (appl == "Finished library") { continue; } // fin lib projects not of interest
+        if(appl == null) { appl = "Other";}
         //console.log(sampleID);
         var applCat = "";
         if (appl.indexOf("capture") != -1) {
@@ -236,7 +238,7 @@ function generateQueueSampleStackDataset(json, cmpDate) {
             applBins[applCat][pid] += 1;
 
             if(projects[pid] == undefined) {
-                projects[pid] = { queueDate: queueDate, projName: pn}
+                projects[pid] = { queueDate: queueDate}
             }
         }
         
@@ -248,7 +250,7 @@ function generateQueueSampleStackDataset(json, cmpDate) {
         var projArr = [];
         //for (c in cat) {
         for (i = 0; i < cat.length; i++) {
-             var o = { x: cat[i], y: applBins[cat[i]][projID], pid: projID, projName: projects[projID]["projName"], queueDate: projects[projID]["queueDate"] };
+             var o = { x: cat[i], y: applBins[cat[i]][projID], pid: projID, queueDate: projects[projID]["queueDate"] };
             projArr.push(o);
         }
         dataArray.push(projArr);
@@ -295,6 +297,8 @@ function generateLibprepSampleLoadDataset(json, cmpDate) {
         var appl = k[2];
         var sampleID = k[4];
         if (appl == "Finished library") { continue; } // fin lib projects not of interest
+        if(appl == null) { appl = "Other";}
+
         //console.log(sampleID);
         var applCat = "";
         if (appl.indexOf("capture") != -1) {
