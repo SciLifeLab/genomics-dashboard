@@ -254,8 +254,8 @@ circle {
 /*Queue stacked bar panels*/
 #queue {
   float: left;
-  margin-left: 20px;
-  margin-right: 20px;
+  margin-left: 10px;
+  margin-right: 0px;
 }
 #load_charts {
   float: left;
@@ -289,12 +289,18 @@ svg #tooltipA, #tooltipB {
   fill: #333;
   stroke: none;
 }
-#queue_sample_load {
+#queue_lp_load {
     float: left;
     margin-top: 0px;
 
 }
-#queue_lane_load {
+#queue_sample_load_lp {
+    float: left;
+    margin-top: 0px;
+    margin-left: 0px;
+
+}
+#queue_fl_load {
     float: left;
     margin-top: 0px;
     margin-right: 10px;
