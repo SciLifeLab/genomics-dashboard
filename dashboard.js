@@ -40,6 +40,9 @@ function dateValueSort(a, b){
         ]
     }
  */
+
+// Look at calculating and adding a first in queue date
+// Sort on queue date - arrival date - proj ID (?)
 function reduceToProject(jsonview) {
     var rows = jsonview["rows"];
     var projects = {};
@@ -523,7 +526,7 @@ function generateRecCtrlBarchartDataset (jsonview, cmpDate) {
             } else if (closeDate != "0000-00-00") { // closed
                 continue;
             } else { // in rec ctrl
-                console.log(k[2])
+                //console.log(k[2])
                 switch(applCat) {
                     case "DNA":
                         dna.value++;
@@ -1069,7 +1072,7 @@ function drawProcessPanels(appl_json, pf_json, plotDate, startDate, height, draw
     //var maxY = d3.max(ongoingDataset, function(d) { return d.value });
     
     //drawBarchartPlot(ongoingDataset, "ongoing_bc", (bar_width + 110), height, 30, maxY);
-    drawBarchartPlot(ongoingDataset, "ongoing_bc_plot", (bar_width / 1.2), height, 30);
+    drawBarchartPlot(ongoingDataset, "ongoing_bc_plot", (bar_width / 2), height, 30);
     
     /** Total delivery times data set */
     var totalRcDataset = generateRunchartDataset(appl_json, startDate, plotDate, startKey, endKey);
