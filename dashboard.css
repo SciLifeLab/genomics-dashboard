@@ -127,10 +127,14 @@ circle {
   font-size: 10pt;
   fill: white;
 }
-#demand_bc_plot,
+#ongoing_bc {
+    float: left;
+}
 #ongoing_bc_plot {
   float: left;
   padding-left: 10px;
+  padding-right: 10px;
+  padding-top: 19px; /*= height of h4*/
   margin-left: 0px;
   background-image: linear-gradient(bottom, rgb(21,21,21) 18%, rgb(93,93,93) 59%);
   background-image: -o-linear-gradient(bottom, rgb(21,21,21) 18%, rgb(93,93,93) 59%);
@@ -143,9 +147,18 @@ circle {
       left top,
       color-stop(0.18, rgb(21,21,21)),
       color-stop(0.59, rgb(93,93,93))
-  );
-  
+  ); 
 }
+#ongoing_bc_plot svg {
+  /*width: 200px;*/
+  /*height: 500px;*/
+  /*border: solid 1px #ccc;*/
+  font: 10px sans-serif;
+  /*fill: #CCC;*/
+  fill: #FFF;
+  shape-rendering: crispEdges;
+}
+
 #fs_prog_bc h2 {
     margin-bottom: 5px;
 }
