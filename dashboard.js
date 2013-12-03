@@ -1072,7 +1072,7 @@ function drawProcessPanels(appl_json, pf_json, plotDate, startDate, height, draw
     //var maxY = d3.max(ongoingDataset, function(d) { return d.value });
     
     //drawBarchartPlot(ongoingDataset, "ongoing_bc", (bar_width + 110), height, 30, maxY);
-    drawBarchartPlot(ongoingDataset, "ongoing_bc_plot", (bar_width / 2), height, 30);
+    //drawBarchartPlot(ongoingDataset, "ongoing_bc_plot", (bar_width / 2), height, 30);
     
     /** Total delivery times data set */
     var totalRcDataset = generateRunchartDataset(appl_json, startDate, plotDate, startKey, endKey);
