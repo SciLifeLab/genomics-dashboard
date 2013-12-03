@@ -30,17 +30,20 @@
 			<div id="queue">
 				<h2>Queue</h2>
 				<div id="load_charts">
-					<div id="queue_sample_load">
-						<h3>Samples</h3>
-						<h4>Lib prep</h4>
-					</div>
-					<div id="queue_lane_load">
-						<h3>Lanes</h3>
+					<div id="queue_lp_load"> <!--was queue_sample_load - rename-->
+						<h3>Lib prep</h3>
+						
+                        <div id="queue_sample_load_lp"> <!--NEW-->
+                            <h4>Samples</h4>
+                        </div>
 						<div id="queue_lane_load_lp">
-							<h4>Lib prep</h4>
+							<h4>Lanes</h4>
 						</div>
+					</div>
+					<div id="queue_fl_load"> <!--was queue_lane_load-->
+						<h3>Finished lib</h3>
 						<div id="queue_lane_load_fl">
-							<h4>Fin lib</h4>            
+							<h4>Lanes</h4>            
 						</div>
 					</div>
 				</div>
@@ -248,7 +251,7 @@
 				var bar_width = drawWidth / 1.8; 				
 				var ongoing_bar_width = drawWidth / 1.8; 				
 
-				drawStackedBars (sampleQueue, "queue_sample_load", bar_width/2, panelHeights, "samples");
+				drawStackedBars (sampleQueue, "queue_sample_load_lp", bar_width/2, panelHeights, "samples");
 				drawStackedBars (libprepLaneQueue, "queue_lane_load_lp", bar_width/4, panelHeights, "lanes");
 				drawStackedBars (finlibLaneQueue, "queue_lane_load_fl", bar_width/4, panelHeights, "lanes");
                 drawStackedBars(sampleLoadLibprep, "libprep_sample_load", ongoing_bar_width/2, panelHeights, "samples");
