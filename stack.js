@@ -11,8 +11,9 @@ function generateQueueLaneLPStackDataset(json, cmpDate) {
         //console.log("looping through json array: 1");
         var k = rows[i]["key"];
         var pid = k[0];
-        var pn = k[1];
+        var type = k[1];
         var appl = k[2];
+        if (type != "Production") { continue; } // only Production of interest
         if (appl == "Finished library") { continue; } // need seq start date to be able to handle fin lib projects
 
         // Determine which platform
@@ -56,17 +57,18 @@ function generateQueueLaneLPStackDataset(json, cmpDate) {
             pfBins[pf][pid] += v["Lanes"];
 
             if(projects[pid] == undefined) {
-                projects[pid] = { queueDate: queueDate, projName: pn}
+                projects[pid] = { queueDate: queueDate }
             }
         }
         
     }
     //console.log(pfBins);
     
+    // remove proj name??????
     // put into "layer structure", sort & then add up y0's
     for (var projID in pfBins["HiSeq"]) {
-        var hO = { x: "HiSeq", y: pfBins["HiSeq"][projID], pid: projID, projName: projects[projID]["projName"], queueDate: projects[projID]["queueDate"] };
-        var mO = { x: "MiSeq", y: pfBins["MiSeq"][projID], pid: projID, projName: projects[projID]["projName"], queueDate: projects[projID]["queueDate"] };
+        var hO = { x: "HiSeq", y: pfBins["HiSeq"][projID], pid: projID, queueDate: projects[projID]["queueDate"] };
+        var mO = { x: "MiSeq", y: pfBins["MiSeq"][projID], pid: projID, queueDate: projects[projID]["queueDate"] };
         dataArray.push([hO, mO]);
     }
     dataArray.sort(sortByPlatform);
@@ -98,8 +100,9 @@ function generateQueueLaneFLStackDataset(json, cmpDate) {
         //console.log("looping through json array: 1");
         var k = rows[i]["key"];
         var pid = k[0];
-        var pn = k[1];
+        var type = k[1];
         var appl = k[2];
+        if (type != "Production") { continue; } // only Production of interest - is this true?? 
         if (appl != "Finished library") { continue; } // skip fin lib projects
 
         // Determine which platform
@@ -141,7 +144,7 @@ function generateQueueLaneFLStackDataset(json, cmpDate) {
             pfBins[pf][pid] += v["Lanes"];
 
             if(projects[pid] == undefined) {
-                projects[pid] = { queueDate: queueDate, projName: pn}
+                projects[pid] = { queueDate: queueDate}
             }
         }
         
@@ -150,8 +153,8 @@ function generateQueueLaneFLStackDataset(json, cmpDate) {
     
     // put into "layer structure", sort & then add up y0's
     for (var projID in pfBins["HiSeq"]) {
-        var hO = { x: "HiSeq", y: pfBins["HiSeq"][projID], pid: projID, projName: projects[projID]["projName"], queueDate: projects[projID]["queueDate"] };
-        var mO = { x: "MiSeq", y: pfBins["MiSeq"][projID], pid: projID, projName: projects[projID]["projName"], queueDate: projects[projID]["queueDate"] };
+        var hO = { x: "HiSeq", y: pfBins["HiSeq"][projID], pid: projID, queueDate: projects[projID]["queueDate"] };
+        var mO = { x: "MiSeq", y: pfBins["MiSeq"][projID], pid: projID, queueDate: projects[projID]["queueDate"] };
         dataArray.push([hO, mO]);
     }
     dataArray.sort(sortByPlatform);
@@ -194,6 +197,7 @@ function generateQueueSampleStackDataset(json, cmpDate) {
         var type = k[1];
         var appl = k[2];
         var sampleID = k[4];
+        if (type != "Production") { continue; } // only Production of interest
         if (appl == "Finished library") { continue; } // fin lib projects not of interest
         if(appl == null) { appl = "Other";}
         //console.log(sampleID);
