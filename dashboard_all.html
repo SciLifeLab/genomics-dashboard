@@ -19,7 +19,7 @@
         </div>
         <div id="status_panels">
             <!--Old ongoing panel - change to only show rec ctrl-->
-			<div id="ongoing_bc" class="barchart_panel">
+			<div id="ongoing_bc">
                 <h2>Rec Ctrl</h2>
 				<div id="ongoing_bc_plot">
 					<h3># projects</h3>
@@ -236,7 +236,7 @@
                 var reduced = reduceToProject(json);
                 console.log(reduced);
 
-				
+				var recCtrl = generateRecCtrlStackDataset(json, today);
 				var sampleQueue = generateQueueSampleStackDataset(json, today);
 				var libprepLaneQueue = generateQueueLaneLPStackDataset(json, today);
 				var finlibLaneQueue = generateQueueLaneFLStackDataset(json, today);
@@ -248,10 +248,11 @@
 				 *  However, give these load bars more space than the demand and ongoing bar charts
 				 *  Note that the drawing code for demand and ongoing bar panels are in dashboard.js
 				 */ 
-				var bar_width = drawWidth / 1.8; 				
+				var bar_width = drawWidth / 1.6; 				
 				var ongoing_bar_width = drawWidth / 1.8; 				
 
-				drawStackedBars (sampleQueue, "queue_sample_load_lp", bar_width/2, panelHeights, "samples");
+				drawRCStackedBars(recCtrl, "ongoing_bc_plot", bar_width/5, panelHeights);
+                drawStackedBars (sampleQueue, "queue_sample_load_lp", bar_width/2, panelHeights, "samples");
 				drawStackedBars (libprepLaneQueue, "queue_lane_load_lp", bar_width/4, panelHeights, "lanes");
 				drawStackedBars (finlibLaneQueue, "queue_lane_load_fl", bar_width/4, panelHeights, "lanes");
                 drawStackedBars(sampleLoadLibprep, "libprep_sample_load", ongoing_bar_width/2, panelHeights, "samples");
