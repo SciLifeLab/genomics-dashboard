@@ -168,7 +168,7 @@
 			var rcWidth = (winWidth - 460) / 4;
 			var drawWidth = (winWidth - 500);
             
-            var dbSource = "local" // local, dev or "" (=tools)
+            var dbSource = "" // local, dev or "" (=tools)
 			var applDataUrl ="getCouchDbData.php?db=projects&design=process_flow&view=KPI_applications&group_level=3&" + dbSource;
 			
             console.log(applDataUrl);	
@@ -245,19 +245,17 @@
                 var seqLoad = generateSeqLoadDataset(json, today);
                 
 				/** 3 bar panels on the upper half.
-				 *  However, give these load bars more space than the demand and ongoing bar charts
-				 *  Note that the drawing code for demand and ongoing bar panels are in dashboard.js
+				 *  
 				 */ 
-				var bar_width = drawWidth / 1.6; 				
-				var ongoing_bar_width = drawWidth / 1.8; 				
+				var bar_width = (drawWidth + 320) / 17; // 17 bars to draw over the width of the window 				
 
-				drawRCStackedBars(recCtrl, "ongoing_bc_plot", bar_width/5, panelHeights);
-                drawStackedBars (sampleQueue, "queue_sample_load_lp", bar_width/2, panelHeights, "samples");
-				drawStackedBars (libprepLaneQueue, "queue_lane_load_lp", bar_width/4, panelHeights, "lanes");
-				drawStackedBars (finlibLaneQueue, "queue_lane_load_fl", bar_width/4, panelHeights, "lanes");
-                drawStackedBars(sampleLoadLibprep, "libprep_sample_load", ongoing_bar_width/2, panelHeights, "samples");
-                drawStackedBars(laneLoadLibprep, "libprep_lane_load", ongoing_bar_width/4, panelHeights, "lanes");
-                drawStackedBars (seqLoad, "seq_load_stack", ongoing_bar_width/4, panelHeights, "lanes");
+				drawRCStackedBars(recCtrl, "ongoing_bc_plot", bar_width * 1, panelHeights);
+                drawStackedBars (sampleQueue, "queue_sample_load_lp", bar_width * 4, panelHeights, "samples");
+				drawStackedBars (libprepLaneQueue, "queue_lane_load_lp", bar_width * 2, panelHeights, "lanes");
+				drawStackedBars (finlibLaneQueue, "queue_lane_load_fl", bar_width * 2, panelHeights, "lanes");
+                drawStackedBars(sampleLoadLibprep, "libprep_sample_load", bar_width * 4, panelHeights, "samples");
+                drawStackedBars(laneLoadLibprep, "libprep_lane_load", bar_width * 2, panelHeights, "lanes");
+                drawStackedBars (seqLoad, "seq_load_stack", bar_width * 2, panelHeights, "lanes");
 			});
             
             /**
