@@ -1001,7 +1001,7 @@ function drawRCStackedBars (dataset, divID, width, height) {
             })
             .attr("text-anchor", "middle")
             .text(function (d, i) {
-                if(d.y > 0) { return d.cat; } else { return ""; }
+                if(d.y > 0) { return d.cat + " (" + d.y + ")"; } else { return ""; }
             })
             ;
 
