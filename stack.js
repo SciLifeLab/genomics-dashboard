@@ -71,7 +71,18 @@ function generateRecCtrlStackDataset(json, cmpDate) {
     //console.log(applBins);
     var projArr = [];
     for (i = 0; i < cat.length; i++) {
-         var o = { x: "RecCtrl", y: applBins[cat[i]]["count"], cat: cat[i] };
+        var o = { x: "RecCtrl", y: applBins[cat[i]]["count"], cat: cat[i] };
+        var proj;
+        for(var p in applBins[cat[i]]) {
+            if(p.indexOf("P") == -1) { continue; }
+            if (proj == undefined) {
+                proj = p;
+            } else {
+                proj += ", " + p;
+            }
+        }
+        o["projects"] = proj;
+        proj = undefined;
         projArr.push(o);
     }
     
@@ -955,33 +966,28 @@ function drawRCStackedBars (dataset, divID, width, height) {
             .style("fill", function(d, i) {
                 return color_scheme[i + 2]; // make sure the chosen colorbrewer color space has num_colors defined
             }) 
-            //.on("mouseover", function(d) {
-            //     //d3.select(this)
-            //     //  //.attr("r", 7)
-            //     //  .attr("fill", "blue")
-            //     //  ;
-            //     var xPosition = x(d.x) + 10;
-            //     var yPosition = -y(d.y0) - y(d.y)/2; // position for offset value (y0) + half hight of layer
-            //     var num_lanes = d.y;
-            //     //Create the tooltip label
-            //     svg.append("text")
-            //       .attr("id", "tooltipA")
-            //       .attr("x", xPosition)
-            //       .attr("y", yPosition)
-            //     .text(d.pid)
-            //     ;
-            //     svg.append("text")
-            //       .attr("id", "tooltipB")
-            //       .attr("x", xPosition)
-            //       .attr("y", yPosition + 13)
-            //     .text(parseFloat(d.y).toFixed(fixedDigits) + " " + unit)
-            //     ;
-            //})
-            //.on("mouseout", function(d) { //Remove the tooltip
-            //       d3.select("#tooltipA").remove();
-            //        d3.select("#tooltipB").remove();
-            //        //d3.select("#tooltip3").remove();
-            //})
+            .on("mouseover", function(d) {
+                 //d3.select(this)
+                 //  //.attr("r", 7)
+                 //  .attr("fill", "blue")
+                 //  ;
+                 //var xPosition = x(d.x) + 10;
+                 var xPosition = -20 ;
+                 //var yPosition = -y(d.y0) - y(d.y)/2; // position for offset value (y0) + half hight of layer
+                 var yPosition = -h + 50; // position for offset value (y0) + half hight of layer
+                 //Create the tooltip label
+                 svg.append("text")
+                   .attr("id", "tooltipA")
+                   .attr("x", xPosition)
+                   .attr("y", yPosition)
+                   .style("fill", "white")
+                   .style("font-size", "7pt")
+                 .text(d.projects)
+                 ;
+            })
+            .on("mouseout", function(d) { //Remove the tooltip
+                   d3.select("#tooltipA").remove();
+            })
             //.on("click", function(d) {
             //         var projID = d.pid;
             //         var url = "http://genomics-status.scilifelab.se/projects/" + projID;
