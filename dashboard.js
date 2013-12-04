@@ -14,6 +14,8 @@ function dateValueSort(a, b){
             return datediff;
         }
 }
+
+
 /**
  * Datastructure KPI_appl_pf_dates_sampl_lanes (2013-11-29)
     { "rows": [
@@ -116,9 +118,144 @@ function reduceToProject(jsonview) {
         outRows.push(newRow);
     }
 
+    //// sort by libprep start for first in queue calc
+    //outRows.sort(sortByLibprepStart);
+    //console.log(outRows);
+    
+    // sort in queue order 
+    outRows.sort(sortByQueueArrival);
+    
+    ////  2nd try - not working properly - testing stuff for first in queue calc
+    //var firstLPDate;
+    //var prevFirstLPDate;
+    //var prevLPDate;
+    //var firstFLDate;
+    //var prevFLDate;
+    //
+    //for (var i =0; i < outRows.length; i++) {
+    //    var p = outRows[i]; // project object
+    //    if(p["key"][1] == "Application") { continue; }
+    //    if(p["key"][2] == "Finished library") {
+    //        
+    //    } else {
+    //        if (firstFLDate == undefined) { firstFLDate = p["value"]["Queue date"]; prevFirstLPDate = firstFLDate; }
+    //        if(p["value"]["Lib prep start"] == prevLPDate) {
+    //            p["value"]["First in queue"] = prevFirstLPDate;
+    //        } else {
+    //            p["value"]["First in queue"] = firstFLDate;
+    //            prevFirstLPDate = firstFLDate;
+    //        }
+    //        firstFLDate = p["value"]["Lib prep start"];
+    //        prevLPDate = p["value"]["Lib prep start"];
+    //    
+    //    }
+    //}
+    //console.log(outRows);
+    
+    //// 1st try - not that great. testing stuff for first in queue calc
+    //var lpStarts = {};
+    //for (var i = 0; i < outRows.length; i++) {
+    //    if(outRows[i]["key"][1] == "Application") { continue; }
+    //    if(outRows[i]["key"][2] == "Finished library") { continue; }
+    //    if(lpStarts[outRows[i]["value"]["Lib prep start"]] == undefined) { // create array for date if it doesn't exist
+    //        lpStarts[outRows[i]["value"]["Lib prep start"]] = []
+    //    }
+    //    lpStarts[outRows[i]["value"]["Lib prep start"]].push(outRows[i]); // push project object to array
+    //}
+    //var prevLpDate;
+    //var dates = [];
+    //for (var d in lpStarts) {
+    //    dates.push(d);
+    //}
+    //dates.sort();
+    ////for (var lpDate in lpStarts) {
+    //for (var i = 0; i < dates.length; i++) {
+    //    var lpDate = dates[i];
+    //    if (lpDate == "0000-00-00") {
+    //        continue;
+    //    }
+    //    for(var j =0; j < lpStarts[lpDate].length; j++) {
+    //        var o = lpStarts[lpDate][j];
+    //        var lpD = o["value"]["Lib prep start"];
+    //        if(prevLpDate == undefined) { prevLpDate = o["value"]["Queue date"]} // first project
+    //        o["value"]["First in queue"] = prevLpDate;
+    //    }
+    //    prevLpDate = lpDate;
+    //}
+    //for (var i = 0; i < lpStarts["0000-00-00"]; i++) {
+    //    
+    //}
+    //console.log(lpStarts);
+    
+    
     return { "rows": outRows };
     
 }
+function sortByQueueArrival (a, b) {
+    var aV =  a["value"];
+    var bV =  b["value"];
+    var aQD = aV["Queue date"];
+    var bQD = bV["Queue date"];
+    var aAD = aV["Arrival date"];
+    var bAD = bV["Arrival date"];
+    var aPid = a["key"][0];
+    var bPid = b["key"][0];
+    //var aAppl = a["key"][2];
+    //var bAppl = b["key"][2];
+    if(aQD < bQD) {
+        if(aQD == "0000-00-00") { return 1; } // if no queue date yet => end of queue
+        return -1;
+    }
+    if(aQD > bQD) {
+        if(bQD == "0000-00-00") { return 1; } // if no queue date yet => end of queue
+        return 1;
+    }
+    if(aAD < bAD) { return -1; }
+    if(aAD > bAD) { return 1; }
+    if(aPid < bPid) { return -1; }
+    if(aPid > bPid) { return 1; }
+    return 0;
+    
+}
+//function sortByLibprepStart (a, b) {
+//    var aV =  a["value"];
+//    var bV =  b["value"];
+//    var aLPS = aV["Lib prep start"];
+//    var bLPS = bV["Lib prep start"];
+//    var aQD = aV["Queue date"];
+//    var bQD = bV["Queue date"];
+//    var aAD = aV["Arrival date"];
+//    var bAD = bV["Arrival date"];
+//    var aPid = a["key"][0];
+//    var bPid = b["key"][0];
+//    //var aAppl = a["key"][2];
+//    //var bAppl = b["key"][2];
+//    //console.log(aLPS)
+//    if(aLPS < bLPS) {
+//        if(aLPS == "0000-00-00") {
+//            console.log("a is 0000-00-00")
+//            return 1; } // if no lib prep start date yet => end of queue
+//        return -1;
+//    }
+//    if(aLPS > bLPS) {
+//        if(bLPS == "0000-00-00") { return 1; } // if no lib prep start date yet => end of queue
+//        return 1;
+//    }
+//    if(aQD < bQD) {
+//        if(aQD == "0000-00-00") { return 1; } // if no queue date yet => end of queue
+//        return -1;
+//    }
+//    if(aQD > bQD) {
+//        if(bQD == "0000-00-00") { return 1; } // if no queue date yet => end of queue
+//        return 1;
+//    }
+//    if(aAD < bAD) { return -1; }
+//    if(aAD > bAD) { return 1; }
+//    if(aPid < bPid) { return -1; }
+//    if(aPid > bPid) { return 1; }
+//    return 0;
+//    
+//}
 /**
  * Generates a dataset for runchart line plot over time from a couchdb view
  * @param {Object} jsonview		A parsed json stream
