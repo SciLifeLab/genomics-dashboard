@@ -19,7 +19,7 @@
         </div>
         <div id="status_panels">
             <!--Old ongoing panel - change to only show rec ctrl-->
-			<div id="ongoing_bc" class="barchart_panel">
+			<div id="ongoing_bc">
                 <h2>Rec Ctrl</h2>
 				<div id="ongoing_bc_plot">
 					<h3># projects</h3>
@@ -30,17 +30,20 @@
 			<div id="queue">
 				<h2>Queue</h2>
 				<div id="load_charts">
-					<div id="queue_sample_load">
-						<h3>Samples</h3>
-						<h4>Lib prep</h4>
-					</div>
-					<div id="queue_lane_load">
-						<h3>Lanes</h3>
+					<div id="queue_lp_load"> <!--was queue_sample_load - rename-->
+						<h3>Lib prep</h3>
+						
+                        <div id="queue_sample_load_lp"> <!--NEW-->
+                            <h4>Samples</h4>
+                        </div>
 						<div id="queue_lane_load_lp">
-							<h4>Lib prep</h4>
+							<h4>Lanes</h4>
 						</div>
+					</div>
+					<div id="queue_fl_load"> <!--was queue_lane_load-->
+						<h3>Finished lib</h3>
 						<div id="queue_lane_load_fl">
-							<h4>Fin lib</h4>            
+							<h4>Lanes</h4>            
 						</div>
 					</div>
 				</div>
@@ -192,43 +195,48 @@
 				});
 				
 			});
-            // trying out stuff for problem KPIs.
-            var failedProgUrl = "getCouchDbData.php?db=projects&design=kpi_external&view=KPI1&reduce=false&" + dbSource;
-            d3.json(failedProgUrl, function(json){
-                //console.log(json);
-                var fpDataset = generateFailedProgressedDataset(json, today);
-                //console.log(fpDataset);
-                //drawBarchartPlot(fpDataset, "fs_prog_bc", 500, panelHeights, 30);
-                drawBarchartPlot(fpDataset, "fs_prog_bc", (rcWidth + 110), panelHeights, 30);
-            });
-            
-            var wsFailRateUrl = "getCouchDbData.php?db=projects&design=kpi_external&view=KPI2&reduce=false&" + dbSource;
-            d3.json(wsFailRateUrl, function(json){
-                //console.log("Workset failrate dataset:");
-                //console.log(json);
-                var d = generateWorksetFailureDataset (json, twelveWeeks, today);
-                //console.log(d);
-                drawFailedLpRunChart(d, "fs_ws_rc", [], rcWidth, panelHeights, 30);
-                var bd = generateGenericBoxDataset(d, 1);
-                //console.log(bd);
-                drawBoxPlot(bd, "fs_ws_bp", panelHeights);
-            });
-            
-            var delDataUrl = "getCouchDbData.php?db=projects&design=kpi_external&view=KPI3_1&reduce=false&" + dbSource;
-            d3.json(delDataUrl, function(json){
-                var delDataDataset = generateDeliveredDataDataset (json, twelveWeeks, today);
-                //console.log("Data del dataset");
-                //console.log(delDataDataset);
-                drawDeliveredDataRunChart(delDataDataset, "data_del_rc", [], rcWidth, panelHeights, 30);
-                var bd = generateGenericBoxDataset(delDataDataset, 1);
-                drawBoxPlot(bd, "data_del_bp", panelHeights);
-            });
+            // Problem KPIs. Not shown at the moment
+            //var failedProgUrl = "getCouchDbData.php?db=projects&design=kpi_external&view=KPI1&reduce=false&" + dbSource;
+            //d3.json(failedProgUrl, function(json){
+            //    //console.log(json);
+            //    var fpDataset = generateFailedProgressedDataset(json, today);
+            //    //console.log(fpDataset);
+            //    //drawBarchartPlot(fpDataset, "fs_prog_bc", 500, panelHeights, 30);
+            //    drawBarchartPlot(fpDataset, "fs_prog_bc", (rcWidth + 110), panelHeights, 30);
+            //});
+            //
+            //var wsFailRateUrl = "getCouchDbData.php?db=projects&design=kpi_external&view=KPI2&reduce=false&" + dbSource;
+            //d3.json(wsFailRateUrl, function(json){
+            //    //console.log("Workset failrate dataset:");
+            //    //console.log(json);
+            //    var d = generateWorksetFailureDataset (json, twelveWeeks, today);
+            //    //console.log(d);
+            //    drawFailedLpRunChart(d, "fs_ws_rc", [], rcWidth, panelHeights, 30);
+            //    var bd = generateGenericBoxDataset(d, 1);
+            //    //console.log(bd);
+            //    drawBoxPlot(bd, "fs_ws_bp", panelHeights);
+            //});
+            //
+            //var delDataUrl = "getCouchDbData.php?db=projects&design=kpi_external&view=KPI3_1&reduce=false&" + dbSource;
+            //d3.json(delDataUrl, function(json){
+            //    var delDataDataset = generateDeliveredDataDataset (json, twelveWeeks, today);
+            //    //console.log("Data del dataset");
+            //    //console.log(delDataDataset);
+            //    drawDeliveredDataRunChart(delDataDataset, "data_del_rc", [], rcWidth, panelHeights, 30);
+            //    var bd = generateGenericBoxDataset(delDataDataset, 1);
+            //    drawBoxPlot(bd, "data_del_bp", panelHeights);
+            //});
 			
 			/** Load stacks */
 			var queueLaneLoadUrl = "getCouchDbData.php?db=projects&design=process_flow&view=KPI_appl_pf_dates_sampl_lanes&reduce=false&" + dbSource;
 			d3.json(queueLaneLoadUrl, function(json){
-				//console.log(json);
-				
+                console.log("Drawing load stacks")
+                console.log(json);
+
+                var reduced = reduceToProject(json);
+                console.log(reduced);
+
+				var recCtrl = generateRecCtrlStackDataset(json, today);
 				var sampleQueue = generateQueueSampleStackDataset(json, today);
 				var libprepLaneQueue = generateQueueLaneLPStackDataset(json, today);
 				var finlibLaneQueue = generateQueueLaneFLStackDataset(json, today);
@@ -237,18 +245,17 @@
                 var seqLoad = generateSeqLoadDataset(json, today);
                 
 				/** 3 bar panels on the upper half.
-				 *  However, give these load bars more space than the demand and ongoing bar charts
-				 *  Note that the drawing code for demand and ongoing bar panels are in dashboard.js
+				 *  
 				 */ 
-				var bar_width = drawWidth / 1.8; 				
-				var ongoing_bar_width = drawWidth / 1.8; 				
+				var bar_width = (drawWidth + 320) / 17; // 17 bars to draw over the width of the window 				
 
-				drawStackedBars (sampleQueue, "queue_sample_load", bar_width/2, panelHeights, "samples");
-				drawStackedBars (libprepLaneQueue, "queue_lane_load_lp", bar_width/4, panelHeights, "lanes");
-				drawStackedBars (finlibLaneQueue, "queue_lane_load_fl", bar_width/4, panelHeights, "lanes");
-                drawStackedBars(sampleLoadLibprep, "libprep_sample_load", ongoing_bar_width/2, panelHeights, "samples");
-                drawStackedBars(laneLoadLibprep, "libprep_lane_load", ongoing_bar_width/4, panelHeights, "lanes");
-                drawStackedBars (seqLoad, "seq_load_stack", ongoing_bar_width/4, panelHeights, "lanes");
+				drawRCStackedBars(recCtrl, "ongoing_bc_plot", bar_width * 1, panelHeights);
+                drawStackedBars (sampleQueue, "queue_sample_load_lp", bar_width * 4, panelHeights, "samples");
+				drawStackedBars (libprepLaneQueue, "queue_lane_load_lp", bar_width * 2, panelHeights, "lanes");
+				drawStackedBars (finlibLaneQueue, "queue_lane_load_fl", bar_width * 2, panelHeights, "lanes");
+                drawStackedBars(sampleLoadLibprep, "libprep_sample_load", bar_width * 4, panelHeights, "samples");
+                drawStackedBars(laneLoadLibprep, "libprep_lane_load", bar_width * 2, panelHeights, "lanes");
+                drawStackedBars (seqLoad, "seq_load_stack", bar_width * 2, panelHeights, "lanes");
 			});
             
             /**

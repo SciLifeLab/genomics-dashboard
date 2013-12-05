@@ -15,6 +15,247 @@ function dateValueSort(a, b){
         }
 }
 
+
+/**
+ * Datastructure KPI_appl_pf_dates_sampl_lanes (2013-11-29)
+    { "rows": [
+            {
+                "key": [
+                    "Pxxx", "Production", "Metagenome", "HiSeq 2000/2500 High Output", "Pxxx_101"   
+                ],
+                "value: {
+                    "Arrival date":"2013-07-03",
+                    "Rec Ctrl start":"2013-07-18",
+                    "Queue date":"2013-07-17",
+                    "Lib prep start":"2013-09-26",
+                    "QC library finished":"2013-10-03",
+                    "Sequencing start":"2013-10-08",
+                    "All samples sequenced":"2013-10-20",
+                    "Close date":"2013-11-11",
+                    "Samples":1,
+                    "Lanes":0.066666666666666665741
+                }
+            },
+            {
+                ...
+            }
+        ]
+    }
+ */
+
+// Look at calculating and adding a first in queue date
+// Sort on queue date - arrival date - proj ID (?)
+function reduceToProject(jsonview) {
+    var rows = jsonview["rows"];
+    var projects = {};
+    
+    
+    // Loop through all samples
+    for (var i = 0; i < rows.length; i++) {
+        //console.log("looping through json array: 1");
+        var keys = rows[i]["key"];
+        var values = rows[i]["value"];
+        var pid = keys[0]; // project id
+        var type = keys[1]; // type = Production || Applications
+        var appl = keys[2]; // application
+        var pf = keys[3]; // platform
+        var sid = keys[4]; // sample id
+        if(projects[pid] == undefined) { // new project, initialize with keys
+            projects[pid] = {
+                                "type": type,
+                                "appl": appl,
+                                "pf": pf,
+                            }
+            for (var valKey in values) {
+                projects[pid][valKey] = values[valKey]; // intialize all data for proj with values of first sample
+            }
+        } else {
+            // update data with appropriat date, or sum up lanes or samples
+            for (var valKey in values) {
+                var currVal = values[valKey];
+                if(valKey == "Samples" || valKey == "Lanes") {
+                    projects[pid][valKey] += values[valKey];
+                } else if (valKey.indexOf("start") != -1 ) { // get earliest start dates
+                    if (currVal < projects[pid][valKey]) { projects[pid][valKey] = currVal; } // handles 0000-00-00 as well
+                } else { // get latest done dates, except 0000-00-00
+                    if (currVal == "0000-00-00") {
+                        projects[pid][valKey] = "0000-00-00";
+                    } else if (currVal > projects[pid][valKey]) {
+                        projects[pid][valKey] = currVal;
+                    }
+                }
+            }
+        }
+    }
+
+    var outRows = [];
+    
+    // go through all projects and put in original structure
+    for (var pid in projects) {
+        var newKey = [
+            pid,
+            projects[pid]["type"],
+            projects[pid]["appl"],
+            projects[pid]["pf"]
+        ];
+        var newValue = {
+            "Arrival date":projects[pid]["Arrival date"],
+            "Rec Ctrl start":projects[pid]["Rec Ctrl start"],
+            "Queue date":projects[pid]["Queue date"],
+            "Lib prep start":projects[pid]["Lib prep start"],
+            "QC library finished":projects[pid]["QC library finished"],
+            "Sequencing start":projects[pid]["Sequencing start"],
+            "All samples sequenced":projects[pid]["All samples sequenced"],
+            "Close date":projects[pid]["Close date"],
+            "Samples":projects[pid]["Samples"],
+            "Lanes":projects[pid]["Lanes"]
+        };
+        
+        var newRow = {
+            "key": newKey,
+            "value": newValue
+        }
+        outRows.push(newRow);
+    }
+
+    //// sort by libprep start for first in queue calc
+    //outRows.sort(sortByLibprepStart);
+    //console.log(outRows);
+    
+    // sort in queue order 
+    outRows.sort(sortByQueueArrival);
+    
+    ////  2nd try - not working properly - testing stuff for first in queue calc
+    //var firstLPDate;
+    //var prevFirstLPDate;
+    //var prevLPDate;
+    //var firstFLDate;
+    //var prevFLDate;
+    //
+    //for (var i =0; i < outRows.length; i++) {
+    //    var p = outRows[i]; // project object
+    //    if(p["key"][1] == "Application") { continue; }
+    //    if(p["key"][2] == "Finished library") {
+    //        
+    //    } else {
+    //        if (firstFLDate == undefined) { firstFLDate = p["value"]["Queue date"]; prevFirstLPDate = firstFLDate; }
+    //        if(p["value"]["Lib prep start"] == prevLPDate) {
+    //            p["value"]["First in queue"] = prevFirstLPDate;
+    //        } else {
+    //            p["value"]["First in queue"] = firstFLDate;
+    //            prevFirstLPDate = firstFLDate;
+    //        }
+    //        firstFLDate = p["value"]["Lib prep start"];
+    //        prevLPDate = p["value"]["Lib prep start"];
+    //    
+    //    }
+    //}
+    //console.log(outRows);
+    
+    //// 1st try - not that great. testing stuff for first in queue calc
+    //var lpStarts = {};
+    //for (var i = 0; i < outRows.length; i++) {
+    //    if(outRows[i]["key"][1] == "Application") { continue; }
+    //    if(outRows[i]["key"][2] == "Finished library") { continue; }
+    //    if(lpStarts[outRows[i]["value"]["Lib prep start"]] == undefined) { // create array for date if it doesn't exist
+    //        lpStarts[outRows[i]["value"]["Lib prep start"]] = []
+    //    }
+    //    lpStarts[outRows[i]["value"]["Lib prep start"]].push(outRows[i]); // push project object to array
+    //}
+    //var prevLpDate;
+    //var dates = [];
+    //for (var d in lpStarts) {
+    //    dates.push(d);
+    //}
+    //dates.sort();
+    ////for (var lpDate in lpStarts) {
+    //for (var i = 0; i < dates.length; i++) {
+    //    var lpDate = dates[i];
+    //    if (lpDate == "0000-00-00") {
+    //        continue;
+    //    }
+    //    for(var j =0; j < lpStarts[lpDate].length; j++) {
+    //        var o = lpStarts[lpDate][j];
+    //        var lpD = o["value"]["Lib prep start"];
+    //        if(prevLpDate == undefined) { prevLpDate = o["value"]["Queue date"]} // first project
+    //        o["value"]["First in queue"] = prevLpDate;
+    //    }
+    //    prevLpDate = lpDate;
+    //}
+    //for (var i = 0; i < lpStarts["0000-00-00"]; i++) {
+    //    
+    //}
+    //console.log(lpStarts);
+    
+    
+    return { "rows": outRows };
+    
+}
+function sortByQueueArrival (a, b) {
+    var aV =  a["value"];
+    var bV =  b["value"];
+    var aQD = aV["Queue date"];
+    var bQD = bV["Queue date"];
+    var aAD = aV["Arrival date"];
+    var bAD = bV["Arrival date"];
+    var aPid = a["key"][0];
+    var bPid = b["key"][0];
+    //var aAppl = a["key"][2];
+    //var bAppl = b["key"][2];
+    if(aQD < bQD) {
+        if(aQD == "0000-00-00") { return 1; } // if no queue date yet => end of queue
+        return -1;
+    }
+    if(aQD > bQD) {
+        if(bQD == "0000-00-00") { return 1; } // if no queue date yet => end of queue
+        return 1;
+    }
+    if(aAD < bAD) { return -1; }
+    if(aAD > bAD) { return 1; }
+    if(aPid < bPid) { return -1; }
+    if(aPid > bPid) { return 1; }
+    return 0;
+    
+}
+//function sortByLibprepStart (a, b) {
+//    var aV =  a["value"];
+//    var bV =  b["value"];
+//    var aLPS = aV["Lib prep start"];
+//    var bLPS = bV["Lib prep start"];
+//    var aQD = aV["Queue date"];
+//    var bQD = bV["Queue date"];
+//    var aAD = aV["Arrival date"];
+//    var bAD = bV["Arrival date"];
+//    var aPid = a["key"][0];
+//    var bPid = b["key"][0];
+//    //var aAppl = a["key"][2];
+//    //var bAppl = b["key"][2];
+//    //console.log(aLPS)
+//    if(aLPS < bLPS) {
+//        if(aLPS == "0000-00-00") {
+//            console.log("a is 0000-00-00")
+//            return 1; } // if no lib prep start date yet => end of queue
+//        return -1;
+//    }
+//    if(aLPS > bLPS) {
+//        if(bLPS == "0000-00-00") { return 1; } // if no lib prep start date yet => end of queue
+//        return 1;
+//    }
+//    if(aQD < bQD) {
+//        if(aQD == "0000-00-00") { return 1; } // if no queue date yet => end of queue
+//        return -1;
+//    }
+//    if(aQD > bQD) {
+//        if(bQD == "0000-00-00") { return 1; } // if no queue date yet => end of queue
+//        return 1;
+//    }
+//    if(aAD < bAD) { return -1; }
+//    if(aAD > bAD) { return 1; }
+//    if(aPid < bPid) { return -1; }
+//    if(aPid > bPid) { return 1; }
+//    return 0;
+//    
+//}
 /**
  * Generates a dataset for runchart line plot over time from a couchdb view
  * @param {Object} jsonview		A parsed json stream
@@ -72,6 +313,104 @@ function generateRunchartDataset (jsonview, dateRangeStart, dateRangeEnd, dateFr
         return dataArray;
         
 }
+
+/**
+ * NEW implementation using the one-for-all non-reduced map view
+ * 
+ * Generates a dataset for runchart line plot over time from a couchdb view
+ * @param {Object} jsonview		A parsed json stream
+ * @param {Date} dateRangeStart	A Date object to specify start of date range to include
+ * @param {Date} dateRangeEnd	A Date object to specify end of date range to include
+ * @param {String} dateFromKey	A key to identify start date for diff calculation
+ * @param {Boolean} onlyProduction	If true only include data where type == "Production"
+ * @param {String} filter	A key to identify records to be selected
+ * @param {Boolean} inverseSelection If true look for absence of filter string
+ * @returns {Array} 			An array of date-times-project as arrays. Times are in days
+ */
+function generateRunchartDataset_New (jsonview, dateRangeStart, dateRangeEnd, dateFromKey, dateToKey, onlyProduction, filter, inverseSelection) {
+        var dataArray = [];
+        var rows = jsonview["rows"];
+        var projects = {};
+        
+        // Each row is one sample
+        // Need logic to summarize dates per project
+        for (var i = 0; i < rows.length; i++) {
+            //console.log("looping through json array: 1");
+            var keys = rows[i]["key"];
+            var values = rows[i]["value"];
+            
+            
+            var pid = keys[0]; // project id
+            var type = keys[1]; // type = Production || Applications
+            var appl = keys[2]; // application
+            var pf = keys[3]; // platform
+            var sid = keys[4]; // sample id
+            if(onlyProduction && type != "Production") { continue; }
+            
+            var filter_field;
+            if(filter.indexOf("library") != -1) {
+                filter_field = 2; // index for application in keys array
+            } else if(filter.indexOf("iSeq") != -1) {
+                filter_field = 3; // index for platform in keys array
+            }
+            // more here... ?
+            
+            if(filter) {
+                if(!inverseSelection) {
+                    if(keys[filter_field] != null && keys[filter_field].indexOf(filter) == -1 ) { continue; }                     
+                } else {
+                    if(keys[filter_field] == null || keys[filter_field].indexOf(filter) != -1 ) { continue; }
+                }
+            }
+            var sampleDateFrom = values[dateFromKey];
+            var sampleDateTo = values[dateToKey];
+            if(projects[pid] == undefined) {
+                projects[pid] = {
+                                    "type": type,
+                                    "appl": appl,
+                                    "pf": pf,
+                                    "num_samples": 1,
+                                    "fromDate": sampleDateFrom,
+                                    "toDate": sampleDateTo,
+                                    "daydiff": daydiff(new Date(sampleDateFrom), new Date(sampleDateTo))
+                                }
+            } else {
+                if(sampleDateFrom < projects[pid]["fromDate"]) { projects[pid]["fromDate"] = sampleDateFrom; }
+                if(sampleDateTo > projects[pid]["toDate"]) { projects[pid]["toDate"] = sampleDateTo; }
+                projects[pid]["daydiff"] = daydiff(new Date(projects[pid]["fromDate"]), new Date(projects[pid]["toDate"]));
+                projects[pid]["num_samples"]++;
+            }
+        }
+
+        // out data structure: [ order, daydiff, num_samples, doneDate, project_id ]. Order is added after date sort?
+        for (var pid in projects) {
+            // if fromDate or toDate is 0000-00-00 not all samples are done, so ignore
+            if (projects[pid]["fromDate"] == "0000-00-00" || projects[pid]["toDate"] == "0000-00-00") { continue; }
+
+            //// check if data is in scope
+            //// within date range
+            var toDate = new Date(projects[pid]["toDate"]);
+            if (toDate < dateRangeStart || toDate > dateRangeEnd) { continue; }
+            
+            // we find ourselves with a project that has a toDate within range, so write it to the output array
+            dataArray.push([
+                projects[pid]["daydiff"],
+                projects[pid]["num_samples"],
+                projects[pid]["toDate"],
+                pid
+            ]);
+        }
+    
+        dataArray.sort(dateValueSort);
+        // add order number as first element in each array
+        for (var j = 0; j < dataArray.length; j++) {
+                var tmpdata = dataArray[j];
+                tmpdata.unshift(j + 1);
+        }
+        return dataArray;
+        
+}
+
 
 /**
  * Generates a dataset for box plot from a couchdb view
@@ -230,6 +569,121 @@ function generateBarchartDataset (jsonview, cmpDate) {
             step = "no step";
         }                        
         
+        
+    }
+    return dataArray;
+    
+}
+
+// This is a quick-fix that uses the old map-reduce view. Change to the new one later
+/**
+ * Generates a dataset for active projects bar chart from a couchdb view
+ * @param {Object} jsonview		A parsed json stream (key has to be in the form [application, project_name])
+ * @param {Date} cmpDate	A Date object to specify the date to generate data for 
+ * @returns {Array} 			An array of step-#projects as step-value objects.
+ */
+function generateRecCtrlBarchartDataset (jsonview, cmpDate) {
+    //console.log(jsonview);
+    var dateFormat = d3.time.format("%Y-%m-%d");
+    var cmpDateStr = dateFormat(cmpDate); // Turn cmp date into a string to compare to dates in data
+    
+    // Key strings in indata
+    var arrivalKey = "Arrival date";
+    var queueKey = "Queue date";
+    var libQCKey = "QC library finished";
+    var allSeqKey = "All samples sequenced";
+    var closeKey = "Close date";
+    //var finishedKey = "Finished date";
+
+    /**
+     * Rec ctrl		=	arrivalKey to queueKey
+     */
+
+    //var recCtrl = { key: "Rec ctrl", value: 0 };					
+    //var libPrep = { key: "Lib prep", value: 0 };					
+    //var seq = { key: "Seq", value: 0 };
+    ////var rawDataQC = { step: "Raw data QC", value: 0 };
+
+    var dna = { key: "DNA", value: 0 };
+    var rna = { key: "RNA", value: 0 };
+    var seqCap = { key: "SeqCap", value: 0 };
+    var other = { key: "Other", value: 0 };
+    var finLib = { key: "FinLib", value: 0 };
+
+    var dataArray = [dna, rna, seqCap, other, finLib]; 
+
+
+    var rows = jsonview["rows"];
+    //var j = 0; // counter for data points that make it into the data array NOT USED
+    for (var i = 0; i < rows.length; i++) {
+        //console.log("looping through json array: 1");
+        var k = rows[i]["key"];
+        var appl = k[0];
+        if (appl == null) { continue; }
+        //var libPrepProj = false;
+        //if(k[0] != null && k[0].indexOf("Finished library") == -1 )  { libPrepProj = true; }  
+
+        var applCat = "";
+        if (appl.indexOf("capture") != -1) {
+            applCat = "SeqCap";
+        } else if (appl == "Amplicon" ||
+                   appl == "de novo" ||
+                   appl == "Metagenome" ||
+                   appl == "WG re-seq") {
+            applCat = "DNA";
+        } else if (appl == "RNA-seq (total RNA)") {
+            applCat = "RNA";
+        } else if (appl == "Finished library") {
+            applCat = "FinLib";
+        } else {
+            applCat = "Other";
+        }
+        
+        var dates = rows[i]["value"];
+
+        //var arrivalDate = new Date(dates[arrivalKey]);
+        //var queueDate = new Date(dates[queueKey]);
+        //var libQCDate = new Date(dates[libQCKey]);
+        //var allSeqDate = new Date(dates[allSeqKey]);
+        ////var finishedDate = new Date(dates[finishedKey]);
+
+        var arrivalDate = dates[arrivalKey];
+        var queueDate = dates[queueKey];
+        var libQCDate = dates[libQCKey];
+        var allSeqDate = dates[allSeqKey];
+        var closeDate = dates[closeKey];
+        //var finishedDate = new Date(dates[finishedKey]);
+        
+        //console.log("in rows");
+        if ( (queueDate == "0000-00-00") || cmpDateStr < queueDate) { 
+            if (allSeqDate != "0000-00-00" && cmpDateStr > allSeqDate) { // to handle data without a queue date but where seq is finished
+                continue;
+            } else if (libQCDate != "0000-00-00") { // missing queue date, seq is not finished, but libQC passed => seq
+                continue;
+            } else if (closeDate != "0000-00-00") { // closed
+                continue;
+            } else { // in rec ctrl
+                //console.log(k[2])
+                switch(applCat) {
+                    case "DNA":
+                        dna.value++;
+                        break;
+                    case "RNA":
+                        rna.value++;
+                        break;
+                    case "SeqCap":
+                        seqCap.value++;
+                        break;
+                    case "Other":
+                        other.value++;
+                        break;
+                    case "FinLib":
+                        finLib.value++;
+                        break;
+                }
+             }
+        }
+               
         
     }
     return dataArray;
@@ -661,6 +1115,7 @@ function drawBarchartPlot(dataset, divID, width, height, bottom_padding, maxY) {
        .enter()
        .append("text")
        .text(function(d) {
+            if(d.value == 0) { return ""; }
             if(d.value < 1) { return smallFormat(d.value); }
             return d.value;
        })
@@ -682,7 +1137,8 @@ function drawBarchartPlot(dataset, divID, width, height, bottom_padding, maxY) {
         return false;
     }
     if(hasTotal(dataset)) {
-        console.log("We have total");
+        //console.log("We have total");
+        //console.log(dataset);
         svg.selectAll("text")
            .data(dataset, key)		//Bind data with custom key function
            .enter()
@@ -745,15 +1201,15 @@ function drawProcessPanels(appl_json, pf_json, plotDate, startDate, height, draw
      */
     var bar_width = draw_width / 4;
 
-
-    var ongoingDataset = generateBarchartDataset(appl_json, plotDate);
+    //var ongoingDataset = generateBarchartDataset(appl_json, plotDate);
+    var ongoingDataset = generateRecCtrlBarchartDataset(appl_json, plotDate); // new split on application
     //console.log(demandDataset);
     
     
     //var maxY = d3.max(ongoingDataset, function(d) { return d.value });
     
     //drawBarchartPlot(ongoingDataset, "ongoing_bc", (bar_width + 110), height, 30, maxY);
-    drawBarchartPlot(ongoingDataset, "ongoing_bc_plot", (bar_width / 4), height, 30);
+    //drawBarchartPlot(ongoingDataset, "ongoing_bc_plot", (bar_width / 2), height, 30);
     
     /** Total delivery times data set */
     var totalRcDataset = generateRunchartDataset(appl_json, startDate, plotDate, startKey, endKey);

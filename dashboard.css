@@ -127,10 +127,14 @@ circle {
   font-size: 10pt;
   fill: white;
 }
-#demand_bc_plot,
+#ongoing_bc {
+    float: left;
+}
 #ongoing_bc_plot {
   float: left;
   padding-left: 10px;
+  padding-right: 10px;
+  padding-top: 19px; /*= height of h4*/
   margin-left: 0px;
   background-image: linear-gradient(bottom, rgb(21,21,21) 18%, rgb(93,93,93) 59%);
   background-image: -o-linear-gradient(bottom, rgb(21,21,21) 18%, rgb(93,93,93) 59%);
@@ -143,9 +147,18 @@ circle {
       left top,
       color-stop(0.18, rgb(21,21,21)),
       color-stop(0.59, rgb(93,93,93))
-  );
-  
+  ); 
 }
+#ongoing_bc_plot svg {
+  /*width: 200px;*/
+  /*height: 500px;*/
+  /*border: solid 1px #ccc;*/
+  font: 10px sans-serif;
+  /*fill: #CCC;*/
+  fill: #FFF;
+  shape-rendering: crispEdges;
+}
+
 #fs_prog_bc h2 {
     margin-bottom: 5px;
 }
@@ -254,8 +267,8 @@ circle {
 /*Queue stacked bar panels*/
 #queue {
   float: left;
-  margin-left: 40px;
-  margin-right: 40px;
+  margin-left: 10px;
+  margin-right: 0px;
 }
 #load_charts {
   float: left;
@@ -289,15 +302,26 @@ svg #tooltipA, #tooltipB {
   fill: #333;
   stroke: none;
 }
-#queue_sample_load {
+#queue_lp_load {
     float: left;
     margin-top: 0px;
 
 }
-#queue_lane_load {
+#queue_sample_load_lp {
+    float: left;
+    margin-top: 0px;
+    margin-left: 0px;
+
+}
+#queue_fl_load {
     float: left;
     margin-top: 0px;
     margin-right: 10px;
+    margin-left: 5px;
+    padding-left: 5px;
+    border-left-width: 1px;
+    border-left-color: white;
+    border-left-style: solid;
 }
 
 #queue_lane_load_lp,
@@ -352,7 +376,12 @@ svg #tooltipA, #tooltipB {
 
 #seq_load{
     float: left;
-    margin-left: 30px;
+    margin-left: 5px;
+    padding-left: 5px;
+    border-left-width: 1px;
+    border-left-color: white;
+    border-left-style: solid;
+    
 }
 #seq_load_stack{
     float: left;

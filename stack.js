@@ -1,3 +1,99 @@
+function generateRecCtrlStackDataset(json, cmpDate) {
+
+    var dateFormat = d3.time.format("%Y-%m-%d");
+    var cmpDateStr = dateFormat(cmpDate); // Turn cmp date into a string to compare to dates in data
+
+    var dataArray = [];
+    var rows = json["rows"];
+    var applBins = {};
+    var cat = ["DNA", "RNA", "SeqCap", "Other", "FinLib", "Application"];
+    for (i = 0; i < cat.length; i++) {
+        //console.log("adding " + cat[i]);
+        applBins[cat[i]] = { count: 0 };// initialize count for each category
+    }
+    //console.log(applBins);
+    
+    var projects = {};
+    // loop through each sample and add upp num of projects
+    for (var i = 0; i < rows.length; i++) {
+        var k = rows[i]["key"];
+        //console.log(k)
+        var pid = k[0];
+        var type = k[1];
+        var appl = k[2];
+        var sampleID = k[4];
+
+        if(appl == null) { appl = "Other";}
+        //console.log(sampleID);
+        var applCat = "";
+        if(type == "Application") {
+            applCat = "Application"
+        } else if (appl.indexOf("capture") != -1) {
+            applCat = "SeqCap";
+        } else if (appl == "Amplicon" ||
+                   appl == "de novo" ||
+                   appl == "Metagenome" ||
+                   appl == "WG re-seq") {
+            applCat = "DNA";
+        } else if (appl == "RNA-seq (total RNA)") {
+            applCat = "RNA";
+        } else if (appl == "Finished library") {
+            applCat = "FinLib";
+        } else {
+            applCat = "Other";
+        }
+        
+        var v = rows[i]["value"];
+        
+        var arrDate = v["Arrival date"];
+
+        var queueDate = v["Queue date"];
+        if (arrDate != "0000-00-00" &&
+            arrDate <= cmpDateStr &&
+            queueDate == "0000-00-00") {
+            // initialize a value for the project if it doesn't exist in applBins
+            
+            if(applBins[applCat][pid] == undefined) { //this is only done once for each project
+                applBins[applCat][pid] = 1; // just add a value for the project
+                applBins[applCat]["count"]++;
+                //console.log(pid + ", " + type + ", " + appl + ", " + applCat);
+            }
+
+            //if(projects[pid] == undefined) { // is this needed?
+            //    projects[pid] = { cat: applCat, arrivalDate: arrDate, queueDate: queueDate}
+            //}
+        }
+        
+    }
+    //console.log(pfBins);
+    
+    // put into "layer structure", sort & then add up y0's
+    //console.log(applBins);
+    var projArr = [];
+    for (i = 0; i < cat.length; i++) {
+        var o = { x: "RecCtrl", y: applBins[cat[i]]["count"], cat: cat[i] };
+        var proj;
+        for(var p in applBins[cat[i]]) {
+            if(p.indexOf("P") == -1) { continue; }
+            if (proj == undefined) {
+                proj = p;
+            } else {
+                proj += ", " + p;
+            }
+        }
+        o["projects"] = proj;
+        proj = undefined;
+        projArr.push(o);
+    }
+    
+    tot = 0;
+    for (var i = 0; i < projArr.length; i++) {
+        projArr[i]["y0"] = tot;
+        tot += projArr[i]["y"];
+    }
+   return [projArr];
+}
+
 function generateQueueLaneLPStackDataset(json, cmpDate) {
     var dateFormat = d3.time.format("%Y-%m-%d");
     var cmpDateStr = dateFormat(cmpDate); // Turn cmp date into a string to compare to dates in data
@@ -11,8 +107,9 @@ function generateQueueLaneLPStackDataset(json, cmpDate) {
         //console.log("looping through json array: 1");
         var k = rows[i]["key"];
         var pid = k[0];
-        var pn = k[1];
+        var type = k[1];
         var appl = k[2];
+        if (type != "Production") { continue; } // only Production of interest
         if (appl == "Finished library") { continue; } // need seq start date to be able to handle fin lib projects
 
         // Determine which platform
@@ -56,17 +153,18 @@ function generateQueueLaneLPStackDataset(json, cmpDate) {
             pfBins[pf][pid] += v["Lanes"];
 
             if(projects[pid] == undefined) {
-                projects[pid] = { queueDate: queueDate, projName: pn}
+                projects[pid] = { queueDate: queueDate }
             }
         }
         
     }
     //console.log(pfBins);
     
+    // remove proj name??????
     // put into "layer structure", sort & then add up y0's
     for (var projID in pfBins["HiSeq"]) {
-        var hO = { x: "HiSeq", y: pfBins["HiSeq"][projID], pid: projID, projName: projects[projID]["projName"], queueDate: projects[projID]["queueDate"] };
-        var mO = { x: "MiSeq", y: pfBins["MiSeq"][projID], pid: projID, projName: projects[projID]["projName"], queueDate: projects[projID]["queueDate"] };
+        var hO = { x: "HiSeq", y: pfBins["HiSeq"][projID], pid: projID, queueDate: projects[projID]["queueDate"] };
+        var mO = { x: "MiSeq", y: pfBins["MiSeq"][projID], pid: projID, queueDate: projects[projID]["queueDate"] };
         dataArray.push([hO, mO]);
     }
     dataArray.sort(sortByPlatform);
@@ -98,8 +196,9 @@ function generateQueueLaneFLStackDataset(json, cmpDate) {
         //console.log("looping through json array: 1");
         var k = rows[i]["key"];
         var pid = k[0];
-        var pn = k[1];
+        var type = k[1];
         var appl = k[2];
+        if (type != "Production") { continue; } // only Production of interest - is this true?? 
         if (appl != "Finished library") { continue; } // skip fin lib projects
 
         // Determine which platform
@@ -141,7 +240,7 @@ function generateQueueLaneFLStackDataset(json, cmpDate) {
             pfBins[pf][pid] += v["Lanes"];
 
             if(projects[pid] == undefined) {
-                projects[pid] = { queueDate: queueDate, projName: pn}
+                projects[pid] = { queueDate: queueDate}
             }
         }
         
@@ -150,8 +249,8 @@ function generateQueueLaneFLStackDataset(json, cmpDate) {
     
     // put into "layer structure", sort & then add up y0's
     for (var projID in pfBins["HiSeq"]) {
-        var hO = { x: "HiSeq", y: pfBins["HiSeq"][projID], pid: projID, projName: projects[projID]["projName"], queueDate: projects[projID]["queueDate"] };
-        var mO = { x: "MiSeq", y: pfBins["MiSeq"][projID], pid: projID, projName: projects[projID]["projName"], queueDate: projects[projID]["queueDate"] };
+        var hO = { x: "HiSeq", y: pfBins["HiSeq"][projID], pid: projID, queueDate: projects[projID]["queueDate"] };
+        var mO = { x: "MiSeq", y: pfBins["MiSeq"][projID], pid: projID, queueDate: projects[projID]["queueDate"] };
         dataArray.push([hO, mO]);
     }
     dataArray.sort(sortByPlatform);
@@ -189,11 +288,14 @@ function generateQueueSampleStackDataset(json, cmpDate) {
     // loop through each sample and add upp lane load per project
     for (var i = 0; i < rows.length; i++) {
         var k = rows[i]["key"];
+        //console.log(k)
         var pid = k[0];
-        var pn = k[1];
+        var type = k[1];
         var appl = k[2];
         var sampleID = k[4];
+        if (type != "Production") { continue; } // only Production of interest
         if (appl == "Finished library") { continue; } // fin lib projects not of interest
+        if(appl == null) { appl = "Other";}
         //console.log(sampleID);
         var applCat = "";
         if (appl.indexOf("capture") != -1) {
@@ -236,7 +338,7 @@ function generateQueueSampleStackDataset(json, cmpDate) {
             applBins[applCat][pid] += 1;
 
             if(projects[pid] == undefined) {
-                projects[pid] = { queueDate: queueDate, projName: pn}
+                projects[pid] = { queueDate: queueDate}
             }
         }
         
@@ -248,7 +350,7 @@ function generateQueueSampleStackDataset(json, cmpDate) {
         var projArr = [];
         //for (c in cat) {
         for (i = 0; i < cat.length; i++) {
-             var o = { x: cat[i], y: applBins[cat[i]][projID], pid: projID, projName: projects[projID]["projName"], queueDate: projects[projID]["queueDate"] };
+             var o = { x: cat[i], y: applBins[cat[i]][projID], pid: projID, queueDate: projects[projID]["queueDate"] };
             projArr.push(o);
         }
         dataArray.push(projArr);
@@ -295,6 +397,8 @@ function generateLibprepSampleLoadDataset(json, cmpDate) {
         var appl = k[2];
         var sampleID = k[4];
         if (appl == "Finished library") { continue; } // fin lib projects not of interest
+        if(appl == null) { appl = "Other";}
+
         //console.log(sampleID);
         var applCat = "";
         if (appl.indexOf("capture") != -1) {
@@ -603,6 +707,7 @@ function dateValueSort(a, b){
 }
 
 function drawStackedBars (dataset, divID, width, height, unit, padding) {
+    //console.log(dataset)
     var
         //w = 200,
         //h = 500,
@@ -779,10 +884,159 @@ function drawStackedBars (dataset, divID, width, height, unit, padding) {
             .attr("transform", function(d) { return "translate(0," + -y(d) + ")"; });
         
         // horizontal lines. Add?
-        //rule.append("svg:line")
-        //    .attr("x2", w - p[1] - p[3])
-        //    .style("stroke", function(d) { return d ? "#fff" : "#000"; })
-        //    .style("stroke-opacity", function(d) { return d ? .7 : null; });
+        rule.append("svg:line")
+            .attr("x2", w - p[1] - p[3] + 10)
+            .style("stroke", function(d) { return d ? "#fff" : "#000"; })
+            .style("stroke-opacity", function(d) { return d ? .1 : null; });
+        
+        rule.append("svg:text")
+            //.attr("x", w - p[1] - p[3] + 6)
+            .attr("text-anchor", "end")
+            .attr("x", -p[3] + 18)
+            .attr("dy", ".35em")
+            .text(d3.format(",d"))
+            ;
+    
+            
+    //});
+    
+}
+
+function drawRCStackedBars (dataset, divID, width, height) {
+    //console.log(dataset)
+    var
+        //w = 200,
+        //h = 500,
+        w = width,
+        h = height,
+        p = [30, 10, 30, 20], // t, r, b, l
+        x = d3.scale.ordinal().rangeRoundBands([0, w - p[1] - p[3]]),
+        y = d3.scale.linear().range([0, h - p[0] - p[2]]),
+        parse = d3.time.format("%m/%Y").parse,
+        format = d3.time.format("%b");
+        
+    /**
+     * Not really using these colour schemes at the moment
+     * Will leave the code in for my bad old memory, if they are to be
+     * used later on
+     */    
+    // color scales
+    // use colorbrewer color schemes
+    // number of colors to use. NB! not all schemes have the same number of colors, see colorbrewer.js
+    // Also, see colorbrewer2.org
+    var num_colors = 9; 
+    var color_scheme = colorbrewer.Blues[num_colors]; // array of colors defined in colorbrewer.js
+    //var color_scheme = d3.scale.category20c(); // array of colors defined in d3.js
+       
+    
+    var svg = d3.select("#" + divID).append("svg:svg")
+        .attr("width", w)
+        .attr("height", h)
+      .append("svg:g")
+        .attr("transform", "translate(" + p[3] + "," + (h - p[2]) + ")");
+    
+        
+        // Compute the x-domain (by platform) and y-domain (by top).
+        x.domain(dataset[0].map(function(d) { return d.x; }));
+        y.domain([0, d3.max(dataset[dataset.length - 1], function(d) { return d.y0 + d.y; })]);
+    
+        // Add a group for each project.
+        var project = svg.selectAll("g.project")
+            //.data(projLayers)
+            .data(dataset)
+          .enter().append("svg:g")
+            .attr("class", "project")
+            .style("stroke", function(d, i) {
+                return "white";
+            })
+            ;
+    
+        // Add a rect for each .
+        var rect = project.selectAll("rect")
+            .data(Object)
+          .enter().append("svg:rect")
+            .attr("x", function(d) { return x(d.x); })
+            .attr("y", function(d) { return -y(d.y0) - y(d.y); })
+            .attr("height", function(d) { return y(d.y); })
+            .attr("width", x.rangeBand())
+            .style("stroke-width", function(d, i) {
+                if(d.y == 0) { return "0"; }
+                return "1px";
+            })
+            .style("fill", function(d, i) {
+                return color_scheme[i + 2]; // make sure the chosen colorbrewer color space has num_colors defined
+            }) 
+            .on("mouseover", function(d) {
+                 //d3.select(this)
+                 //  //.attr("r", 7)
+                 //  .attr("fill", "blue")
+                 //  ;
+                 //var xPosition = x(d.x) + 10;
+                 var xPosition = -20 ;
+                 //var yPosition = -y(d.y0) - y(d.y)/2; // position for offset value (y0) + half hight of layer
+                 var yPosition = -h + 50; // position for offset value (y0) + half hight of layer
+                 //Create the tooltip label
+                 svg.append("text")
+                   .attr("id", "tooltipA")
+                   .attr("x", xPosition)
+                   .attr("y", yPosition)
+                   .style("fill", "white")
+                   .style("font-size", "7pt")
+                 .text(d.projects)
+                 ;
+            })
+            .on("mouseout", function(d) { //Remove the tooltip
+                   d3.select("#tooltipA").remove();
+            })
+            .on("click", function(d) {
+                     alert("These " + d.y + " " + d.cat + " projects are currently in Reception control\n"+ d.projects)
+                     
+                     //var projID = d.pid;
+                     //var url = "http://genomics-status.scilifelab.se/projects/" + projID;
+                     //window.open(url, "genomics-status");
+            })
+            ;
+        // 
+        svg.selectAll("text")
+            .data(dataset[0]) // all elements for the only bar
+            .enter().append("svg:text")
+            .attr("x", function (d, i) {
+                return x(d.x) + (w - p[1] - p[3])/2;                
+            })
+            .attr("y", function (d, i) {
+                var yPos = -y(d.y0) - y(d.y)/2 + 3;// position for offset value (y0) + half hight of layer
+                return yPos; 
+            })
+            .attr("text-anchor", "middle")
+            .text(function (d, i) {
+                if(d.y > 0) { return d.cat + " (" + d.y + ")"; } else { return ""; }
+            })
+            ;
+
+        //console.log(x.domain());
+        // Add a label per category.
+        var label = svg.selectAll("text")
+            .data(x.domain())
+          .enter().append("svg:text")
+            .attr("x", function(d) { return x(d) + x.rangeBand() / 2; })
+            .attr("y", 6)
+            .attr("text-anchor", "middle")
+            .attr("dy", ".71em")
+            .text(function(d) { return d; })
+            ;
+
+        // Add y-axis rules.
+        var rule = svg.selectAll("g.rule")
+            .data(y.ticks(5))
+          .enter().append("svg:g")
+            .attr("class", "rule")
+            .attr("transform", function(d) { return "translate(0," + -y(d) + ")"; });
+        
+        // horizontal lines. Add?
+        rule.append("svg:line")
+            .attr("x2", w - p[1] - p[3] + 5)
+            .style("stroke", function(d) { return d ? "#fff" : "#000"; })
+            .style("stroke-opacity", function(d) { return d ? .1 : null; });
         
         rule.append("svg:text")
             //.attr("x", w - p[1] - p[3] + 6)
