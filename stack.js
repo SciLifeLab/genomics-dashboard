@@ -988,11 +988,13 @@ function drawRCStackedBars (dataset, divID, width, height) {
             .on("mouseout", function(d) { //Remove the tooltip
                    d3.select("#tooltipA").remove();
             })
-            //.on("click", function(d) {
-            //         var projID = d.pid;
-            //         var url = "http://genomics-status.scilifelab.se/projects/" + projID;
-            //         window.open(url, "genomics-status");
-            //})
+            .on("click", function(d) {
+                     alert("These " + d.y + " " + d.cat + " projects are currently in Reception control\n"+ d.projects)
+                     
+                     //var projID = d.pid;
+                     //var url = "http://genomics-status.scilifelab.se/projects/" + projID;
+                     //window.open(url, "genomics-status");
+            })
             ;
         // 
         svg.selectAll("text")
