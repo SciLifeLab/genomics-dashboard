@@ -179,6 +179,14 @@ function generateQueueLaneLPStackDataset(json, cmpDate) {
         }
     }
     //console.log(dataArray);
+    if (dataArray.length == 0 ) {
+        dataArray = [
+                        [
+                            { x: "HiSeq", y: 0, y0: 0, pid: "Px", projName: "empty", queueDate: "0000-00-00"},
+                            { x: "MiSeq", y: 0, y0: 0, pid: "Px", projName: "empty", queueDate: "0000-00-00"}
+                        ]
+                    ];
+    }
     
     return dataArray;
 }
@@ -265,6 +273,14 @@ function generateQueueLaneFLStackDataset(json, cmpDate) {
         }
     }
     //console.log(dataArray);
+    if (dataArray.length == 0 ) {
+        dataArray = [
+                        [
+                            { x: "HiSeq", y: 0, y0: 0, pid: "Px", projName: "empty", queueDate: "0000-00-00"},
+                            { x: "MiSeq", y: 0, y0: 0, pid: "Px", projName: "empty", queueDate: "0000-00-00"}
+                        ]
+                    ];
+    }
     
     return dataArray;
 }
@@ -370,6 +386,16 @@ function generateQueueSampleStackDataset(json, cmpDate) {
     //console.log(dataArray);
         
     //return pfBins;
+    if (dataArray.length == 0 ) {
+        dataArray = [
+                        [
+                            { x: "DNA", y: 0, y0: 0, pid: "Px", projName: "empty", queueDate: "0000-00-00"},
+                            { x: "RNA", y: 0, y0: 0, pid: "Px", projName: "empty", queueDate: "0000-00-00"},
+                            { x: "SeqCap", y: 0, y0: 0, pid: "Px", projName: "empty", queueDate: "0000-00-00"},
+                            { x: "Other", y: 0, y0: 0, pid: "Px", projName: "empty", queueDate: "0000-00-00"}
+                        ]
+                    ];
+    }
     return dataArray;
 }
 
@@ -659,6 +685,14 @@ function generateSeqLoadDataset(json, cmpDate) {
         }
     }
     //console.log(dataArray);
+    if (dataArray.length == 0 ) {
+        dataArray = [
+                        [
+                            { x: "HiSeq", y: 0, y0: 0, pid: "Px", projName: "empty", queueDate: "0000-00-00"},
+                            { x: "MiSeq", y: 0, y0: 0, pid: "Px", projName: "empty", queueDate: "0000-00-00"}
+                        ]
+                    ];
+    }
     
     return dataArray;
 }
