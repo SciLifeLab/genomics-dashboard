@@ -256,6 +256,7 @@ function sortByQueueArrival (a, b) {
 //    return 0;
 //    
 //}
+
 /**
  * Generates a dataset for runchart line plot over time from a couchdb view
  * @param {Object} jsonview		A parsed json stream
@@ -458,6 +459,7 @@ function generateBoxDataset (jsonview, dateRangeStart, dateRangeEnd, dateFromKey
         }
         return dataArray;
 }
+
 
 // Returns a function to compute the interquartile range.
 function iqr(k) {
@@ -740,6 +742,75 @@ function generateDemandDataset (jsonview, cmpDate) {
     
     return dataArray;
     
+}
+
+// calculate # lanes started for sequencing
+function calculateLanesStarted (json, startDate, cmpDate) {
+    var jsonrows = json.rows;
+    var dateFormat = d3.time.format("%Y-%m-%d");
+    var cmpDateStr = dateFormat(cmpDate); // Turn cmp date into a string to compare to dates in data
+    var startDateStr = dateFormat(startDate);
+    console.log(startDateStr + " - " + cmpDateStr);
+    
+    var tot = { HiSeq: 0, MiSeq: 0, HiSeqSamples: 0, MiSeqSamples: 0 };
+    for (var i=0; i<jsonrows.length; i++) {
+        var seqStartDate = jsonrows[i]["value"]["Sequencing start"];
+        var pf = jsonrows[i]["key"][3];
+        if (pf != "MiSeq") {
+            pf = "HiSeq";
+        }
+        if (seqStartDate >= startDateStr && seqStartDate <= cmpDateStr) {
+            var lanes = jsonrows[i]["value"]["Lanes"];
+            //console.log("lanes: " + lanes);
+            tot[pf] += lanes;
+            if(pf == "HiSeq") {
+                tot["HiSeqSamples"]++;
+            } else if (pf == "MiSeq") {
+                tot["MiSeqSamples"]++;
+            }
+        }
+    }
+    tot.HiSeq = parseFloat(tot.HiSeq).toFixed(1);
+    tot.MiSeq = parseFloat(tot.MiSeq).toFixed(1);
+    return tot;
+}
+// calculate # lanes started for sequencing
+function calculateWorksetsStarted (json, startDate, cmpDate) {
+    var jsonrows = json.rows;
+    var dateFormat = d3.time.format("%Y-%m-%d");
+    var cmpDateStr = dateFormat(cmpDate); // Turn cmp date into a string to compare to dates in data
+    var startDateStr = dateFormat(startDate);
+    console.log(startDateStr + " - " + cmpDateStr);
+    
+    var tot = { DNA: 0, RNA: 0, SeqCap: 0, Other: 0 };
+    for (var i=0; i<jsonrows.length; i++) {
+        var prepStartDate = jsonrows[i]["value"]["Lib prep start"];
+        var appl = jsonrows[i]["key"][2];
+        
+        console.log(appl);
+
+        var applCat = "";
+        if(appl == null) {
+            applCat = "Other";
+        } else if (appl.indexOf("capture") != -1) {
+            applCat = "SeqCap";
+        } else if (appl == "Amplicon" ||
+                   appl == "de novo" ||
+                   appl == "Metagenome" ||
+                   appl == "WG re-seq") {
+            applCat = "DNA";
+        } else if (appl == "RNA-seq (total RNA)") {
+            applCat = "RNA";
+        } else {
+            applCat = "Other";
+        }
+
+        
+        if (prepStartDate >= startDateStr && prepStartDate <= cmpDateStr) {
+            tot[applCat]++;
+        }
+    }
+    return tot;
 }
 
 
