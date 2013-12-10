@@ -92,6 +92,13 @@ circle {
 #header {
     /*margin-bottom: 0;*/
 }
+#header_title {
+    float: left;
+}
+#starts {
+    float: right;
+    margin-right: 30px;
+}
 #title {
     margin-bottom: 0;
     margin-top: 5px;
