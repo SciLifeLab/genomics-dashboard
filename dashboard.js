@@ -750,7 +750,7 @@ function calculateLanesStarted (json, startDate, cmpDate) {
     var dateFormat = d3.time.format("%Y-%m-%d");
     var cmpDateStr = dateFormat(cmpDate); // Turn cmp date into a string to compare to dates in data
     var startDateStr = dateFormat(startDate);
-    console.log(startDateStr + " - " + cmpDateStr);
+    //console.log(startDateStr + " - " + cmpDateStr);
     
     var tot = { HiSeq: 0, MiSeq: 0, HiSeqSamples: 0, MiSeqSamples: 0 };
     for (var i=0; i<jsonrows.length; i++) {
@@ -780,14 +780,14 @@ function calculateWorksetsStarted (json, startDate, cmpDate) {
     var dateFormat = d3.time.format("%Y-%m-%d");
     var cmpDateStr = dateFormat(cmpDate); // Turn cmp date into a string to compare to dates in data
     var startDateStr = dateFormat(startDate);
-    console.log(startDateStr + " - " + cmpDateStr);
+    //console.log(startDateStr + " - " + cmpDateStr);
     
     var tot = { DNA: 0, RNA: 0, SeqCap: 0, Other: 0 };
     for (var i=0; i<jsonrows.length; i++) {
         var prepStartDate = jsonrows[i]["value"]["Lib prep start"];
         var appl = jsonrows[i]["key"][2];
         
-        console.log(appl);
+        //console.log(appl);
 
         var applCat = "";
         if(appl == null) {
