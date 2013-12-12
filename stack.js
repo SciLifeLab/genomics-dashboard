@@ -45,7 +45,12 @@ function generateRecCtrlStackDataset(json, cmpDate) {
         
         var v = rows[i]["value"];
         
+        // skip closed projects
+        var closeDate = v["Close date"];
+        if(closeDate != "0000-00-00") { continue; }
+        
         var arrDate = v["Arrival date"];
+        
 
         var queueDate = v["Queue date"];
         if (arrDate != "0000-00-00" &&
@@ -122,6 +127,10 @@ function generateQueueLaneLPStackDataset(json, cmpDate) {
         }
         
         var v = rows[i]["value"];
+        
+        // skip closed projects
+        var closeDate = v["Close date"];
+        if(closeDate != "0000-00-00") { continue; }
         
         // skip samples already done, but where dates are missing in lims
         var seqFinishedDate = v["All samples sequenced"];
@@ -219,6 +228,11 @@ function generateQueueLaneFLStackDataset(json, cmpDate) {
         }
         
         var v = rows[i]["value"];
+
+        // skip closed projects
+        var closeDate = v["Close date"];
+        if(closeDate != "0000-00-00") { continue; }
+        
         var seqFinishedDate = v["All samples sequenced"];
         if (seqFinishedDate != "0000-00-00") { continue; }
         var queueDate = v["Queue date"];
@@ -328,6 +342,10 @@ function generateQueueSampleStackDataset(json, cmpDate) {
         }
         
         var v = rows[i]["value"];
+        // skip closed projects
+        var closeDate = v["Close date"];
+        if(closeDate != "0000-00-00") { continue; }
+        
         
         // skip samples already done, but where dates are missing in lims
         var seqFinishedDate = v["All samples sequenced"];
@@ -441,6 +459,10 @@ function generateLibprepSampleLoadDataset(json, cmpDate) {
         }
         
         var v = rows[i]["value"];
+        // skip closed projects
+        var closeDate = v["Close date"];
+        if(closeDate != "0000-00-00") { continue; }
+        
         
         // skip samples already done, but where dates are missing in lims
         var seqFinishedDate = v["All samples sequenced"];
@@ -449,7 +471,7 @@ function generateLibprepSampleLoadDataset(json, cmpDate) {
         var queueDate = v["Queue date"];
         var prepStartDate = v["Lib prep start"];
         var libQCDate = v["QC library finished"];
-        //console.log("app cat: " + applCat + ", pid: " + pid + ", sample: " + sampleID + ", " + prepStartDate + "-" + libQCDate);
+        console.log("app cat: " + applCat + ", pid: " + pid + ", sample: " + sampleID + ", " + prepStartDate + "-" + libQCDate);
         // this is for libprep projects
         if (prepStartDate != "0000-00-00" &&
             prepStartDate <= cmpDateStr &&
@@ -523,6 +545,7 @@ function generateLibprepLaneLoadDataset(json, cmpDate) {
         var appl = k[2];
         if (appl == "Finished library") { continue; } // skip fin lib projects
 
+        
         // Determine which platform
         var pf = k[3];
         var otherPf = "MiSeq";
@@ -533,6 +556,14 @@ function generateLibprepLaneLoadDataset(json, cmpDate) {
         }
         
         var v = rows[i]["value"];
+        // skip closed projects
+        var closeDate = v["Close date"];
+        if(closeDate != "0000-00-00") { continue; }
+        
+        // skip samples already done, but where dates are missing in lims
+        var seqFinishedDate = v["All samples sequenced"];
+        if (seqFinishedDate != "0000-00-00") { continue; }
+        
         var queueDate = v["Queue date"];
         var prepStartDate = v["Lib prep start"];
         //console.log(prepStartDate);
@@ -626,6 +657,10 @@ function generateSeqLoadDataset(json, cmpDate) {
         }
         
         var v = rows[i]["value"];
+        // skip closed projects
+        var closeDate = v["Close date"];
+        if(closeDate != "0000-00-00") { continue; }
+        
         var queueDate = v["Queue date"];
         var libQCDate = v["QC library finished"];
         var seqStartDate = v["Sequencing start"];

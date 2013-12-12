@@ -14,13 +14,20 @@
 	<body>
 
 		<div id="header">
-            <h1 id="title">Genomics Process status</h1>
-            <span id="date"></span> - <em>Data for the previous 12 weeks</em>
+            <div id="header_title">
+                <h1 id="title">Genomics Process status</h1>
+                <span id="date"></span> - <em>Data for the previous 12 weeks</em>
+            </div>
+            <div id=starts style="display: none">
+                Sequencing lanes started/week (HiSeq/MiSeq): <span id="lane_starts"></span><br>
+                Lib prep samples started/week (DNA/RNA/SeqCap/Other): <span id="prep_starts"></span>
+            </div>
         </div>
+        <br class="clear">
         <div id="status_panels">
             <!--Old ongoing panel - change to only show rec ctrl-->
 			<div id="ongoing_bc">
-                <h2>Rec Ctrl</h2>
+                <h2>Rec Ctrl - All</h2>
 				<div id="ongoing_bc_plot">
 					<h3># projects</h3>
 				</div>
@@ -28,7 +35,7 @@
             
 			<!--Queue panels -->
 			<div id="queue">
-				<h2>Queue</h2>
+				<h2>Queue - Production (Queue date, but not started)</h2>
 				<div id="load_charts">
 					<div id="queue_lp_load"> <!--was queue_sample_load - rename-->
 						<h3>Lib prep</h3>
@@ -50,7 +57,7 @@
 			</div>
             <!--Ongoing panels -> change to load-->
             <div id="ongoing">
-                <h2>Ongoing</h2>
+                <h2>Ongoing - Production (started, but not delivered)</h2>
                 <div id="ongoing_load_charts">
                     <div id="libprep_load">
                         <h3>Lib prep</h3>
@@ -73,6 +80,7 @@
             <!--Delivery time run charts-->
             <div id="total_del_times" class="times_panel">
                 <h2>Total delivery times - <span id="total_legend">All projects</span></h2>
+                <h3>Production (Queue date - All samples sequenced)</h3>
                 <div id="total_rc">
                     <h3>Run chart</h3>
                     <!--<h3 id="total_rc_legend">All projects</h3>-->
@@ -84,6 +92,7 @@
             </div>
             <div id="rec_ctrl_del_times" class="times_panel">
                 <h2 id="rec_ctrl_legend">Rec control delivery times - All projects</h2>
+                <h3>Production (Open date - Queue date)</h3>
                 <div id="rec_ctrl_rc">
                     <h3>Run chart</h3>
                     <!--<h3 id="rec_ctrl_rc_legend">All projects</h3>-->
@@ -95,6 +104,7 @@
             </div>
             <div id="lib_prep_del_times" class="times_panel">
                 <h2 id="lib_prep_legend">Lib prep delivery times - Lib prep projects</h2>
+                <h3>Production (Queue date - Library QC)</h3>
                 <div id="lib_prep_rc">
                     <h3>Run chart</h3>
                     <!--<h3 id="lib_prep_rc_legend">All projects</h3>-->
@@ -106,6 +116,7 @@
             </div>
             <div id="seq_del_times" class="times_panel">
                 <h2>Sequencing delivery times - <span id="seq_legend">All projects</span></h2>
+                <h3>Production (Library QC - All samples sequenced)</h3>
                 <div id="seq_rc">
                     <h3>Run chart</h3>
                     <!--<h3 id="seq_rc_legend">All projects</h3>-->
@@ -168,6 +179,9 @@
 			var rcWidth = (winWidth - 460) / 4;
 			var drawWidth = (winWidth - 500);
             
+            /** 
+            * Database source
+            */ 
             var dbSource = "" // local, dev or "" (=tools)
 			var applDataUrl ="getCouchDbData.php?db=projects&design=process_flow&view=KPI_applications&group_level=3&" + dbSource;
 			
@@ -231,10 +245,19 @@
 			var queueLaneLoadUrl = "getCouchDbData.php?db=projects&design=process_flow&view=KPI_appl_pf_dates_sampl_lanes&reduce=false&" + dbSource;
 			d3.json(queueLaneLoadUrl, function(json){
                 console.log("Drawing load stacks")
-                console.log(json);
+                //console.log(json);
 
                 var reduced = reduceToProject(json);
-                console.log(reduced);
+                //console.log(reduced);
+                var numLanes = calculateLanesStarted (reduced, twelveWeeks, today);
+                var numPreps = calculateWorksetsStarted (reduced, twelveWeeks, today);
+                //console.log(numLanes);
+                //console.log(numPreps);
+                
+                d3.select("#lane_starts").text(parseFloat(numLanes.HiSeq/12).toFixed(1) + " / " + parseFloat(numLanes.MiSeq/12).toFixed(1)
+                                               + " (" + parseFloat(numLanes.HiSeqSamples/12).toFixed(1) + "/" + parseFloat(numLanes.MiSeqSamples/12).toFixed(1) + " samples)");
+                d3.select("#prep_starts").text(parseFloat(numPreps.DNA /12).toFixed(2) + " / " + parseFloat(numLanes.RNA/12).toFixed(2)
+                                               + " / " + parseFloat(numPreps.SeqCap/12).toFixed(2) + " / " + parseFloat(numPreps.Other/12).toFixed(2));
 
 				var recCtrl = generateRecCtrlStackDataset(json, today);
 				var sampleQueue = generateQueueSampleStackDataset(json, today);
@@ -243,6 +266,8 @@
                 var sampleLoadLibprep = generateLibprepSampleLoadDataset(json, today);
                 var laneLoadLibprep = generateLibprepLaneLoadDataset(json, today);
                 var seqLoad = generateSeqLoadDataset(json, today);
+                
+                console.log(sampleLoadLibprep);
                 
 				/** 3 bar panels on the upper half.
 				 *  
