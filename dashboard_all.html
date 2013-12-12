@@ -249,8 +249,8 @@
 
                 var reduced = reduceToProject(json);
                 //console.log(reduced);
-                var numLanes = calculateLanesStarted (reduced, twelveWeeks, today);
-                var numPreps = calculateWorksetsStarted (reduced, twelveWeeks, today);
+                var numLanes = calculateLanesStarted (json, twelveWeeks, today);
+                var numPreps = calculateWorksetsStarted (json, twelveWeeks, today);
                 //console.log(numLanes);
                 //console.log(numPreps);
                 
@@ -267,7 +267,7 @@
                 var laneLoadLibprep = generateLibprepLaneLoadDataset(json, today);
                 var seqLoad = generateSeqLoadDataset(json, today);
                 
-                console.log(sampleLoadLibprep);
+                //console.log(sampleLoadLibprep);
                 
 				/** 3 bar panels on the upper half.
 				 *  
