@@ -43,12 +43,12 @@ function dateValueSort(a, b){
     }
  */
 
-// Look at calculating and adding a first in queue date
+// Look at calculating and adding a first in queue date. Is this the proper place to do this? On sample level instead?
 // Sort on queue date - arrival date - proj ID (?)
 function reduceToProject(jsonview) {
     var rows = jsonview["rows"];
     var projects = {};
-    
+    var prepStarts = {};
     
     // Loop through all samples
     for (var i = 0; i < rows.length; i++) {
@@ -73,6 +73,12 @@ function reduceToProject(jsonview) {
             // update data with appropriat date, or sum up lanes or samples
             for (var valKey in values) {
                 var currVal = values[valKey];
+                if (valKey == "Lib prep start") { // capture prep start dates
+                    if (prepStarts[currVal] == undefined) { // no data for this date, so initialize array
+                        prepStarts[currVal] = [ ]; 
+                    }
+                    prepStarts[currVal].push( projects[pid]); // add project object   
+                }
                 if(valKey == "Samples" || valKey == "Lanes") {
                     projects[pid][valKey] += values[valKey];
                 } else if (valKey.indexOf("start") != -1 ) { // get earliest start dates
@@ -124,6 +130,16 @@ function reduceToProject(jsonview) {
     
     // sort in queue order 
     outRows.sort(sortByQueueArrival);
+    
+    // get the prep start dates. Not used at the moment
+    var prepStartsArr = [];
+    for (var date in prepStarts) {
+        if (date != "0000-00-00") {
+            prepStartsArr.push(date);
+        }
+    }
+    prepStartsArr.sort();
+    //console.log(prepStartsArr);
     
     ////  2nd try - not working properly - testing stuff for first in queue calc
     //var firstLPDate;
@@ -191,6 +207,7 @@ function reduceToProject(jsonview) {
     return { "rows": outRows };
     
 }
+
 function sortByQueueArrival (a, b) {
     var aV =  a["value"];
     var bV =  b["value"];
@@ -198,16 +215,23 @@ function sortByQueueArrival (a, b) {
     var bQD = bV["Queue date"];
     var aAD = aV["Arrival date"];
     var bAD = bV["Arrival date"];
-    var aPid = a["key"][0];
-    var bPid = b["key"][0];
+    var aPid = a["key"][0]; // project id
+    var bPid = b["key"][0]; // project id
     //var aAppl = a["key"][2];
     //var bAppl = b["key"][2];
+    if (aQD == "0000-00-00" && bQD == "0000-00-00") {
+        return 0;
+    }
     if(aQD < bQD) {
-        if(aQD == "0000-00-00") { return 1; } // if no queue date yet => end of queue
+        if(aQD == "0000-00-00") {
+            return 1;
+        } // if no queue date yet => end of queue
         return -1;
     }
     if(aQD > bQD) {
-        if(bQD == "0000-00-00") { return 1; } // if no queue date yet => end of queue
+        if(bQD == "0000-00-00") {
+            return -1;
+        } // if no queue date yet => end of queue
         return 1;
     }
     if(aAD < bAD) { return -1; }
@@ -346,6 +370,103 @@ function generateRunchartDataset_New (jsonview, dateRangeStart, dateRangeEnd, da
             var appl = keys[2]; // application
             var pf = keys[3]; // platform
             var sid = keys[4]; // sample id
+            if(onlyProduction && type != "Production") { continue; }
+            
+            var filter_field;
+            if(filter.indexOf("library") != -1) {
+                filter_field = 2; // index for application in keys array
+            } else if(filter.indexOf("iSeq") != -1) {
+                filter_field = 3; // index for platform in keys array
+            }
+            // more here... ?
+            
+            if(filter) {
+                if(!inverseSelection) {
+                    if(keys[filter_field] != null && keys[filter_field].indexOf(filter) == -1 ) { continue; }                     
+                } else {
+                    if(keys[filter_field] == null || keys[filter_field].indexOf(filter) != -1 ) { continue; }
+                }
+            }
+            var sampleDateFrom = values[dateFromKey];
+            var sampleDateTo = values[dateToKey];
+            if(projects[pid] == undefined) {
+                projects[pid] = {
+                                    "type": type,
+                                    "appl": appl,
+                                    "pf": pf,
+                                    "num_samples": 1,
+                                    "fromDate": sampleDateFrom,
+                                    "toDate": sampleDateTo,
+                                    "daydiff": daydiff(new Date(sampleDateFrom), new Date(sampleDateTo))
+                                }
+            } else {
+                if(sampleDateFrom < projects[pid]["fromDate"]) { projects[pid]["fromDate"] = sampleDateFrom; }
+                if(sampleDateTo > projects[pid]["toDate"]) { projects[pid]["toDate"] = sampleDateTo; }
+                projects[pid]["daydiff"] = daydiff(new Date(projects[pid]["fromDate"]), new Date(projects[pid]["toDate"]));
+                projects[pid]["num_samples"]++;
+            }
+        }
+
+        // out data structure: [ order, daydiff, num_samples, doneDate, project_id ]. Order is added after date sort?
+        for (var pid in projects) {
+            // if fromDate or toDate is 0000-00-00 not all samples are done, so ignore
+            if (projects[pid]["fromDate"] == "0000-00-00" || projects[pid]["toDate"] == "0000-00-00") { continue; }
+
+            //// check if data is in scope
+            //// within date range
+            var toDate = new Date(projects[pid]["toDate"]);
+            if (toDate < dateRangeStart || toDate > dateRangeEnd) { continue; }
+            
+            // we find ourselves with a project that has a toDate within range, so write it to the output array
+            dataArray.push([
+                projects[pid]["daydiff"],
+                projects[pid]["num_samples"],
+                projects[pid]["toDate"],
+                pid
+            ]);
+        }
+    
+        dataArray.sort(dateValueSort);
+        // add order number as first element in each array
+        for (var j = 0; j < dataArray.length; j++) {
+                var tmpdata = dataArray[j];
+                tmpdata.unshift(j + 1);
+        }
+        return dataArray;
+        
+}
+
+/**
+ * NEW NEW (i.e. third) implementation using the data from the reduceToProject function on the one-for-all non-reduced map view
+ * 
+ * Generates a dataset for runchart line plot over time from a couchdb view
+ * @param {Object} jsonview		A parsed json stream
+ * @param {Date} dateRangeStart	A Date object to specify start of date range to include
+ * @param {Date} dateRangeEnd	A Date object to specify end of date range to include
+ * @param {String} dateFromKey	A key to identify start date for diff calculation
+ * @param {Boolean} onlyProduction	If true only include data where type == "Production"
+ * @param {String} filter	A key to identify records to be selected
+ * @param {Boolean} inverseSelection If true look for absence of filter string
+ * @returns {Array} 			An array of date-times-project as arrays. Times are in days
+ */
+function generateRunchartDataset_Take3 (jsonview, dateRangeStart, dateRangeEnd, dateFromKey, dateToKey, onlyProduction, filter, inverseSelection) {
+        var dataArray = [];
+        var rows = jsonview["rows"];
+        var projects = {};
+        
+        // Each row is one project
+        // ??Need logic to summarize dates per project
+        for (var i = 0; i < rows.length; i++) {
+            //console.log("looping through json array: 1");
+            var keys = rows[i]["key"];
+            var values = rows[i]["value"];
+            
+            
+            var pid = keys[0]; // project id
+            var type = keys[1]; // type = Production || Applications
+            var appl = keys[2]; // application
+            var pf = keys[3]; // platform
+            //var sid = keys[4]; // sample id
             if(onlyProduction && type != "Production") { continue; }
             
             var filter_field;
