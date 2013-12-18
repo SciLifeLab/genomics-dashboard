@@ -471,7 +471,7 @@ function generateLibprepSampleLoadDataset(json, cmpDate) {
         var queueDate = v["Queue date"];
         var prepStartDate = v["Lib prep start"];
         var libQCDate = v["QC library finished"];
-        console.log("app cat: " + applCat + ", pid: " + pid + ", sample: " + sampleID + ", " + prepStartDate + "-" + libQCDate);
+        //console.log("app cat: " + applCat + ", pid: " + pid + ", sample: " + sampleID + ", " + prepStartDate + "-" + libQCDate);
         // this is for libprep projects
         if (prepStartDate != "0000-00-00" &&
             prepStartDate <= cmpDateStr &&
@@ -765,14 +765,6 @@ function sortByApplication (a, b) {
     if(aQ < bQ ) return -1;
     if(aQ > bQ ) return 1;
     return 0;
-}
-function dateValueSort(a, b){
-        var datediff = a[2] - b[2];
-        if (datediff == 0) {
-            return b[1] - a[1]; // longer del times sorted before shorter
-        } else {
-            return datediff;
-        }
 }
 
 function drawStackedBars (dataset, divID, width, height, unit, padding) {
