@@ -7,9 +7,20 @@ function daydiff(date1, date2) {
 }
 
 function dateValueSort(a, b){
-        var datediff = a[2] - b[2];
+        var datediff = a[2] - b[2]; // Date done
         if (datediff == 0) {
-            return b[1] - a[1]; // longer del times sorted before shorter
+            //return b[1] - a[1]; // longer del times sorted before shorter
+            
+            if (a[0] == b[0]) { // Delivery time
+                if (a[3] < b[3]) { // Project ID, lower ID before higher
+                    //console.log("a: " + a[3] + ", " + a[0] + ", " + a[2] + " / " + "b: " + b[3] + ", " + b[0] + ", " + b[2]);
+                    return -1;
+                } else {
+                    //console.log("a: " + a[3] + ", " + a[0] + ", " + a[2] + " / " + "b: " + b[3] + ", " + b[0] + ", " + b[2]);
+                    return 1;
+                }
+            }
+            return b[0] - a[0]; // longer del times sorted before shorter
         } else {
             return datediff;
         }
@@ -504,7 +515,7 @@ function generateRunchartDataset_Take3 (jsonview, dateRangeStart, dateRangeEnd, 
             }
         }
 
-        // out data structure: [ order, daydiff, num_samples, doneDate, project_id ]. Order is added after date sort?
+        // out data structure: [ order, daydiff, num_samples, doneDate, project_id ]. Order is added after date sort
         for (var pid in projects) {
             // if fromDate or toDate is 0000-00-00 not all samples are done, so ignore
             if (projects[pid]["fromDate"] == "0000-00-00" || projects[pid]["toDate"] == "0000-00-00") { continue; }
@@ -518,12 +529,13 @@ function generateRunchartDataset_Take3 (jsonview, dateRangeStart, dateRangeEnd, 
             dataArray.push([
                 projects[pid]["daydiff"],
                 projects[pid]["num_samples"],
-                projects[pid]["toDate"],
+                new Date(projects[pid]["toDate"]),
                 pid
             ]);
         }
-    
-        dataArray.sort(dateValueSort);
+        
+        console.log("Before sort in new method");
+        dataArray.sort(dateValueSort);    
         // add order number as first element in each array
         for (var j = 0; j < dataArray.length; j++) {
                 var tmpdata = dataArray[j];
@@ -1428,7 +1440,7 @@ function drawProcessPanels(appl_json, pf_json, plotDate, startDate, height, draw
     var recCtrlBpDataset = generateBoxDataset(appl_json, startDate, plotDate, "Arrival date", "Queue date");
     drawBoxPlot(recCtrlBpDataset, "rec_ctrl_bp", height, maxStepY);
     
-    drawRunChart(libPrepDataset, "lib_prep_rc", [2.5], rc_width, height, 30, maxStepY);
+    //drawRunChart(libPrepDataset, "lib_prep_rc", [2.5], rc_width, height, 30, maxStepY); // This call has been moved to dashboard_all.html for testing purposes
     var libPrepBpDataset = generateBoxDataset(appl_json, startDate, plotDate, "Queue date", "QC library finished", "Finished library", true);
     drawBoxPlot(libPrepBpDataset, "lib_prep_bp", height, maxStepY);
     
