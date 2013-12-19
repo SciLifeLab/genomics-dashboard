@@ -153,20 +153,6 @@ function generateWorksetFailureDataset (jsonview, dateRangeStart, dateRangeEnd, 
         
 }
 
-/**
- * Generates a dataset for boxplots based on a specified index of the values
- * @param {Array} dataset		An array of arrays (the dataset used to generate the runchart)
- * @param {Integer} index		index of the array that contains the value
- * @returns {Array} 			An array of arrays of values. 
- */
-function generateGenericBoxDataset (dataset, index) {
-        var dataArray = [];
-        dataArray[0] = [];
-        for (var i = 0; i<dataset.length; i++) {
-                dataArray[0].push(dataset[i][index]);
-        }
-        return dataArray;
-}
 
 
 /**
