@@ -156,8 +156,7 @@
             </div>
         </div>
 		<script type="text/javascript">
-            // check every hour if time is between 7 and 8
-            // if so, reload window
+            // Reload window every hour
             var oneHour = 1000*60*60;
             window.setTimeout(function() {
                         window.location.reload();
@@ -170,48 +169,29 @@
 			var twelveWeeks = new Date( today.getTime() - 12 * 7 * 1000*60*60*24);
 			var winWidth = window.innerWidth;
             var winHeight = window.innerHeight;
-            console.log("w: " + winWidth + ", h: " + winHeight);
+            //console.log("w: " + winWidth + ", h: " + winHeight);
 			
-			//var panelHeights = (winHeight - 305) / 2;
-			var panelHeights = (winHeight - 210) / 2;
-						
-			//var rcWidth = (winWidth - 440) / 3;
-			var rcWidth = (winWidth - 460) / 4;
+			var panelHeights = (winHeight - 210) / 2;						
 			var drawWidth = (winWidth - 500);
-            
-            /** 
-            * Database source
-            */ 
-            var dbSource = "local" // local, dev or "" (=tools)
-			var applDataUrl ="getCouchDbData.php?db=projects&design=process_flow&view=KPI_applications&group_level=3&" + dbSource;
-			
-            console.log(applDataUrl);	
-            var dateStr = today.getFullYear() + "-" + today.getMonth() + "-" + today.getDate();    
+
+            //var dateStr = today.getFullYear() + "-" + today.getMonth() + "-" + today.getDate();    
             var dateStr = today.toDateString();    
 			d3.select("#date")
                 .text(dateStr);
-            var appl_json;
-			var pf_json;
-            d3.json(applDataUrl, function(json) {
-				appl_json = json;
-				//console.log(appl_json); //Log output to console
-                
-                /* 
-                 * Nest d3.json call to be sure all data is loaded before drawing all panels
-                 */
-				// preparation for both data sets
-				var pfDataUrl ="getCouchDbData.php?db=projects&design=process_flow&view=KPI&group_level=3&" + dbSource;
-				//console.log("About to call d3.json again");
-				d3.json(pfDataUrl, function(json) {
-					pf_json = json;
-                    var loadUrl = "getCouchDbData.php?db=projects&design=process_flow&view=KPI_appl_pf_dates_sampl_lanes&reduce=false&" + dbSource;
-                    d3.json(loadUrl, function(json){
-                        load_json = json;
-                        drawProcessPanels(appl_json, pf_json, load_json, today, twelveWeeks, panelHeights, drawWidth);
-                    });
-                });
-				
-			});
+            
+            /* 
+            * Database server source
+            */ 
+            var dbSource = "local" // local, dev or "" (=tools)
+            
+            /*
+             * Get data for projects & draw
+             */
+            var dataUrl = "getCouchDbData.php?db=projects&design=process_flow&view=KPI_appl_pf_dates_sampl_lanes&reduce=false&" + dbSource;
+            d3.json(dataUrl, function(json){
+                drawProcessPanels(json, today, twelveWeeks, panelHeights, drawWidth);
+            });
+                    
             // Problem KPIs. Not shown at the moment
             //var failedProgUrl = "getCouchDbData.php?db=projects&design=kpi_external&view=KPI1&reduce=false&" + dbSource;
             //d3.json(failedProgUrl, function(json){
