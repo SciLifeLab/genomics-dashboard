@@ -95,7 +95,7 @@ function reduceToProject(jsonview) {
                 } else if (valKey.indexOf("start") != -1 ) { // get earliest start dates
                     if (currVal < projects[pid][valKey]) { projects[pid][valKey] = currVal; } // handles 0000-00-00 as well
                 } else { // get latest done dates, except 0000-00-00
-                    if (currVal == "0000-00-00") {
+                    if (currVal == "0000-00-00" || projects[pid][valKey] == "0000-00-00") { // need to capture if date is already set to 0000-00-00
                         projects[pid][valKey] = "0000-00-00";
                     } else if (currVal > projects[pid][valKey]) {
                         projects[pid][valKey] = currVal;
@@ -115,6 +115,7 @@ function reduceToProject(jsonview) {
             projects[pid]["appl"],
             projects[pid]["pf"]
         ];
+        
         var newValue = {
             "Arrival date":projects[pid]["Arrival date"],
             "Rec Ctrl start":projects[pid]["Rec Ctrl start"],
@@ -125,7 +126,7 @@ function reduceToProject(jsonview) {
             "All samples sequenced":projects[pid]["All samples sequenced"],
             "Close date":projects[pid]["Close date"],
             "Samples":projects[pid]["Samples"],
-            "Lanes":projects[pid]["Lanes"]
+            "Lanes":parseFloat(Math.round(projects[pid]["Lanes"]).toFixed(2))
         };
         
         var newRow = {
@@ -534,12 +535,12 @@ function generateRunchartDataset_Take3 (jsonview, dateRangeStart, dateRangeEnd, 
             ]);
         }
         
-        console.log("Before sort in new method");
         dataArray.sort(dateValueSort);    
         // add order number as first element in each array
         for (var j = 0; j < dataArray.length; j++) {
                 var tmpdata = dataArray[j];
                 tmpdata.unshift(j + 1);
+                //console.log(tmpdata[4]); // project ID
         }
         return dataArray;
         
@@ -1391,7 +1392,7 @@ function drawBarchartPlot(dataset, divID, width, height, bottom_padding, maxY) {
  */
 //function drawProcessPanels(appl_json, plotDate, startDate, height, rc_width){
 //function drawProcessPanels(appl_json, pf_json, plotDate, startDate, height, rc_width){
-function drawProcessPanels(appl_json, pf_json, plotDate, startDate, height, draw_width){
+function drawProcessPanels(appl_json, pf_json, load_json, plotDate, startDate, height, draw_width){
     // keys for total time calculation
     var startKey = "Queue date";
     var endKey = "All samples sequenced";
@@ -1399,12 +1400,65 @@ function drawProcessPanels(appl_json, pf_json, plotDate, startDate, height, draw
 
     var rc_width = draw_width / 4; // 4 run chart panels on the lower half
 
-    /** 3 bar panels on the upper half.
-     *  However, give the demand and ongoing charts less space than the load bars
-     *  Note that the drawing call for the load bars are in dashboard_all.html 
-     */
-    var bar_width = draw_width / 4;
+    //var bar_width = draw_width / 4;
 
+    /***** Code moved here from dashboard_all.html **
+     ***********************************************************
+    */
+    
+    var reduced = reduceToProject(load_json);
+    console.log(reduced);
+    
+    // testing with data from the one view to rule them all. Move below!!!!!!!!!
+    var libPrepDataset = generateRunchartDataset_Take3(reduced, startDate, plotDate, "Queue date", "QC library finished", true, "Finished library", true); 
+    var libPrepBpDataset = generateGenericBoxDataset(libPrepDataset, 1);
+    console.log(libPrepDataset);
+
+    drawRunChart(libPrepDataset, "lib_prep_rc", [2.5], rc_width, height, 30, 150); // this used to be in dashboard.js
+    drawBoxPlot(libPrepBpDataset, "lib_prep_bp", height, 150); // this used to be in dashboard.js
+
+    
+    // testing number of lanes and prep starts calculations
+    var numLanes = calculateLanesStarted (load_json, twelveWeeks, today);
+    var numPreps = calculateWorksetsStarted (load_json, twelveWeeks, today);
+    //console.log(numLanes);
+    //console.log(numPreps);
+    
+    d3.select("#lane_starts").text(parseFloat(numLanes.HiSeq/12).toFixed(1) + " / " + parseFloat(numLanes.MiSeq/12).toFixed(1)
+                                   + " (" + parseFloat(numLanes.HiSeqSamples/12).toFixed(1) + "/" + parseFloat(numLanes.MiSeqSamples/12).toFixed(1) + " samples)");
+    d3.select("#prep_starts").text(parseFloat(numPreps.DNA /12).toFixed(2) + " / " + parseFloat(numLanes.RNA/12).toFixed(2)
+                                   + " / " + parseFloat(numPreps.SeqCap/12).toFixed(2) + " / " + parseFloat(numPreps.Other/12).toFixed(2));
+    
+    // The ongoing calculations
+    var recCtrl = generateRecCtrlStackDataset(load_json, today);
+    var sampleQueue = generateQueueSampleStackDataset(load_json, today);
+    var libprepLaneQueue = generateQueueLaneLPStackDataset(load_json, today);
+    var finlibLaneQueue = generateQueueLaneFLStackDataset(load_json, today);
+    var sampleLoadLibprep = generateLibprepSampleLoadDataset(load_json, today);
+    var laneLoadLibprep = generateLibprepLaneLoadDataset(load_json, today);
+    var seqLoad = generateSeqLoadDataset(load_json, today);
+    
+    //console.log(sampleLoadLibprep);
+    
+    /** 
+     *  17 bars to draw over the width of the window
+     */ 
+    var bar_width = (draw_width + 320) / 17; 
+
+    drawRCStackedBars(recCtrl, "ongoing_bc_plot", bar_width * 1, panelHeights);
+    drawStackedBars (sampleQueue, "queue_sample_load_lp", bar_width * 4, panelHeights, "samples");
+    drawStackedBars (libprepLaneQueue, "queue_lane_load_lp", bar_width * 2, panelHeights, "lanes");
+    drawStackedBars (finlibLaneQueue, "queue_lane_load_fl", bar_width * 2, panelHeights, "lanes");
+    drawStackedBars(sampleLoadLibprep, "libprep_sample_load", bar_width * 4, panelHeights, "samples");
+    drawStackedBars(laneLoadLibprep, "libprep_lane_load", bar_width * 2, panelHeights, "lanes");
+    drawStackedBars (seqLoad, "seq_load_stack", bar_width * 2, panelHeights, "lanes");
+    
+    
+    /* End moved code
+     *************************************************************************************************
+     */
+    
+    
     //var ongoingDataset = generateBarchartDataset(appl_json, plotDate);
     var ongoingDataset = generateRecCtrlBarchartDataset(appl_json, plotDate); // new split on application
     //console.log(demandDataset);
@@ -1441,8 +1495,9 @@ function drawProcessPanels(appl_json, pf_json, plotDate, startDate, height, draw
     drawBoxPlot(recCtrlBpDataset, "rec_ctrl_bp", height, maxStepY);
     
     //drawRunChart(libPrepDataset, "lib_prep_rc", [2.5], rc_width, height, 30, maxStepY); // This call has been moved to dashboard_all.html for testing purposes
-    var libPrepBpDataset = generateBoxDataset(appl_json, startDate, plotDate, "Queue date", "QC library finished", "Finished library", true);
-    drawBoxPlot(libPrepBpDataset, "lib_prep_bp", height, maxStepY);
+    // testing to do this with the one dataset
+    //var libPrepBpDataset = generateBoxDataset(appl_json, startDate, plotDate, "Queue date", "QC library finished", "Finished library", true);
+    //drawBoxPlot(libPrepBpDataset, "lib_prep_bp", height, maxStepY);
     
     drawRunChart(seqDataset, "seq_rc", [3], rc_width, height, 30, maxStepY);
     var seqBpDataset = generateBoxDataset(pf_json, startDate, plotDate, "QC library finished", "All samples sequenced");
