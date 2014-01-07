@@ -158,7 +158,10 @@ function generateRecCtrlStackDataset(json, cmpDate) {
         var type = k[1];
         var appl = k[2];
         var sampleID = k[4];
-
+        
+        // skip projects that are labeled as neither Production or Application
+        if (type == null ) { continue; }
+        
         if(appl == null) { appl = "Other";}
         //console.log(sampleID);
         var applCat = "";
@@ -185,9 +188,18 @@ function generateRecCtrlStackDataset(json, cmpDate) {
         var closeDate = v["Close date"];
         if(closeDate != "0000-00-00") { continue; }
         
-        var arrDate = v["Arrival date"];
-        
+        // skip projects that have passed later process steps
+        var libQCDate = v["QC library finished"];
+        var seqDoneDate = v["All samples sequenced"];
+        if (appl != "Finished library" && libQCDate != "0000-00-00") {
+            continue;
+        }
+        if (seqDoneDate != "0000-00-00") {
+            continue;
+        }
+            
 
+        var arrDate = v["Arrival date"];
         var queueDate = v["Queue date"];
         if (arrDate != "0000-00-00" &&
             arrDate <= cmpDateStr &&
