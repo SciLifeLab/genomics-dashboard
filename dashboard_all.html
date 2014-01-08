@@ -182,12 +182,12 @@
             /* 
             * Database server source
             */ 
-            var dbSource = "local" // local, dev or "" (=tools)
+            var dbSource = "" // local, dev or "" (=tools)
             
             /*
              * Get data for projects & draw
              */
-            var dataUrl = "getCouchDbData.php?db=projects&design=process_flow&view=KPI_appl_pf_dates_sampl_lanes&reduce=false&" + dbSource;
+            var dataUrl = "getCouchDbData.php?db=projects&design=genomics-dashboard&view=dates_and_load_per_sample&reduce=false&" + dbSource;
             d3.json(dataUrl, function(json){
                 drawProcessPanels(json, today, twelveWeeks, panelHeights, drawWidth);
             });
