@@ -161,7 +161,7 @@ function reduceToProject(jsonview) {
         
         var newValue = {
             "Arrival date":projects[pid]["Arrival date"],
-            "Rec Ctrl start":projects[pid]["Rec Ctrl start"],
+            "Rec ctrl start":projects[pid]["Rec ctrl start"],
             "Queue date":projects[pid]["Queue date"],
             "Lib prep start":projects[pid]["Lib prep start"],
             "QC library finished":projects[pid]["QC library finished"],
@@ -291,6 +291,116 @@ function generateRunchartDataset (jsonview, dateRangeStart, dateRangeEnd, dateFr
         
 }
 
+/**
+ * Adds a time series to an existing dataset for runchart line plot over time from a couchdb view
+ * @param {Object} jsonview		A parsed json stream
+ * @param {Array} dataArray		An array of "project arrays" to which an extra time series shall be added
+ * @param {Date} dateRangeStart	A Date object to specify start of date range to include
+ * @param {Date} dateRangeEnd	A Date object to specify end of date range to include
+ * @param {String} dateFromKey	A key to identify start date for diff calculation
+ * @param {Boolean} onlyProduction	If true only include data where type == "Production"
+ * @param {String} filter	A key to identify records to be selected
+ * @param {Boolean} inverseSelection If true look for absence of filter string
+ * @returns {Array} 			An array [ order, pid, num_samples, date, daysX, daysY, ... ]. Times are in days
+ */
+function addToRunchartDataset (jsonview, dataArray, dateRangeStart, dateRangeEnd, dateFromKey, dateToKey, onlyProduction, filter, inverseSelection) {
+        var rows = jsonview["rows"];
+        var projects = {};
+
+        console.log(dateToKey);
+        
+        // Each row is one project
+        for (var i = 0; i < rows.length; i++) {
+            //console.log("looping through json array: 1");
+            var keys = rows[i]["key"];
+            var values = rows[i]["value"];
+            
+            
+            var pid = keys[0]; // project id
+            var type = keys[1]; // type = Production || Applications
+            var appl = keys[2]; // application
+            var pf = keys[3]; // platform
+            //var sid = keys[4]; // sample id
+            if(onlyProduction && type != "Production") { continue; }
+            
+            
+            if(filter) {
+                var filter_field;
+                if(filter.indexOf("library") != -1) {
+                    filter_field = 2; // index for application in keys array
+                } else if(filter.indexOf("iSeq") != -1) {
+                    filter_field = 3; // index for platform in keys array
+                }
+                
+                // more here... ?
+                
+                if(!inverseSelection) {
+                    if(keys[filter_field] != null && keys[filter_field].indexOf(filter) == -1 ) { continue; }                     
+                } else {
+                    if(keys[filter_field] == null || keys[filter_field].indexOf(filter) != -1 ) { continue; }
+                }
+            }
+            var sampleDateFrom = values[dateFromKey];
+            var sampleDateTo = values[dateToKey];
+            console.log(pid + ": " + sampleDateTo);
+            if(projects[pid] == undefined) {
+                projects[pid] = {
+                                    "type": type,
+                                    "appl": appl,
+                                    "pf": pf,
+                                    "num_samples": 1,
+                                    "fromDate": sampleDateFrom,
+                                    "toDate": sampleDateTo,
+                                    "daydiff": daydiff(new Date(sampleDateFrom), new Date(sampleDateTo))
+                                }
+            } else {
+                if(sampleDateFrom < projects[pid]["fromDate"]) { projects[pid]["fromDate"] = sampleDateFrom; }
+                if(sampleDateTo > projects[pid]["toDate"]) { projects[pid]["toDate"] = sampleDateTo; }
+                projects[pid]["daydiff"] = daydiff(new Date(projects[pid]["fromDate"]), new Date(projects[pid]["toDate"]));
+                projects[pid]["num_samples"]++;
+            }
+        }
+        console.log(projects);
+        
+        // out data structure: [ order, pid, num_samples, date, daysX, daysY, ... ]. Order is added after date sort
+        //// THIS SHOULD GO AWAY
+        //for (var pid in projects) {
+        //    // if fromDate or toDate is 0000-00-00 not all samples are done, so ignore
+        //    if (projects[pid]["fromDate"] == "0000-00-00" || projects[pid]["toDate"] == "0000-00-00") { continue; }
+        //
+        //    //// check if data is in scope
+        //    //// within date range
+        //    var toDate = new Date(projects[pid]["toDate"]);
+        //    if (toDate < dateRangeStart || toDate > dateRangeEnd) { continue; }
+        //    
+        //    //// we find ourselves with a project that has a toDate within range, so write it to the output array
+        //    dataArray.push([
+        //        pid,
+        //        projects[pid]["num_samples"],
+        //        new Date(projects[pid]["toDate"]),
+        //        projects[pid]["daydiff"]
+        //    ]);
+        //}
+        
+        for (var j = 0; j < dataArray.length; j++) {
+            var tmpID = dataArray[j][1]; // pid
+            var tmpDiff = projects[tmpID]["daydiff"];
+            console.log(tmpID + ": " + tmpDiff);
+            dataArray[j].push(tmpDiff);
+        }
+        
+        //// THIS IS NOT NEEDED
+        //dataArray.sort(dateValueSort);    
+        //// add order number as first element in each array
+        //for (var j = 0; j < dataArray.length; j++) {
+        //        var tmpdata = dataArray[j];
+        //        tmpdata.unshift(j + 1);
+        //        //console.log(tmpdata[4]); // project ID
+        //}
+        
+        return dataArray;
+        
+}
 
 /**
  * Generates a dataset for boxplots based on a specified index of the values
@@ -830,7 +940,8 @@ function drawProcessPanels(sample_json, plotDate, startDate, height, draw_width)
     };
     var recCtrl = {
         startKey: "Arrival date",
-        endKey: "Queue date"
+        endKey: "Queue date",
+        endKey2: "Rec ctrl start"
     };
     var libPrep = {
         startKey: "Queue date",
@@ -910,6 +1021,8 @@ function drawProcessPanels(sample_json, plotDate, startDate, height, draw_width)
 
     /* **** RecCtrl delivery times data sets **** */
     var recCtrlDataset = generateRunchartDataset(reduced, startDate, plotDate, recCtrl.startKey, recCtrl.endKey, true);
+    recCtrlDataset = addToRunchartDataset(reduced, recCtrlDataset, startDate, plotDate, recCtrl.startKey, recCtrl.endKey2, true);
+    console.log(recCtrlDataset);
     var recCtrlBpDataset = generateGenericBoxDataset(recCtrlDataset, 4);
 
     /* **** Libprep delivery times data sets **** */
