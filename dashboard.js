@@ -28,11 +28,10 @@ function iqr(k) {
   };
 }
 
-
 /**
  * Sorting function for runchart data sets
- * @param {Array} a	An array for a project: [ daydiff, num_samples, doneDate, project_id ]
- * @param {Array} b	An array for a project: [ daydiff, num_samples, doneDate, project_id ]
+ * @param {Array} a	An array for a project: [pid, num_samples, doneDate, daysX, daysY, ...]
+ * @param {Array} b	An array for a project: [pid, num_samples, doneDate, daysX, daysY, ...]
  * @returns {Number} 	negative values if a should be sorted before b, and positive values if vice versa
  */
 function dateValueSort(a, b){
@@ -40,8 +39,8 @@ function dateValueSort(a, b){
         if (datediff == 0) {
             //return b[1] - a[1]; // longer del times sorted before shorter
             
-            if (a[0] == b[0]) { // Delivery time
-                if (a[3] < b[3]) { // Project ID, lower ID before higher
+            if (a[3] == b[3]) { // Delivery time
+                if (a[0] < b[0]) { // Project ID, lower ID before higher
                     //console.log("a: " + a[3] + ", " + a[0] + ", " + a[2] + " / " + "b: " + b[3] + ", " + b[0] + ", " + b[2]);
                     return -1;
                 } else {
@@ -49,7 +48,7 @@ function dateValueSort(a, b){
                     return 1;
                 }
             }
-            return b[0] - a[0]; // longer del times sorted before shorter
+            return b[3] - a[3]; // longer del times sorted before shorter
         } else {
             return datediff;
         }
@@ -195,7 +194,6 @@ function reduceToProject(jsonview) {
     return { "rows": outRows };
 }
 
-
 /**
  * Generates a dataset for runchart line plot over time from a couchdb view
  * @param {Object} jsonview		A parsed json stream
@@ -205,7 +203,7 @@ function reduceToProject(jsonview) {
  * @param {Boolean} onlyProduction	If true only include data where type == "Production"
  * @param {String} filter	A key to identify records to be selected
  * @param {Boolean} inverseSelection If true look for absence of filter string
- * @returns {Array} 			An array [ order, daydiff, num_samples, doneDate, project_id ]. Times are in days
+ * @returns {Array} 			An array [ order, pid, num_samples, date, daysX, daysY, ... ]. Times are in days
  */
 function generateRunchartDataset (jsonview, dateRangeStart, dateRangeEnd, dateFromKey, dateToKey, onlyProduction, filter, inverseSelection) {
         var dataArray = [];
@@ -263,7 +261,7 @@ function generateRunchartDataset (jsonview, dateRangeStart, dateRangeEnd, dateFr
             }
         }
 
-        // out data structure: [ order, daydiff, num_samples, doneDate, project_id ]. Order is added after date sort
+        // out data structure: [ order, pid, num_samples, date, daysX, daysY, ... ]. Order is added after date sort
         for (var pid in projects) {
             // if fromDate or toDate is 0000-00-00 not all samples are done, so ignore
             if (projects[pid]["fromDate"] == "0000-00-00" || projects[pid]["toDate"] == "0000-00-00") { continue; }
@@ -273,12 +271,12 @@ function generateRunchartDataset (jsonview, dateRangeStart, dateRangeEnd, dateFr
             var toDate = new Date(projects[pid]["toDate"]);
             if (toDate < dateRangeStart || toDate > dateRangeEnd) { continue; }
             
-            // we find ourselves with a project that has a toDate within range, so write it to the output array
+            //// we find ourselves with a project that has a toDate within range, so write it to the output array
             dataArray.push([
-                projects[pid]["daydiff"],
+                pid,
                 projects[pid]["num_samples"],
                 new Date(projects[pid]["toDate"]),
-                pid
+                projects[pid]["daydiff"]
             ]);
         }
         
@@ -292,6 +290,7 @@ function generateRunchartDataset (jsonview, dateRangeStart, dateRangeEnd, dateFr
         return dataArray;
         
 }
+
 
 /**
  * Generates a dataset for boxplots based on a specified index of the values
@@ -378,7 +377,6 @@ function calculateWorksetsStarted (json, startDate, cmpDate) {
     return tot;
 }
 
-
 /**
  * Code to draw the run chart plot
  * @param {Object} dataset  Parsed json object
@@ -407,7 +405,7 @@ function drawRunChart(dataset, divID, clines, width, height, padding, maxY) {
     
     //Create scale functions
     if(maxY == undefined) {
-        maxY = d3.max(dataset, function(d) { return d[1]; });
+        maxY = d3.max(dataset, function(d) { return d[4]; });
     }
     var xScale = d3.scale.linear()
             .domain([0, dataset.length])
@@ -461,7 +459,7 @@ function drawRunChart(dataset, divID, clines, width, height, padding, maxY) {
             return xScale(d[0]);
        })
        .attr("cy", function(d) {
-            return yScale(d[1]);
+            return yScale(d[4]);
        })
        .attr("r", 4)
        .on("mouseover", function(d) {
@@ -470,14 +468,14 @@ function drawRunChart(dataset, divID, clines, width, height, padding, maxY) {
               .attr("fill", "blue")
               ;
             var xPosition = xScale(d[0]) + 10;
-            var yPosition = yScale(d[1]);
+            var yPosition = yScale(d[4]);
             //Create the tooltip label
             svg.append("text")
               .attr("id", "tooltip1")
               .attr("x", xPosition)
               .attr("y", yPosition)
             //.text(d[2])
-            .text(d[4])
+            .text(d[1]) 
             ;
             svg.append("text")
               .attr("id", "tooltip2")
@@ -489,7 +487,7 @@ function drawRunChart(dataset, divID, clines, width, height, padding, maxY) {
               .attr("id", "tooltip3")
               .attr("x", xPosition)
               .attr("y", yPosition + 26)
-            .text(d[1] + " days")
+            .text(d[4] + " days")
             ;	
 
        })
@@ -503,7 +501,7 @@ function drawRunChart(dataset, divID, clines, width, height, padding, maxY) {
                d3.select("#tooltip3").remove();
        })
        .on("click", function(d) {
-                var projID = d[4];
+                var projID = d[1];
                 var url = "http://genomics-status.scilifelab.se/projects/" + projID;
                 window.open(url, "genomics-status");
        })
@@ -511,7 +509,7 @@ function drawRunChart(dataset, divID, clines, width, height, padding, maxY) {
     // Add line (needs sorted array for lines to make sense)
     var line = d3.svg.line()
         .x(function(d) { return xScale(d[0]); })
-        .y(function(d) { return yScale(d[1]); });
+        .y(function(d) { return yScale(d[4]); });
     
     svg.append("path")
           .attr("class", "line")
@@ -611,7 +609,6 @@ function drawRunChart(dataset, divID, clines, width, height, padding, maxY) {
         }
     }
 }
-
 
 
 /**
@@ -895,47 +892,47 @@ function drawProcessPanels(sample_json, plotDate, startDate, height, draw_width)
     
     /* **** Total delivery times data sets **** */
     var totalRcDataset = generateRunchartDataset(reduced, startDate, plotDate, total.startKey, total.endKey, true);
-    var totalBpDataset = generateGenericBoxDataset(totalRcDataset, 1);
+    var totalBpDataset = generateGenericBoxDataset(totalRcDataset, 4);
         /* ** Subsets ** */
         // LibPrep projects
     var totalRcLPDataset = generateRunchartDataset(reduced, startDate, plotDate, total.startKey, total.endKey, true, "Finished library", true);
-    var totalBpLPDataset = generateGenericBoxDataset(totalRcLPDataset, 1);
+    var totalBpLPDataset = generateGenericBoxDataset(totalRcLPDataset, 4);
         // Finished library projects
     var totalRcFLDataset = generateRunchartDataset(reduced, startDate, plotDate, total.startKey, total.endKey, true, "Finished library");   
-    var totalBpFLDataset = generateGenericBoxDataset(totalRcFLDataset, 1);
+    var totalBpFLDataset = generateGenericBoxDataset(totalRcFLDataset, 4);
         // MiSeq projects
     var totalRcMiSeqDataset = generateRunchartDataset(reduced, startDate, plotDate, total.startKey, total.endKey, true, "MiSeq");
-    var totalBpMiSeqDataset = generateGenericBoxDataset(totalRcMiSeqDataset, 1);
+    var totalBpMiSeqDataset = generateGenericBoxDataset(totalRcMiSeqDataset, 4);
         // HiSeq projects
     var totalRcHiSeqDataset = generateRunchartDataset(reduced, startDate, plotDate, total.startKey, total.endKey, true, "HiSeq");
-    var totalBpHiSeqDataset = generateGenericBoxDataset(totalRcHiSeqDataset, 1);
+    var totalBpHiSeqDataset = generateGenericBoxDataset(totalRcHiSeqDataset, 4);
     
 
     /* **** RecCtrl delivery times data sets **** */
     var recCtrlDataset = generateRunchartDataset(reduced, startDate, plotDate, recCtrl.startKey, recCtrl.endKey, true);
-    var recCtrlBpDataset = generateGenericBoxDataset(recCtrlDataset, 1);
+    var recCtrlBpDataset = generateGenericBoxDataset(recCtrlDataset, 4);
 
     /* **** Libprep delivery times data sets **** */
     var libPrepDataset = generateRunchartDataset(reduced, startDate, plotDate, libPrep.startKey, libPrep.endKey, true, "Finished library", true); 
-    var libPrepBpDataset = generateGenericBoxDataset(libPrepDataset, 1);
+    var libPrepBpDataset = generateGenericBoxDataset(libPrepDataset, 4);
     
     /* **** Seq datasets for all projects **** */
     var seqDataset = generateRunchartDataset(reduced, startDate, plotDate, seq.startKey, seq.endKey, true); 
-    var seqBpDataset = generateGenericBoxDataset(seqDataset, 1);
+    var seqBpDataset = generateGenericBoxDataset(seqDataset, 4);
         /* ** Subsets ** */
         // MiSeq projects
     var seqMiSeqDataset = generateRunchartDataset(reduced, startDate, plotDate, seq.startKey, seq.endKey, true, "MiSeq"); 
-    var seqBpMiSeqDataset = generateGenericBoxDataset(seqMiSeqDataset, 1);
+    var seqBpMiSeqDataset = generateGenericBoxDataset(seqMiSeqDataset, 4);
         // HiSeq projects
     var seqHiSeqDataset = generateRunchartDataset(reduced, startDate, plotDate, seq.startKey, seq.endKey, true, "HiSeq"); 
-    var seqBpHiSeqDataset =generateGenericBoxDataset(seqHiSeqDataset, 1);
+    var seqBpHiSeqDataset =generateGenericBoxDataset(seqHiSeqDataset, 4);
 
     
     // get highest value in the runchart data sets to set a common scale
-    var maxTot = d3.max(totalRcDataset, function(d) {return d[1];});
-    var maxRC = d3.max(recCtrlDataset, function(d) {return d[1];});
-    var maxLP = d3.max(libPrepDataset, function(d) {return d[1];});
-    var maxSeq = d3.max(seqDataset, function(d) {return d[1];});
+    var maxTot = d3.max(totalRcDataset, function(d) {return d[4];});
+    var maxRC = d3.max(recCtrlDataset, function(d) {return d[4];});
+    var maxLP = d3.max(libPrepDataset, function(d) {return d[4];});
+    var maxSeq = d3.max(seqDataset, function(d) {return d[4];});
     maxStepY = Math.max(maxTot, maxRC, maxLP, maxSeq)
 
     /* ***** Draw the panels with the first data **** */
