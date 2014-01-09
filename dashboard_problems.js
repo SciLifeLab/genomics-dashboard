@@ -1,10 +1,10 @@
+// couchdb view "KPI1" not yet ready fully ok
 /**
  * Generates a dataset for fraction of failed samples being progressed bar chart from a couchdb view
  * @param {Object} jsonview		A parsed json stream
  * @param {Date} cmpDate	A Date object to specify the date to generate data for 
  * @returns {Array} 			An array of time range-% failed samples as range-value objects.
  */
-// couchdb view "KPI1" not yet ready fully ok
 function generateFailedProgressedDataset (jsonview, cmpDate) {
     // Key strings in indata
     //var arrivalKey = "Arrival date";
@@ -153,22 +153,8 @@ function generateWorksetFailureDataset (jsonview, dateRangeStart, dateRangeEnd, 
         
 }
 
-/**
- * Generates a dataset for boxplots based on a specified index of the values
- * @param {Array} dataset		An array of arrays (the dataset used to generate the runchart)
- * @param {Integer} index		index of the array that contains the value
- * @returns {Array} 			An array of arrays of values. 
- */
-function generateGenericBoxDataset (dataset, index) {
-        var dataArray = [];
-        dataArray[0] = [];
-        for (var i = 0; i<dataset.length; i++) {
-                dataArray[0].push(dataset[i][index]);
-        }
-        return dataArray;
-}
 
-
+ //use couchdb view "KPI3_1 => re-write this function
 /**
  * Generates a dataset for seq volume output runchart line plot over time from a couchdb view
  * @param {Object} jsonview		A parsed json stream
@@ -176,7 +162,6 @@ function generateGenericBoxDataset (dataset, index) {
  * @param {Date} dateRangeEnd	A Date object to specify end of date range to include
  * @returns {Array} 			!!!!!!! An array of date-percent-project as arrays. 
  */
- //use couchdb view "KPI3_1 => re-write this function
 function generateDeliveredDataDataset (jsonview, dateRangeStart, dateRangeEnd) {
     var dataArray = [];
     var rows = jsonview["rows"];
@@ -212,14 +197,14 @@ function generateDeliveredDataDataset (jsonview, dateRangeStart, dateRangeEnd) {
 }
 
 /**
- * Code to draw the run chart plot for failed lib preps
- * @param dataset  Parsed json object
- * @param {String} divID Id of DOM div to where plot should reside
+ * Drawa the run chart plot for failed lib preps
+ * @param {Object} dataset  Parsed json object
+ * @param {String} divID Id of DOM div where the plot shall reside
  * @param {Array} clines Array of numbers representing where x week control lines should be drawn, e.g.[6, 10]
- * @param width plot width
- * @param height plot height
- * @param (padding) plot padding
- * @param (maxY) Optional. Max value of y axis. To be able to draw different panels on the same scale 
+ * @param {Number} width plot width
+ * @param {Number} height plot height
+ * @param {Number} [padding=30] plot padding
+ * @param {Number} [maxY] Max value of y axis. To be able to draw different panels on the same scale 
  */
 function drawFailedLpRunChart(dataset, divID, clines, width, height, padding, maxY) {
     // Set default padding
@@ -462,13 +447,13 @@ function drawFailedLpRunChart(dataset, divID, clines, width, height, padding, ma
 }
 /**
  * Code to draw the run chart plot for delivered data
- * @param dataset  Parsed json object
+ * @param {Object} dataset  Parsed json object
  * @param {String} divID Id of DOM div to where plot should reside
  * @param {Array} clines Array of numbers representing where x week control lines should be drawn, e.g.[6, 10]
- * @param width plot width
- * @param height plot height
- * @param (padding) plot padding
- * @param (maxY) Optional. Max value of y axis. To be able to draw different panels on the same scale 
+ * @param {Number} width plot width
+ * @param {Number} height plot height
+ * @param {Number} [padding=30] plot padding
+ * @param {Number} [maxY] Max value of y axis. To be able to draw different panels on the same scale 
  */
 function drawDeliveredDataRunChart(dataset, divID, clines, width, height, padding, maxY) {
     // Set default padding

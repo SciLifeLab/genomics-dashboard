@@ -169,28 +169,10 @@ The visualizations depend on a number of *statusdb* Couchdb map-reduce views fro
     	]
 
 ## Dataset generation
-### Customer demand barchart
-**View**: KPI_applications
 
-**Function**: generateDemandDataset(data, cmpDate)
+### Ongoing projects today 
 
-Bins projects on Arrival date in three 4-week bins until cpmDate. Returns weekly averages for each bin
- 
-
-### Ongoing projects today barchart
-**View**: KPI_applications
-
-**Function**: generateBarchartDataset(data, cmpDate)
-
-Bins projects to these process steps depending on presence of dates
-    
-    /**
-     * Rec ctrl		=	Arrival date to Queue date
-     * Lib prep 	= 	Queue date to QC library finished
-     * Seq 			= 	QC library finished to All samples sequenced
-     */
-
-Returns number of projects for each bin
+*This section needs at complete re-write for the stacked load barcharts*
 
 ### Total delivery times runchart & boxplot
 

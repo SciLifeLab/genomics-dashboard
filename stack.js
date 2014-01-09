@@ -1,3 +1,139 @@
+/* **** Helper functions **** */
+
+/**
+ * Sort function for layer objects to sort by platform.<br>
+ * HiSeq before MiSeq - then on Queue date
+ * @param {Object} a		Layer object
+ * @param {Object} b		Layer object
+ * @returns {Number} A negative number if a should be sorted before b, a positive number if vice versa, otherwise 0 
+ */
+function sortByPlatform (a, b) {
+    aPf = "";
+    bPf = "";
+    for (var i = 0; i < a.length; i++) {
+        if(a[i]["y"] != 0) { aPf = a[i]["x"]; aQ = a[i]["queueDate"]; }
+        if(b[i]["y"] != 0) { bPf = b[i]["x"]; bQ = b[i]["queueDate"]; }
+    }
+    if(aPf < bPf) return -1;
+    if(aPf > bPf) return 1;
+    if(aQ < bQ ) return -1;
+    if(aQ > bQ ) return 1;
+    return 0;
+}
+
+/**
+ * Sort function for layer objects to sort by application.<br>
+ * DNA/RNA/SeqCap/Other - then on Queue date
+ * @param {Object} a		Layer object
+ * @param {Object} b		Layer object
+ * @returns {Number} A negative number if a should be sorted before b, a positive number if vice versa, otherwise 0 
+ */
+function sortByApplication (a, b) {
+    var map = {
+        "DNA": 0,
+        "RNA": 1,
+        "SeqCap": 2,
+        "Other": 3
+    }
+    
+    var aAppl;
+    var bAppl;
+    for (var i = 0; i < a.length; i++) {
+        if(a[i]["y"] != 0) { aAppl = map[a[i]["x"]]; aQ = a[i]["queueDate"]; }
+        if(b[i]["y"] != 0) { bAppl = map[b[i]["x"]]; bQ = b[i]["queueDate"]; }
+    }
+    if(aAppl < bAppl) return -1;
+    if(aAppl > bAppl) return 1;
+    if(aQ < bQ ) return -1;
+    if(aQ > bQ ) return 1;
+    return 0;
+}
+
+/**
+ * Calculates number of projects per domain (x value) in a layer object data set
+ * @param {Array} dataset  Array of array of layer objects
+ * @param {Array} domain    Array of domain names (x values)
+ * @returns {Object}    An object with counts per domain
+ */
+function numProjects(dataset, domain) {
+    var num_projects = {};
+    for (var i = 0; i < domain.length; i++) {
+        num_projects[domain[i]] = 0;
+    }
+    //console.log(num_projects);
+    for(var i = 0; i < dataset.length; i++) {
+        for (var j = 0; j < dataset[i].length; j++) {
+            var obj = dataset[i][j];
+            if(obj.y != 0) { num_projects[obj.x]++; }
+        }
+    }
+    //console.log(num_projects);
+    return num_projects;
+}
+
+/**
+ * Calculates number of units (worksets or lanes) per domain (x value) in a layer object data set
+ * @param {Array} dataset  Array of array of layer objects
+ * @param {Array} domain    Array of domain names (x values)
+ * @param {String} [unit="lanes"]    Name of unit. Specify "samples" to get number of worksets, otherwise number of lanes
+ * @returns {Object}    An object with counts per domain. 
+ */
+function numUnits(dataset, domain, unit) {
+    var num_u = {};
+    for (var i = 0; i < domain.length; i++) {
+        num_u[domain[i]] = 0;
+    }
+    //console.log(num_u);
+    for(var i = 0; i < dataset.length; i++) {
+        for (var j = 0; j < dataset[i].length; j++) {
+            var obj = dataset[i][j];
+            if(obj.y != 0) { num_u[obj.x] += obj.y; }
+        }
+    }
+    for (c in num_u) {
+        if (unit == "samples") { // convert samples to worksets
+            if (num_u[c] != 0) {
+                num_u[c] = Math.ceil(num_u[c]/96);
+            }
+        } else { // round off lane counts to one digit
+            num_u[c] = parseFloat(num_u[c]).toFixed(1);
+        }
+        
+    }
+    //console.log(num_u);
+    return num_u;
+}
+
+/**
+ * Calculates the total y value for all stacked bars per domain (x value) in a layer object data set
+ * @param {Array} dataset  Array of array of layer objects
+ * @param {Array} domain    Array of domain names (x values)
+ * @returns {Object}    An object with counts per domain
+ */
+function totalY(dataset, domain) {
+    var tot = {};
+    for (var i = 0; i < domain.length; i++) {
+        tot[domain[i]] = 0;
+    }
+    //console.log(num_projects);
+    for(var i = 0; i < dataset.length; i++) {
+        for (var j = 0; j < dataset[i].length; j++) {
+            var obj = dataset[i][j];
+            tot[obj.x] += obj.y;
+        }
+    }
+    //console.log(tot);
+    return tot;
+}
+
+/* **** Data transformation functions **** */
+
+/**
+ * Generates a dataset for Rec Ctrl project load for stacked bar chart drawing
+ * @param {Object} json		A parsed json stream object at sample level
+ * @param {Date} cmpDate	A Date object to specify load date
+ * @returns {Array} An array of arrays of "layer" objects 
+ */
 function generateRecCtrlStackDataset(json, cmpDate) {
 
     var dateFormat = d3.time.format("%Y-%m-%d");
@@ -22,7 +158,10 @@ function generateRecCtrlStackDataset(json, cmpDate) {
         var type = k[1];
         var appl = k[2];
         var sampleID = k[4];
-
+        
+        // skip projects that are labeled as neither Production or Application
+        if (type == null ) { continue; }
+        
         if(appl == null) { appl = "Other";}
         //console.log(sampleID);
         var applCat = "";
@@ -49,9 +188,18 @@ function generateRecCtrlStackDataset(json, cmpDate) {
         var closeDate = v["Close date"];
         if(closeDate != "0000-00-00") { continue; }
         
-        var arrDate = v["Arrival date"];
-        
+        // skip projects that have passed later process steps
+        var libQCDate = v["QC library finished"];
+        var seqDoneDate = v["All samples sequenced"];
+        if (appl != "Finished library" && libQCDate != "0000-00-00") {
+            continue;
+        }
+        if (seqDoneDate != "0000-00-00") {
+            continue;
+        }
+            
 
+        var arrDate = v["Arrival date"];
         var queueDate = v["Queue date"];
         if (arrDate != "0000-00-00" &&
             arrDate <= cmpDateStr &&
@@ -99,6 +247,12 @@ function generateRecCtrlStackDataset(json, cmpDate) {
    return [projArr];
 }
 
+/**
+ * Generates a dataset for Libprep queue lane load for stacked bar chart drawing
+ * @param {Object} json		A parsed json stream object at sample level
+ * @param {Date} cmpDate	A Date object to specify load date
+ * @returns {Array} An array of arrays of "layer" objects 
+ */
 function generateQueueLaneLPStackDataset(json, cmpDate) {
     var dateFormat = d3.time.format("%Y-%m-%d");
     var cmpDateStr = dateFormat(cmpDate); // Turn cmp date into a string to compare to dates in data
@@ -200,6 +354,12 @@ function generateQueueLaneLPStackDataset(json, cmpDate) {
     return dataArray;
 }
 
+/**
+ * Generates a dataset for Finished lib queue lane load for stacked bar chart drawing
+ * @param {Object} json		A parsed json stream object at sample level
+ * @param {Date} cmpDate	A Date object to specify load date
+ * @returns {Array} An array of arrays of "layer" objects 
+ */
 function generateQueueLaneFLStackDataset(json, cmpDate) {
     var dateFormat = d3.time.format("%Y-%m-%d");
     var cmpDateStr = dateFormat(cmpDate); // Turn cmp date into a string to compare to dates in data
@@ -299,6 +459,12 @@ function generateQueueLaneFLStackDataset(json, cmpDate) {
     return dataArray;
 }
 
+/**
+ * Generates a dataset for Libprep queue sample load for stacked bar chart drawing
+ * @param {Object} json		A parsed json stream object at sample level
+ * @param {Date} cmpDate	A Date object to specify load date
+ * @returns {Array} An array of arrays of "layer" objects 
+ */
 function generateQueueSampleStackDataset(json, cmpDate) {
 
     var dateFormat = d3.time.format("%Y-%m-%d");
@@ -417,6 +583,12 @@ function generateQueueSampleStackDataset(json, cmpDate) {
     return dataArray;
 }
 
+/**
+ * Generates a dataset for Libprep ongoing sample load for stacked bar chart drawing
+ * @param {Object} json		A parsed json stream object at sample level
+ * @param {Date} cmpDate	A Date object to specify load date
+ * @returns {Array} An array of arrays of "layer" objects 
+ */
 function generateLibprepSampleLoadDataset(json, cmpDate) {
 
     var dateFormat = d3.time.format("%Y-%m-%d");
@@ -471,7 +643,7 @@ function generateLibprepSampleLoadDataset(json, cmpDate) {
         var queueDate = v["Queue date"];
         var prepStartDate = v["Lib prep start"];
         var libQCDate = v["QC library finished"];
-        console.log("app cat: " + applCat + ", pid: " + pid + ", sample: " + sampleID + ", " + prepStartDate + "-" + libQCDate);
+        //console.log("app cat: " + applCat + ", pid: " + pid + ", sample: " + sampleID + ", " + prepStartDate + "-" + libQCDate);
         // this is for libprep projects
         if (prepStartDate != "0000-00-00" &&
             prepStartDate <= cmpDateStr &&
@@ -530,6 +702,12 @@ function generateLibprepSampleLoadDataset(json, cmpDate) {
 }
 
 
+/**
+ * Generates a dataset for Libprep ongoing lane load for stacked bar chart drawing
+ * @param {Object} json		A parsed json stream object at sample level
+ * @param {Date} cmpDate	A Date object to specify load date
+ * @returns {Array} An array of arrays of "layer" objects 
+ */
 function generateLibprepLaneLoadDataset(json, cmpDate) {
     var dateFormat = d3.time.format("%Y-%m-%d");
     var cmpDateStr = dateFormat(cmpDate); // Turn cmp date into a string to compare to dates in data
@@ -630,6 +808,12 @@ function generateLibprepLaneLoadDataset(json, cmpDate) {
 }
 
 
+/**
+ * Generates a dataset for Seq lane load for stacked bar chart drawing
+ * @param {Object} json		A parsed json stream object at sample level
+ * @param {Date} cmpDate	A Date object to specify load date
+ * @returns {Array} An array of arrays of "layer" objects 
+ */
 function generateSeqLoadDataset(json, cmpDate) {
     var dateFormat = d3.time.format("%Y-%m-%d");
     var cmpDateStr = dateFormat(cmpDate); // Turn cmp date into a string to compare to dates in data
@@ -732,49 +916,17 @@ function generateSeqLoadDataset(json, cmpDate) {
     return dataArray;
 }
 
+/* **** Drawing functions **** */
 
-function sortByPlatform (a, b) {
-    aPf = "";
-    bPf = "";
-    for (var i = 0; i < a.length; i++) {
-        if(a[i]["y"] != 0) { aPf = a[i]["x"]; aQ = a[i]["queueDate"]; }
-        if(b[i]["y"] != 0) { bPf = b[i]["x"]; bQ = b[i]["queueDate"]; }
-    }
-    if(aPf < bPf) return -1;
-    if(aPf > bPf) return 1;
-    if(aQ < bQ ) return -1;
-    if(aQ > bQ ) return 1;
-    return 0;
-}
-function sortByApplication (a, b) {
-    var map = {
-        "DNA": 0,
-        "RNA": 1,
-        "SeqCap": 2,
-        "Other": 3
-    }
-    
-    var aAppl;
-    var bAppl;
-    for (var i = 0; i < a.length; i++) {
-        if(a[i]["y"] != 0) { aAppl = map[a[i]["x"]]; aQ = a[i]["queueDate"]; }
-        if(b[i]["y"] != 0) { bAppl = map[b[i]["x"]]; bQ = b[i]["queueDate"]; }
-    }
-    if(aAppl < bAppl) return -1;
-    if(aAppl > bAppl) return 1;
-    if(aQ < bQ ) return -1;
-    if(aQ > bQ ) return 1;
-    return 0;
-}
-function dateValueSort(a, b){
-        var datediff = a[2] - b[2];
-        if (datediff == 0) {
-            return b[1] - a[1]; // longer del times sorted before shorter
-        } else {
-            return datediff;
-        }
-}
-
+/**
+ * Code to draw a stacked barchart plot
+ * @param {Array} dataset  Array of array of layer objects
+ * @param {String} divID    Id of DOM div to where plot should reside
+ * @param {Number} width    plot width
+ * @param {Number} height   plot height
+ * @param {String} [unit="lanes"] Unit of values. Used for bar legend 
+ * @param {Number} [padding=30] plot padding
+ */
 function drawStackedBars (dataset, divID, width, height, unit, padding) {
     //console.log(dataset)
     var
@@ -792,7 +944,7 @@ function drawStackedBars (dataset, divID, width, height, unit, padding) {
     var fixedDigits = 1;
     if (unit == "samples") { fixedDigits = 0; }
     
-    /**
+    /*
      * Not really using these colour schemes at the moment
      * Will leave the code in for my bad old memory, if they are to be
      * used later on
@@ -971,6 +1123,13 @@ function drawStackedBars (dataset, divID, width, height, unit, padding) {
     
 }
 
+/**
+ * Code to draw a stacked barchart plot for RecCtrl load
+ * @param {Array} dataset  Array of array of layer objects
+ * @param {String} divID    Id of DOM div to where plot should reside
+ * @param {Number} width    plot width
+ * @param {Number} height   plot height
+ */
 function drawRCStackedBars (dataset, divID, width, height) {
     //console.log(dataset)
     var
@@ -984,7 +1143,7 @@ function drawRCStackedBars (dataset, divID, width, height) {
         parse = d3.time.format("%m/%Y").parse,
         format = d3.time.format("%b");
         
-    /**
+    /*
      * Not really using these colour schemes at the moment
      * Will leave the code in for my bad old memory, if they are to be
      * used later on
@@ -1118,61 +1277,4 @@ function drawRCStackedBars (dataset, divID, width, height) {
             
     //});
     
-}
-
-function numProjects(dataset, domain) {
-    var num_projects = {};
-    for (var i = 0; i < domain.length; i++) {
-        num_projects[domain[i]] = 0;
-    }
-    //console.log(num_projects);
-    for(var i = 0; i < dataset.length; i++) {
-        for (var j = 0; j < dataset[i].length; j++) {
-            var obj = dataset[i][j];
-            if(obj.y != 0) { num_projects[obj.x]++; }
-        }
-    }
-    //console.log(num_projects);
-    return num_projects;
-}
-
-function numUnits(dataset, domain, unit) {
-    var num_u = {};
-    for (var i = 0; i < domain.length; i++) {
-        num_u[domain[i]] = 0;
-    }
-    //console.log(num_u);
-    for(var i = 0; i < dataset.length; i++) {
-        for (var j = 0; j < dataset[i].length; j++) {
-            var obj = dataset[i][j];
-            if(obj.y != 0) { num_u[obj.x] += obj.y; }
-        }
-    }
-    for (c in num_u) {
-        if (unit == "samples") { // convert samples to worksets
-            if (num_u[c] != 0) {
-                num_u[c] = Math.ceil(num_u[c]/96);
-            }
-        } else { // round off lane counts to one digit
-            num_u[c] = parseFloat(num_u[c]).toFixed(1);
-        }
-        
-    }
-    //console.log(num_u);
-    return num_u;
-}
-function totalY(dataset, domain) {
-    var tot = {};
-    for (var i = 0; i < domain.length; i++) {
-        tot[domain[i]] = 0;
-    }
-    //console.log(num_projects);
-    for(var i = 0; i < dataset.length; i++) {
-        for (var j = 0; j < dataset[i].length; j++) {
-            var obj = dataset[i][j];
-            tot[obj.x] += obj.y;
-        }
-    }
-    //console.log(tot);
-    return tot;
 }
