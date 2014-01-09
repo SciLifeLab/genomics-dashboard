@@ -30,9 +30,10 @@ h4 {
 br.clear { clear: both; }
 
 circle {
-  fill: #D88F00;
-  fill: #5B87FF;
+  /*fill: #D88F00;*/
+  /*fill: #5B87FF;*/
 }
+
 .axis path,
 .axis line {
   fill: none;
@@ -260,6 +261,21 @@ circle {
   font-size: 11px;
   /*fill: black; */
   fill:#CCCCCC;
+}
+
+/*Trying alternative tooltip strategy for panels*/
+div.tooltip {	
+    position: absolute;			
+    text-align: center;			
+    width: 60px;					
+    height: 38px;					
+    padding: 2px;				
+    font: 11px sans-serif;
+    color: #FFF;
+    background: lightsteelblue;	
+    border: 0px;		
+    border-radius: 8px;			
+    pointer-events: none;			
 }
 
 .line_label {
