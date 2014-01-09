@@ -307,7 +307,7 @@ function addToRunchartDataset (jsonview, dataArray, dateRangeStart, dateRangeEnd
         var rows = jsonview["rows"];
         var projects = {};
 
-        console.log(dateToKey);
+        //console.log(dateToKey);
         
         // Each row is one project
         for (var i = 0; i < rows.length; i++) {
@@ -342,7 +342,7 @@ function addToRunchartDataset (jsonview, dataArray, dateRangeStart, dateRangeEnd
             }
             var sampleDateFrom = values[dateFromKey];
             var sampleDateTo = values[dateToKey];
-            console.log(pid + ": " + sampleDateTo);
+            //console.log(pid + ": " + sampleDateTo);
             if(projects[pid] == undefined) {
                 projects[pid] = {
                                     "type": type,
@@ -360,7 +360,7 @@ function addToRunchartDataset (jsonview, dataArray, dateRangeStart, dateRangeEnd
                 projects[pid]["num_samples"]++;
             }
         }
-        console.log(projects);
+        //console.log(projects);
         
         // out data structure: [ order, pid, num_samples, date, daysX, daysY, ... ]. Order is added after date sort
         //// THIS SHOULD GO AWAY
@@ -385,7 +385,7 @@ function addToRunchartDataset (jsonview, dataArray, dateRangeStart, dateRangeEnd
         for (var j = 0; j < dataArray.length; j++) {
             var tmpID = dataArray[j][1]; // pid
             var tmpDiff = projects[tmpID]["daydiff"];
-            console.log(tmpID + ": " + tmpDiff);
+            //console.log(tmpID + ": " + tmpDiff);
             dataArray[j].push(tmpDiff);
         }
         
@@ -502,16 +502,24 @@ function drawRunChart(dataset, divID, clines, width, height, padding, maxY) {
     if(padding === undefined) {
         padding = 30;
     }
+    // check how many time series there are in the data set
+    var numSeries = dataset[0].length - 4; // There are four other pieces of information for each project
+    //console.log(numSeries);
+    
+    
     // DOM id for svg object
     var svgID = divID + "SVG";
     
     // DOM id for data line
     var dataLineID = divID + "data_line";
     
+
     
     // Time format
     var dateFormat = d3.time.format("%Y-%m-%d");
 
+    // Get a handle to the tooltip div
+    var tooltipDiv = d3.select(".tooltip");
     
     //Create scale functions
     if(maxY == undefined) {
@@ -550,82 +558,111 @@ function drawRunChart(dataset, divID, clines, width, height, padding, maxY) {
                     .attr("width", width)
                     .attr("height", height)
                     .attr("id", svgID);
-    }
 
+    }
 
     // remove old circles and lines if updating chart
     if(!newchart) { 
-        var circles = svg.selectAll("circle");
-        circles.remove();
-        var l = svg.select("#" + dataLineID); 
-        l.remove();
+        var circlesToRemove = svg.selectAll("circle");
+        circlesToRemove.remove();
+        var linesToRemove = svg.selectAll(".line"); 
+        linesToRemove.remove();
+        
     }
     //Create circles
-    svg.selectAll("circle")
-       .data(dataset)
-       .enter()
-       .append("circle")
-       .attr("cx", function(d) {
-            return xScale(d[0]);
-       })
-       .attr("cy", function(d) {
-            return yScale(d[4]);
-       })
-       .attr("r", 4)
-       .on("mouseover", function(d) {
-            d3.select(this)
-              .attr("r", 7)
-              .attr("fill", "blue")
-              ;
-            var xPosition = xScale(d[0]) + 10;
-            var yPosition = yScale(d[4]);
-            //Create the tooltip label
-            svg.append("text")
-              .attr("id", "tooltip1")
-              .attr("x", xPosition)
-              .attr("y", yPosition)
-            //.text(d[2])
-            .text(d[1]) 
+    // trying to draw more than one time series
+    var circleColors = ["#5B87FF", "orange"];
+    var lines = [];
+    var circles = svg.selectAll("circle")
+           .data(dataset)
+           .enter()
+           ;
+    for(var i=0; i < numSeries; i++) {
+        var seriesIndex = i + 4;
+        //var color = circleColors[i-4];
+        var color = circleColors[i];
+        //console.log(color);
+        circles.append("circle")
+           .attr("cx", function(d) {
+                return xScale(d[0]);
+           })
+           .attr("cy", function(d) {
+                //return yScale(d[4]);
+                var cyPos = d[seriesIndex];
+                if (isNaN(cyPos)) {
+                    cyPos = -10;
+                }
+                //return yScale(d[seriesIndex]);
+                return yScale(cyPos);
+           })
+           .attr("fill", color)
+           .attr("r", 4)
+           .on("mouseover", function(d) {
+                d3.select(this)
+                  .attr("r", 7)
+                  ;
+                // Make tooltip div visible and fill with appropriate text
+                tooltipDiv.transition()		
+                    .duration(200)		
+                    .style("opacity", .9);		
+                tooltipDiv.html(d[1] + "<br/>"
+                                + dateFormat(d[3]) + "<br/>"
+                                + d[seriesIndex] + " days"
+                                )	
+                    .style("left", (d3.event.pageX) + "px")		
+                    .style("top", (d3.event.pageY - 28) + "px");	    
+           })
+           .on("mouseout", function(d) { //Remove the tooltip
+                d3.select(this)
+                  .attr("r", 4)
+                  ;
+                // Make tooltip div invisible
+                tooltipDiv.transition()		
+                .duration(300)		
+                .style("opacity", 0);
+           })
+           .on("click", function(d) {
+                    var projID = d[1];
+                    var url = "http://genomics-status.scilifelab.se/projects/" + projID;
+                    window.open(url, "genomics-status");
+           })
+        ;
+        
+        //if (i>4) {
+        //    break;
+        //}
+        // Add line (needs sorted array for lines to make sense)
+        
+        var line = d3.svg.line()
+            .x(function(d) { return xScale(d[0]); })
+            //.y(function(d) { return yScale(d[4]); });
+            .y(function(d) {
+                var y = d[seriesIndex];
+                if (isNaN(y)) {
+                    y = -10;
+                }
+                return yScale(y);
+            })
             ;
-            svg.append("text")
-              .attr("id", "tooltip2")
-              .attr("x", xPosition)
-              .attr("y", yPosition + 13)
-            .text(dateFormat(d[3]))
-            ;
-            svg.append("text")
-              .attr("id", "tooltip3")
-              .attr("x", xPosition)
-              .attr("y", yPosition + 26)
-            .text(d[4] + " days")
-            ;	
-
-       })
-       .on("mouseout", function(d) { //Remove the tooltip
-            d3.select(this)
-              .attr("r", 4)
-              .attr("fill", "black")
-              ;
-               d3.select("#tooltip1").remove();
-               d3.select("#tooltip2").remove();
-               d3.select("#tooltip3").remove();
-       })
-       .on("click", function(d) {
-                var projID = d[1];
-                var url = "http://genomics-status.scilifelab.se/projects/" + projID;
-                window.open(url, "genomics-status");
-       })
-    ;
-    // Add line (needs sorted array for lines to make sense)
-    var line = d3.svg.line()
-        .x(function(d) { return xScale(d[0]); })
-        .y(function(d) { return yScale(d[4]); });
+        lines.push(line);
+        
+        //svg.append("path")
+        //      .attr("class", "line")
+        //      .attr("d", line(dataset))
+        //      .attr("id", dataLineID); 
+    }
+    //add each line
+    for (var i = 0; i < lines.length; i++) {
+        //if (i==1) {
+        //    break;
+        //}
+        svg.append("path")
+              .attr("class", "line")
+              .attr("d", lines[i](dataset))
+              .attr("id", dataLineID + i);  
+        
+    }
     
-    svg.append("path")
-          .attr("class", "line")
-          .attr("d", line(dataset))
-          .attr("id", dataLineID); 
-
     // create or update axis   
     if(newchart){
         //Create X axis
@@ -933,6 +970,11 @@ function drawProcessPanels(sample_json, plotDate, startDate, height, draw_width)
     var reduced = reduceToProject(sample_json);
     //console.log(reduced);
 
+    //// Add invisible tooltip div for mouseovers
+    //var tooltipDiv = d3.select("body").append("div")	
+    //    .attr("class", "tooltip")				
+    //    .style("opacity", 0);    
+    
     // keys for time calculations
     var total = {
         startKey: "Queue date",
@@ -951,7 +993,8 @@ function drawProcessPanels(sample_json, plotDate, startDate, height, draw_width)
         startKey: "QC library finished",
         endKey: "All samples sequenced"
     };
-
+    
+    
     /* 
      *  17 bars to draw over the width of the window in the upper half
      */ 
