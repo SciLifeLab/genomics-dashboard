@@ -943,6 +943,10 @@ function drawStackedBars (dataset, divID, width, height, unit, padding) {
     if (unit == undefined) { unit = "lanes"}
     var fixedDigits = 1;
     if (unit == "samples") { fixedDigits = 0; }
+
+    // Get a handle to the tooltip div
+    var tooltipDiv = d3.select(".tooltip");
+
     
     /*
      * Not really using these colour schemes at the moment
@@ -1011,33 +1015,22 @@ function drawStackedBars (dataset, divID, width, height, unit, padding) {
                 if(d.y == 0) { return "0"; }
                 return "1px";
             })
-            // begin copied code
             .on("mouseover", function(d) {
-                 //d3.select(this)
-                 //  //.attr("r", 7)
-                 //  .attr("fill", "blue")
-                 //  ;
-                 var xPosition = x(d.x) + 10;
-                 var yPosition = -y(d.y0) - y(d.y)/2; // position for offset value (y0) + half hight of layer
-                 var num_lanes = d.y;
-                 //Create the tooltip label
-                 svg.append("text")
-                   .attr("id", "tooltipA")
-                   .attr("x", xPosition)
-                   .attr("y", yPosition)
-                 .text(d.pid)
-                 ;
-                 svg.append("text")
-                   .attr("id", "tooltipB")
-                   .attr("x", xPosition)
-                   .attr("y", yPosition + 13)
-                 .text(parseFloat(d.y).toFixed(fixedDigits) + " " + unit)
-                 ;
+                // Make tooltip div visible and fill with appropriate text
+                tooltipDiv.transition()		
+                    .duration(200)		
+                    .style("opacity", .9);		
+                tooltipDiv.html(d.pid + "<br/>"
+                                + parseFloat(d.y).toFixed(fixedDigits) + " " + unit
+                                )	
+                    .style("left", (d3.event.pageX) + "px")		
+                    .style("top", (d3.event.pageY - 28) + "px");	    
             })
             .on("mouseout", function(d) { //Remove the tooltip
-                   d3.select("#tooltipA").remove();
-                    d3.select("#tooltipB").remove();
-                    //d3.select("#tooltip3").remove();
+                // Make tooltip div invisible
+                tooltipDiv.transition()		
+                .duration(300)		
+                .style("opacity", 0);
             })
             .on("click", function(d) {
                      var projID = d.pid;
@@ -1142,6 +1135,10 @@ function drawRCStackedBars (dataset, divID, width, height) {
         y = d3.scale.linear().range([0, h - p[0] - p[2]]),
         parse = d3.time.format("%m/%Y").parse,
         format = d3.time.format("%b");
+
+    // Get a handle to the tooltip div
+    var tooltipDiv = d3.select(".tooltip");
+
         
     /*
      * Not really using these colour schemes at the moment
@@ -1195,26 +1192,37 @@ function drawRCStackedBars (dataset, divID, width, height) {
                 return color_scheme[i + 2]; // make sure the chosen colorbrewer color space has num_colors defined
             }) 
             .on("mouseover", function(d) {
-                 //d3.select(this)
-                 //  //.attr("r", 7)
-                 //  .attr("fill", "blue")
-                 //  ;
-                 //var xPosition = x(d.x) + 10;
-                 var xPosition = -20 ;
-                 //var yPosition = -y(d.y0) - y(d.y)/2; // position for offset value (y0) + half hight of layer
-                 var yPosition = -h + 50; // position for offset value (y0) + half hight of layer
-                 //Create the tooltip label
-                 svg.append("text")
-                   .attr("id", "tooltipA")
-                   .attr("x", xPosition)
-                   .attr("y", yPosition)
-                   .style("fill", "white")
-                   .style("font-size", "7pt")
-                 .text(d.projects)
-                 ;
+                // Make tooltip div visible and fill with appropriate text
+                tooltipDiv.transition()		
+                    .duration(200)		
+                    .style("opacity", .9);		
+                tooltipDiv.html(d.projects)	
+                    .style("left", (d3.event.pageX) + "px")		
+                    .style("top", (d3.event.pageY - 28) + "px");	    
+                 ////d3.select(this)
+                 ////  //.attr("r", 7)
+                 ////  .attr("fill", "blue")
+                 ////  ;
+                 ////var xPosition = x(d.x) + 10;
+                 //var xPosition = -20 ;
+                 ////var yPosition = -y(d.y0) - y(d.y)/2; // position for offset value (y0) + half hight of layer
+                 //var yPosition = -h + 50; // position for offset value (y0) + half hight of layer
+                 ////Create the tooltip label
+                 //svg.append("text")
+                 //  .attr("id", "tooltipA")
+                 //  .attr("x", xPosition)
+                 //  .attr("y", yPosition)
+                 //  .style("fill", "white")
+                 //  .style("font-size", "7pt")
+                 //.text(d.projects)
+                 //;
             })
             .on("mouseout", function(d) { //Remove the tooltip
-                   d3.select("#tooltipA").remove();
+                // Make tooltip div invisible
+                tooltipDiv.transition()		
+                .duration(300)		
+                .style("opacity", 0);
+                   //d3.select("#tooltipA").remove();
             })
             .on("click", function(d) {
                      alert("These " + d.y + " " + d.cat + " projects are currently in Reception control\n"+ d.projects)
