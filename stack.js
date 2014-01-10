@@ -929,10 +929,7 @@ function generateSeqLoadDataset(json, cmpDate) {
  */
 function drawStackedBars (dataset, divID, width, height, unit, padding) {
     //console.log(dataset)
-    var
-        //w = 200,
-        //h = 500,
-        w = width,
+    var w = width,
         h = height,
         p = [30, 0, 30, 20], // t, r, b, l
         x = d3.scale.ordinal().rangeRoundBands([0, w - p[1] - p[3]]),
@@ -946,7 +943,20 @@ function drawStackedBars (dataset, divID, width, height, unit, padding) {
 
     // Get a handle to the tooltip div
     var tooltipDiv = d3.select(".tooltip");
-
+    // Resize slightly for lane and sample information (done in mouseover code below)
+    // width
+    var tooltipWidth = tooltipDiv.style("width");
+        // remove last two letters: "px" & turn into an integer
+    tooltipWidth = parseInt(tooltipWidth.substring(0, tooltipWidth.length - 2));
+    var tooltipNewWidth = tooltipWidth + 5;
+    // height
+    var tooltipHeight = tooltipDiv.style("height");
+        // remove last two letters: "px" & turn into an integer
+    tooltipHeight = parseInt(tooltipHeight.substring(0, tooltipHeight.length - 2));
+    var tooltipRowHeight = "13"; // 13px per row
+    var tooltipNewHeight = tooltipHeight - tooltipRowHeight;
+    
+    
     
     /*
      * Not really using these colour schemes at the moment
@@ -971,7 +981,7 @@ function drawStackedBars (dataset, divID, width, height, unit, padding) {
     var svg = d3.select("#" + divID).append("svg:svg")
         .attr("width", w)
         .attr("height", h)
-      .append("svg:g")
+        .append("svg:g")
         .attr("transform", "translate(" + p[3] + "," + (h - p[2]) + ")");
     
         
@@ -983,22 +993,14 @@ function drawStackedBars (dataset, divID, width, height, unit, padding) {
         var project = svg.selectAll("g.project")
             //.data(projLayers)
             .data(dataset)
-          .enter().append("svg:g")
+            .enter().append("svg:g")
             .attr("class", "project")
             .style("fill", function(d, i) {
-                //return z(i%num_colors); // make sure the chosen colorbrewer color space has num_colors defined
-                //return z(1); // make sure the chosen colorbrewer color space has num_colors defined
-                //return color_scheme(i%num_colors);
                 var col = d3.rgb("#5B87FF");
                 if(i%2 == 0) { return col.brighter(); }
                 return col;
-                //return d3.rgb("#5B87FF").brighter();
             }) 
-            //.style("fill", "#5B87FF")
             .style("stroke", function(d, i) {
-                //return d3.rgb(z(i%num_colors)).darker();
-                //return d3.rgb(z(i%num_colors));
-                //return "black";
                 return "white";
             })
             ;
@@ -1006,7 +1008,7 @@ function drawStackedBars (dataset, divID, width, height, unit, padding) {
         // Add a rect for each date.
         var rect = project.selectAll("rect")
             .data(Object)
-          .enter().append("svg:rect")
+            .enter().append("svg:rect")
             .attr("x", function(d) { return x(d.x); })
             .attr("y", function(d) { return -y(d.y0) - y(d.y); })
             .attr("height", function(d) { return y(d.y); })
@@ -1024,13 +1026,19 @@ function drawStackedBars (dataset, divID, width, height, unit, padding) {
                                 + parseFloat(d.y).toFixed(fixedDigits) + " " + unit
                                 )	
                     .style("left", (d3.event.pageX) + "px")		
-                    .style("top", (d3.event.pageY - 28) + "px");	    
+                    .style("top", (d3.event.pageY - 28) + "px")
+                    .style("height", (tooltipNewHeight + "px"))
+                    .style("width", (tooltipNewWidth + "px"))
+                    ;	    
             })
             .on("mouseout", function(d) { //Remove the tooltip
                 // Make tooltip div invisible
                 tooltipDiv.transition()		
-                .duration(300)		
-                .style("opacity", 0);
+                .duration(200)		
+                .style("opacity", 0)
+                .style("height", (tooltipHeight + "px"))
+                .style("width", (tooltipWidth + "px"))
+                ;
             })
             .on("click", function(d) {
                      var projID = d.pid;
@@ -1039,7 +1047,6 @@ function drawStackedBars (dataset, divID, width, height, unit, padding) {
             })
             ;
         
-        //console.log(x.domain());
         // Add a label per category.
         var label = svg.selectAll("text")
             .data(x.domain())
@@ -1053,7 +1060,6 @@ function drawStackedBars (dataset, divID, width, height, unit, padding) {
         
         
         var tmp = x.domain();
-        //console.log(tmp);
         var num_projects = numProjects(dataset, tmp);
         var num_units = numUnits(dataset, tmp, unit);
         var totals = totalY(dataset, tmp);
@@ -1111,9 +1117,6 @@ function drawStackedBars (dataset, divID, width, height, unit, padding) {
             .text(d3.format(",d"))
             ;
     
-            
-    //});
-    
 }
 
 /**
@@ -1124,11 +1127,7 @@ function drawStackedBars (dataset, divID, width, height, unit, padding) {
  * @param {Number} height   plot height
  */
 function drawRCStackedBars (dataset, divID, width, height) {
-    //console.log(dataset)
-    var
-        //w = 200,
-        //h = 500,
-        w = width,
+    var w = width,
         h = height,
         p = [30, 10, 30, 20], // t, r, b, l
         x = d3.scale.ordinal().rangeRoundBands([0, w - p[1] - p[3]]),
@@ -1139,12 +1138,14 @@ function drawRCStackedBars (dataset, divID, width, height) {
     // Get a handle to the tooltip div
     var tooltipDiv = d3.select(".tooltip");
 
+        // Resize slightly for lane and sample information (done in mouseover code below)
+    // height
+    var tooltipHeight = tooltipDiv.style("height"); // original height
+        // remove last two letters: "px" & turn into an integer
+    tooltipHeight = parseInt(tooltipHeight.substring(0, tooltipHeight.length - 2));
+    var tooltipRowHeight = "13"; // 13px per row
+
         
-    /*
-     * Not really using these colour schemes at the moment
-     * Will leave the code in for my bad old memory, if they are to be
-     * used later on
-     */    
     // color scales
     // use colorbrewer color schemes
     // number of colors to use. NB! not all schemes have the same number of colors, see colorbrewer.js
@@ -1157,132 +1158,122 @@ function drawRCStackedBars (dataset, divID, width, height) {
     var svg = d3.select("#" + divID).append("svg:svg")
         .attr("width", w)
         .attr("height", h)
-      .append("svg:g")
+        .append("svg:g")
         .attr("transform", "translate(" + p[3] + "," + (h - p[2]) + ")");
     
         
-        // Compute the x-domain (by platform) and y-domain (by top).
-        x.domain(dataset[0].map(function(d) { return d.x; }));
-        y.domain([0, d3.max(dataset[dataset.length - 1], function(d) { return d.y0 + d.y; })]);
-    
-        // Add a group for each project.
-        var project = svg.selectAll("g.project")
-            //.data(projLayers)
-            .data(dataset)
-          .enter().append("svg:g")
-            .attr("class", "project")
-            .style("stroke", function(d, i) {
-                return "white";
-            })
-            ;
-    
-        // Add a rect for each .
-        var rect = project.selectAll("rect")
-            .data(Object)
-          .enter().append("svg:rect")
-            .attr("x", function(d) { return x(d.x); })
-            .attr("y", function(d) { return -y(d.y0) - y(d.y); })
-            .attr("height", function(d) { return y(d.y); })
-            .attr("width", x.rangeBand())
-            .style("stroke-width", function(d, i) {
-                if(d.y == 0) { return "0"; }
-                return "1px";
-            })
-            .style("fill", function(d, i) {
-                return color_scheme[i + 2]; // make sure the chosen colorbrewer color space has num_colors defined
-            }) 
-            .on("mouseover", function(d) {
-                // Make tooltip div visible and fill with appropriate text
-                tooltipDiv.transition()		
-                    .duration(200)		
-                    .style("opacity", .9);		
-                tooltipDiv.html(d.projects)	
-                    .style("left", (d3.event.pageX) + "px")		
-                    .style("top", (d3.event.pageY - 28) + "px");	    
-                 ////d3.select(this)
-                 ////  //.attr("r", 7)
-                 ////  .attr("fill", "blue")
-                 ////  ;
-                 ////var xPosition = x(d.x) + 10;
-                 //var xPosition = -20 ;
-                 ////var yPosition = -y(d.y0) - y(d.y)/2; // position for offset value (y0) + half hight of layer
-                 //var yPosition = -h + 50; // position for offset value (y0) + half hight of layer
-                 ////Create the tooltip label
-                 //svg.append("text")
-                 //  .attr("id", "tooltipA")
-                 //  .attr("x", xPosition)
-                 //  .attr("y", yPosition)
-                 //  .style("fill", "white")
-                 //  .style("font-size", "7pt")
-                 //.text(d.projects)
-                 //;
-            })
-            .on("mouseout", function(d) { //Remove the tooltip
-                // Make tooltip div invisible
-                tooltipDiv.transition()		
-                .duration(300)		
-                .style("opacity", 0);
-                   //d3.select("#tooltipA").remove();
-            })
-            .on("click", function(d) {
-                     alert("These " + d.y + " " + d.cat + " projects are currently in Reception control\n"+ d.projects)
-                     
-                     //var projID = d.pid;
-                     //var url = "http://genomics-status.scilifelab.se/projects/" + projID;
-                     //window.open(url, "genomics-status");
-            })
-            ;
-        // 
-        svg.selectAll("text")
-            .data(dataset[0]) // all elements for the only bar
-            .enter().append("svg:text")
-            .attr("x", function (d, i) {
-                return x(d.x) + (w - p[1] - p[3])/2;                
-            })
-            .attr("y", function (d, i) {
-                var yPos = -y(d.y0) - y(d.y)/2 + 3;// position for offset value (y0) + half hight of layer
-                return yPos; 
-            })
-            .attr("text-anchor", "middle")
-            .text(function (d, i) {
-                if(d.y > 0) { return d.cat + " (" + d.y + ")"; } else { return ""; }
-            })
-            ;
+    // Compute the x-domain (by platform) and y-domain (by top).
+    x.domain(dataset[0].map(function(d) { return d.x; }));
+    y.domain([0, d3.max(dataset[dataset.length - 1], function(d) { return d.y0 + d.y; })]);
 
-        //console.log(x.domain());
-        // Add a label per category.
-        var label = svg.selectAll("text")
-            .data(x.domain())
-          .enter().append("svg:text")
-            .attr("x", function(d) { return x(d) + x.rangeBand() / 2; })
-            .attr("y", 6)
-            .attr("text-anchor", "middle")
-            .attr("dy", ".71em")
-            .text(function(d) { return d; })
-            ;
+    // Add a group for each project.
+    var project = svg.selectAll("g.project")
+        .data(dataset)
+        .enter().append("svg:g")
+        .attr("class", "project")
+        .style("stroke", function(d, i) {
+            return "white";
+        })
+        ;
 
-        // Add y-axis rules.
-        var rule = svg.selectAll("g.rule")
-            .data(y.ticks(5))
-          .enter().append("svg:g")
-            .attr("class", "rule")
-            .attr("transform", function(d) { return "translate(0," + -y(d) + ")"; });
-        
-        // horizontal lines. Add?
-        rule.append("svg:line")
-            .attr("x2", w - p[1] - p[3] + 5)
-            .style("stroke", function(d) { return d ? "#fff" : "#000"; })
-            .style("stroke-opacity", function(d) { return d ? .1 : null; });
-        
-        rule.append("svg:text")
-            //.attr("x", w - p[1] - p[3] + 6)
-            .attr("text-anchor", "end")
-            .attr("x", -p[3] + 18)
-            .attr("dy", ".35em")
-            .text(d3.format(",d"))
-            ;
-    
+    // Add a rect for each .
+    var rect = project.selectAll("rect")
+        .data(Object)
+        .enter().append("svg:rect")
+        .attr("x", function(d) { return x(d.x); })
+        .attr("y", function(d) { return -y(d.y0) - y(d.y); })
+        .attr("height", function(d) { return y(d.y); })
+        .attr("width", x.rangeBand())
+        .style("stroke-width", function(d, i) {
+            if(d.y == 0) { return "0"; }
+            return "1px";
+        })
+        .style("fill", function(d, i) {
+            return color_scheme[i + 2]; // make sure the chosen colorbrewer color space has num_colors defined
+        }) 
+        .on("mouseover", function(d) {
+            // calculate how many rows are needed
+            var ids = d.projects; //list of proj IDs
+            var numIDs = (ids.split("P").length - 1); //count proj IDs
+            var rows = Math.ceil(numIDs/2);
+            var tooltipNewHeight = rows * tooltipRowHeight;
             
-    //});
+            // Make tooltip div visible and fill with appropriate text
+            tooltipDiv.transition()		
+                .duration(200)		
+                .style("opacity", .9);		
+            tooltipDiv.html(d.projects)	
+                .style("left", (d3.event.pageX) + "px")		
+                .style("top", (d3.event.pageY - 28) + "px")
+                .style("height", (tooltipNewHeight + "px"))
+                .style("width", (tooltipNewWidth + "px"))
+                ;	    
+        })
+        .on("mouseout", function(d) { //Remove the tooltip
+            // Make tooltip div invisible
+            tooltipDiv.transition()		
+            .duration(100)		
+            .style("opacity", 0)
+            .style("height", (tooltipHeight + "px"))
+            .style("width", (tooltipWidth + "px"))
+            ;
+               //d3.select("#tooltipA").remove();
+        })
+        .on("click", function(d) {
+                 alert("These " + d.y + " " + d.cat + " projects are currently in Reception control\n"+ d.projects)
+                 
+                 //var projID = d.pid;
+                 //var url = "http://genomics-status.scilifelab.se/projects/" + projID;
+                 //window.open(url, "genomics-status");
+        })
+        ;
     
+    svg.selectAll("text")
+        .data(dataset[0]) // all elements for the only bar
+        .enter().append("svg:text")
+        .attr("x", function (d, i) {
+            return x(d.x) + (w - p[1] - p[3])/2;                
+        })
+        .attr("y", function (d, i) {
+            var yPos = -y(d.y0) - y(d.y)/2 + 3;// position for offset value (y0) + half hight of layer
+            return yPos; 
+        })
+        .attr("text-anchor", "middle")
+        .text(function (d, i) {
+            if(d.y > 0) { return d.cat + " (" + d.y + ")"; } else { return ""; }
+        })
+        ;
+
+    //console.log(x.domain());
+    // Add a label per category.
+    var label = svg.selectAll("text")
+        .data(x.domain())
+        .enter().append("svg:text")
+        .attr("x", function(d) { return x(d) + x.rangeBand() / 2; })
+        .attr("y", 6)
+        .attr("text-anchor", "middle")
+        .attr("dy", ".71em")
+        .text(function(d) { return d; })
+        ;
+
+    // Add y-axis rules.
+    var rule = svg.selectAll("g.rule")
+        .data(y.ticks(5))
+        .enter().append("svg:g")
+        .attr("class", "rule")
+        .attr("transform", function(d) { return "translate(0," + -y(d) + ")"; });
+    
+    // horizontal lines. Add?
+    rule.append("svg:line")
+        .attr("x2", w - p[1] - p[3] + 5)
+        .style("stroke", function(d) { return d ? "#fff" : "#000"; })
+        .style("stroke-opacity", function(d) { return d ? .1 : null; });
+    
+    rule.append("svg:text")
+        //.attr("x", w - p[1] - p[3] + 6)
+        .attr("text-anchor", "end")
+        .attr("x", -p[3] + 18)
+        .attr("dy", ".35em")
+        .text(d3.format(",d"))
+        ;
 }
