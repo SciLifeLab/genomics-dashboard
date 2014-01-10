@@ -778,7 +778,6 @@ function drawBoxPlot(dataset, divID, plotHeight, maxY, bottom_margin, timeseries
     if (timeseries == 2) {
         boxClass = "box2"; // affects which class and css used for graph elements
     }
-    console.log("timeseries: " + timeseries + ", boxclass: " + boxClass);
     
     var min = Infinity,
         max = -Infinity;
@@ -795,7 +794,6 @@ function drawBoxPlot(dataset, divID, plotHeight, maxY, bottom_margin, timeseries
     }
     //min = d3.min(dataset[0]);
     min = 0;
-    //console.log("min: " + min + ", max: " + max);
     chart.domain([min, max]);
 
 
@@ -808,7 +806,6 @@ function drawBoxPlot(dataset, divID, plotHeight, maxY, bottom_margin, timeseries
         svg = d3.select("#" + divID).selectAll("svg")
             .data(dataset)
             .enter().append("svg")
-            //.attr("class", "box")
             .attr("class", boxClass)
             .attr("id", svgID)
             .attr("width", width + margin.left + margin.right)
@@ -817,8 +814,6 @@ function drawBoxPlot(dataset, divID, plotHeight, maxY, bottom_margin, timeseries
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
             .call(chart)
             ;
-        //console.log("appended svg:")
-        //console.log(typeof(svg[0][0]));        
     } else {
         var g = d3.select("#" + divID)
             .selectAll("svg")
