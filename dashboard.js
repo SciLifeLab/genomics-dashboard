@@ -1,3 +1,8 @@
+/*
+ * Array of colours suited for time series colours etc
+ */
+var timeseriesColors = ["#5B87FF", "#FFC447", "#865BFF", "#FFE147"]; // colors for four series, add more?
+
 /**
  * Calculates difference in days between two dates
  * @param {Date} date1	A Date object
@@ -307,7 +312,7 @@ function addToRunchartDataset (jsonview, dataArray, dateRangeStart, dateRangeEnd
         var rows = jsonview["rows"];
         var projects = {};
 
-        console.log(dateToKey);
+        //console.log(dateToKey);
         
         // Each row is one project
         for (var i = 0; i < rows.length; i++) {
@@ -342,7 +347,7 @@ function addToRunchartDataset (jsonview, dataArray, dateRangeStart, dateRangeEnd
             }
             var sampleDateFrom = values[dateFromKey];
             var sampleDateTo = values[dateToKey];
-            console.log(pid + ": " + sampleDateTo);
+            //console.log(pid + ": " + sampleDateTo);
             if(projects[pid] == undefined) {
                 projects[pid] = {
                                     "type": type,
@@ -360,7 +365,7 @@ function addToRunchartDataset (jsonview, dataArray, dateRangeStart, dateRangeEnd
                 projects[pid]["num_samples"]++;
             }
         }
-        console.log(projects);
+        //console.log(projects);
         
         // out data structure: [ order, pid, num_samples, date, daysX, daysY, ... ]. Order is added after date sort
         //// THIS SHOULD GO AWAY
@@ -385,7 +390,7 @@ function addToRunchartDataset (jsonview, dataArray, dateRangeStart, dateRangeEnd
         for (var j = 0; j < dataArray.length; j++) {
             var tmpID = dataArray[j][1]; // pid
             var tmpDiff = projects[tmpID]["daydiff"];
-            console.log(tmpID + ": " + tmpDiff);
+            //console.log(tmpID + ": " + tmpDiff);
             dataArray[j].push(tmpDiff);
         }
         
@@ -412,7 +417,9 @@ function generateGenericBoxDataset (dataset, index) {
         var dataArray = [];
         dataArray[0] = [];
         for (var i = 0; i<dataset.length; i++) {
-                dataArray[0].push(dataset[i][index]);
+            var value = dataset[i][index];
+            if (isNaN(value)) { continue; }
+            dataArray[0].push(value);
         }
         return dataArray;
 }
@@ -502,20 +509,33 @@ function drawRunChart(dataset, divID, clines, width, height, padding, maxY) {
     if(padding === undefined) {
         padding = 30;
     }
+    // check how many time series there are in the data set
+    var numSeries = dataset[0].length - 4; // There are four other pieces of information for each project
+        
     // DOM id for svg object
     var svgID = divID + "SVG";
     
     // DOM id for data line
-    var dataLineID = divID + "data_line";
+    var dataLineID = divID + "_data_line";
     
+
     
     // Time format
     var dateFormat = d3.time.format("%Y-%m-%d");
 
+    // Get a handle to the tooltip div & calculate appropriate size for mouseover
+    var tooltipDiv = d3.select(".tooltip");
+    var tooltipHeight = tooltipDiv.style("height");
+    // remove last two letters: "px" & turn into an integer
+    tooltipHeight = parseInt(tooltipHeight.substring(0, tooltipHeight.length - 2));
+    var tooltipRowHeight = "13"; // 13px per row
+    var extraTooltipRows = numSeries - 1; // add space for an extra row(s) if more than one time series
+    var tooltipNewHeight = tooltipHeight + (extraTooltipRows * tooltipRowHeight);
+    
     
     //Create scale functions
     if(maxY == undefined) {
-        maxY = d3.max(dataset, function(d) { return d[4]; });
+        maxY = d3.max(dataset, function(d) { return d[4]; }); // This doesn't handle multiple time series...
     }
     var xScale = d3.scale.linear()
             .domain([0, dataset.length])
@@ -541,7 +561,6 @@ function drawRunChart(dataset, divID, clines, width, height, padding, maxY) {
     // Get SVG element (or create a new if not existing)
     var svg = d3.select("#" + svgID);
     var newchart = false;
-    //if(svg == undefined) {
     if(svg[0][0] == null) {
         newchart = true;
         //Create new SVG element
@@ -550,82 +569,99 @@ function drawRunChart(dataset, divID, clines, width, height, padding, maxY) {
                     .attr("width", width)
                     .attr("height", height)
                     .attr("id", svgID);
-    }
 
+    }
 
     // remove old circles and lines if updating chart
     if(!newchart) { 
-        var circles = svg.selectAll("circle");
-        circles.remove();
-        var l = svg.select("#" + dataLineID); 
-        l.remove();
+        var circlesToRemove = svg.selectAll("circle");
+        circlesToRemove.remove();
+        var linesToRemove = svg.selectAll(".line"); 
+        linesToRemove.remove();
+        
     }
-    //Create circles
-    svg.selectAll("circle")
-       .data(dataset)
-       .enter()
-       .append("circle")
-       .attr("cx", function(d) {
-            return xScale(d[0]);
-       })
-       .attr("cy", function(d) {
-            return yScale(d[4]);
-       })
-       .attr("r", 4)
-       .on("mouseover", function(d) {
-            d3.select(this)
-              .attr("r", 7)
-              .attr("fill", "blue")
-              ;
-            var xPosition = xScale(d[0]) + 10;
-            var yPosition = yScale(d[4]);
-            //Create the tooltip label
-            svg.append("text")
-              .attr("id", "tooltip1")
-              .attr("x", xPosition)
-              .attr("y", yPosition)
-            //.text(d[2])
-            .text(d[1]) 
-            ;
-            svg.append("text")
-              .attr("id", "tooltip2")
-              .attr("x", xPosition)
-              .attr("y", yPosition + 13)
-            .text(dateFormat(d[3]))
-            ;
-            svg.append("text")
-              .attr("id", "tooltip3")
-              .attr("x", xPosition)
-              .attr("y", yPosition + 26)
-            .text(d[4] + " days")
-            ;	
-
-       })
-       .on("mouseout", function(d) { //Remove the tooltip
-            d3.select(this)
-              .attr("r", 4)
-              .attr("fill", "black")
-              ;
-               d3.select("#tooltip1").remove();
-               d3.select("#tooltip2").remove();
-               d3.select("#tooltip3").remove();
-       })
-       .on("click", function(d) {
-                var projID = d[1];
-                var url = "http://genomics-status.scilifelab.se/projects/" + projID;
-                window.open(url, "genomics-status");
-       })
-    ;
-    // Add line (needs sorted array for lines to make sense)
-    var line = d3.svg.line()
-        .x(function(d) { return xScale(d[0]); })
-        .y(function(d) { return yScale(d[4]); });
+    // Create circles
+    // draw circles and lines for each time series
+    var lines = [];
+    var circles = svg.selectAll("circle")
+           .data(dataset)
+           .enter()
+           ;
+    for(var i=0; i < numSeries; i++) {
+        var seriesIndex = i + 4;
+        var color = timeseriesColors[i]; //timeseriesColors is a global array
+        
+        circles.append("circle")
+           .attr("cx", function(d) {
+                return xScale(d[0]);
+           })
+           .attr("cy", function(d) {
+                //return yScale(d[4]);
+                var cyPos = d[seriesIndex];
+                if (isNaN(cyPos)) {
+                    cyPos = -10;
+                }
+                return yScale(cyPos);
+           })
+           .attr("fill", color)
+           .attr("r", 4)
+           .on("mouseover", function(d) {
+                var timeString = "";
+                for (j = 4; j < (numSeries + 4); j++) {
+                    timeString += d[j] + " days<br/>";
+                }
+                d3.select(this)
+                  .attr("r", 7)
+                  ;
+                // Make tooltip div visible and fill with appropriate text
+                tooltipDiv.transition()		
+                    .duration(200)		
+                    .style("opacity", .9);		
+                tooltipDiv.html(d[1] + "<br/>"
+                                + dateFormat(d[3]) + "<br/>"
+                                + timeString
+                                )	
+                    .style("left", (d3.event.pageX) + "px")		
+                    .style("top", (d3.event.pageY - 28) + "px")
+                    .style("height", (tooltipNewHeight + "px"))
+                    ;	    
+           })
+           .on("mouseout", function(d) { //Remove the tooltip
+                d3.select(this)
+                  .attr("r", 4)
+                  ;
+                // Make tooltip div invisible & reset height
+                tooltipDiv.transition()		
+                .duration(300)		
+                .style("opacity", 0)
+                .style("height", (tooltipHeight + "px"))
+                ;
+           })
+           .on("click", function(d) {
+                    var projID = d[1];
+                    var url = "http://genomics-status.scilifelab.se/projects/" + projID;
+                    window.open(url, "genomics-status");
+           })
+        ;
+        
+        // Add line (needs sorted array for lines to make sense)        
+        var line = d3.svg.line()
+            .x(function(d) { return xScale(d[0]); })
+            .y(function(d) {
+                var y = d[seriesIndex];
+                if (isNaN(y)) { // hack to handle missing data
+                    y = -10;
+                }
+                return yScale(y);
+            })
+            ;           
+        svg.append("path")
+              .attr("class", "line")
+              .attr("d", line(dataset))
+              .attr("id", dataLineID + i);
+              
+    }
     
-    svg.append("path")
-          .attr("class", "line")
-          .attr("d", line(dataset))
-          .attr("id", dataLineID); 
-
     // create or update axis   
     if(newchart){
         //Create X axis
@@ -726,17 +762,23 @@ function drawRunChart(dataset, divID, clines, width, height, padding, maxY) {
  * @param {Object} dataset  Parsed data
  * @param {String} divID Id of DOM div to where plot should reside
  * @param {Number} plotHeight plot height
+ * @param {Number} [timeseries=1] the timeseries for which to draw the boxplot. Affects the color
  */
-function drawBoxPlot(dataset, divID, plotHeight, maxY, bottom_margin) {
+function drawBoxPlot(dataset, divID, plotHeight, maxY, bottom_margin, timeseries) {
     var margin = {top: 30, right: 20, bottom: 30, left: 20},
         width = 60 - margin.left - margin.right,
         //height = 450 - margin.top - margin.bottom;
         //height = 400 - margin.top - margin.bottom;
         height = plotHeight - margin.top - margin.bottom;
     // DOM id for svg object
-
     var svgID = divID + "SVG";
     //console.log("svgID: " + svgID);
+    
+    var boxClass = "box";
+    if (timeseries == 2) {
+        boxClass = "box2"; // affects which class and css used for graph elements
+    }
+    
     var min = Infinity,
         max = -Infinity;
     
@@ -752,7 +794,6 @@ function drawBoxPlot(dataset, divID, plotHeight, maxY, bottom_margin) {
     }
     //min = d3.min(dataset[0]);
     min = 0;
-    //console.log("min: " + min + ", max: " + max);
     chart.domain([min, max]);
 
 
@@ -765,7 +806,7 @@ function drawBoxPlot(dataset, divID, plotHeight, maxY, bottom_margin) {
         svg = d3.select("#" + divID).selectAll("svg")
             .data(dataset)
             .enter().append("svg")
-            .attr("class", "box")
+            .attr("class", boxClass)
             .attr("id", svgID)
             .attr("width", width + margin.left + margin.right)
             .attr("height", height + margin.bottom + margin.top)
@@ -773,8 +814,6 @@ function drawBoxPlot(dataset, divID, plotHeight, maxY, bottom_margin) {
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
             .call(chart)
             ;
-        //console.log("appended svg:")
-        //console.log(typeof(svg[0][0]));        
     } else {
         var g = d3.select("#" + divID)
             .selectAll("svg")
@@ -933,6 +972,11 @@ function drawProcessPanels(sample_json, plotDate, startDate, height, draw_width)
     var reduced = reduceToProject(sample_json);
     //console.log(reduced);
 
+    //// Add invisible tooltip div for mouseovers
+    //var tooltipDiv = d3.select("body").append("div")	
+    //    .attr("class", "tooltip")				
+    //    .style("opacity", 0);    
+    
     // keys for time calculations
     var total = {
         startKey: "Queue date",
@@ -951,7 +995,8 @@ function drawProcessPanels(sample_json, plotDate, startDate, height, draw_width)
         startKey: "QC library finished",
         endKey: "All samples sequenced"
     };
-
+    
+    
     /* 
      *  17 bars to draw over the width of the window in the upper half
      */ 
@@ -1021,9 +1066,10 @@ function drawProcessPanels(sample_json, plotDate, startDate, height, draw_width)
 
     /* **** RecCtrl delivery times data sets **** */
     var recCtrlDataset = generateRunchartDataset(reduced, startDate, plotDate, recCtrl.startKey, recCtrl.endKey, true);
+    // add second time series
     recCtrlDataset = addToRunchartDataset(reduced, recCtrlDataset, startDate, plotDate, recCtrl.startKey, recCtrl.endKey2, true);
     console.log(recCtrlDataset);
-    var recCtrlBpDataset = generateGenericBoxDataset(recCtrlDataset, 4);
+    var recCtrlBpDataset = generateGenericBoxDataset(recCtrlDataset, 5); // boxplot to use second time series
 
     /* **** Libprep delivery times data sets **** */
     var libPrepDataset = generateRunchartDataset(reduced, startDate, plotDate, libPrep.startKey, libPrep.endKey, true, "Finished library", true); 
@@ -1054,7 +1100,7 @@ function drawProcessPanels(sample_json, plotDate, startDate, height, draw_width)
     drawBoxPlot(totalBpDataset, "total_bp", height);
     
     drawRunChart(recCtrlDataset, "rec_ctrl_rc", [2], rc_width, height, 30, maxStepY);
-    drawBoxPlot(recCtrlBpDataset, "rec_ctrl_bp", height, maxStepY);
+    drawBoxPlot(recCtrlBpDataset, "rec_ctrl_bp", height, maxStepY, 30, 2); // force css for class box2
         
     drawRunChart(libPrepDataset, "lib_prep_rc", [2.5], rc_width, height, 30, maxStepY); 
     drawBoxPlot(libPrepBpDataset, "lib_prep_bp", height, maxStepY); 
