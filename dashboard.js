@@ -412,7 +412,9 @@ function generateGenericBoxDataset (dataset, index) {
         var dataArray = [];
         dataArray[0] = [];
         for (var i = 0; i<dataset.length; i++) {
-                dataArray[0].push(dataset[i][index]);
+            var value = dataset[i][index];
+            if (isNaN(value)) { continue; }
+            dataArray[0].push(value);
         }
         return dataArray;
 }
@@ -582,6 +584,7 @@ function drawRunChart(dataset, divID, clines, width, height, padding, maxY) {
         //var color = circleColors[i-4];
         var color = circleColors[i];
         //console.log(color);
+        
         circles.append("circle")
            .attr("cx", function(d) {
                 return xScale(d[0]);
@@ -598,6 +601,7 @@ function drawRunChart(dataset, divID, clines, width, height, padding, maxY) {
            .attr("fill", color)
            .attr("r", 4)
            .on("mouseover", function(d) {
+                var days = d[seriesIndex];
                 d3.select(this)
                   .attr("r", 7)
                   ;
@@ -607,7 +611,7 @@ function drawRunChart(dataset, divID, clines, width, height, padding, maxY) {
                     .style("opacity", .9);		
                 tooltipDiv.html(d[1] + "<br/>"
                                 + dateFormat(d[3]) + "<br/>"
-                                + d[seriesIndex] + " days"
+                                + days + " days"
                                 )	
                     .style("left", (d3.event.pageX) + "px")		
                     .style("top", (d3.event.pageY - 28) + "px");	    
@@ -628,11 +632,7 @@ function drawRunChart(dataset, divID, clines, width, height, padding, maxY) {
            })
         ;
         
-        //if (i>4) {
-        //    break;
-        //}
-        // Add line (needs sorted array for lines to make sense)
-        
+        // Add line (needs sorted array for lines to make sense)        
         var line = d3.svg.line()
             .x(function(d) { return xScale(d[0]); })
             //.y(function(d) { return yScale(d[4]); });
@@ -644,23 +644,12 @@ function drawRunChart(dataset, divID, clines, width, height, padding, maxY) {
                 return yScale(y);
             })
             ;
-        lines.push(line);
-        
-        //svg.append("path")
-        //      .attr("class", "line")
-        //      .attr("d", line(dataset))
-        //      .attr("id", dataLineID); 
-    }
-    //add each line
-    for (var i = 0; i < lines.length; i++) {
-        //if (i==1) {
-        //    break;
-        //}
+            
         svg.append("path")
               .attr("class", "line")
-              .attr("d", lines[i](dataset))
-              .attr("id", dataLineID + i);  
-        
+              .attr("d", line(dataset))
+              .attr("id", dataLineID + i);
+              
     }
     
     // create or update axis   
@@ -1066,7 +1055,7 @@ function drawProcessPanels(sample_json, plotDate, startDate, height, draw_width)
     var recCtrlDataset = generateRunchartDataset(reduced, startDate, plotDate, recCtrl.startKey, recCtrl.endKey, true);
     recCtrlDataset = addToRunchartDataset(reduced, recCtrlDataset, startDate, plotDate, recCtrl.startKey, recCtrl.endKey2, true);
     console.log(recCtrlDataset);
-    var recCtrlBpDataset = generateGenericBoxDataset(recCtrlDataset, 4);
+    var recCtrlBpDataset = generateGenericBoxDataset(recCtrlDataset, 5);
 
     /* **** Libprep delivery times data sets **** */
     var libPrepDataset = generateRunchartDataset(reduced, startDate, plotDate, libPrep.startKey, libPrep.endKey, true, "Finished library", true); 
