@@ -90,6 +90,35 @@ circle {
   fill: none;
   stroke: #ccc;
 }
+
+/**/
+.box2 {
+  font: 10px sans-serif;
+  fill: #FFC447;
+}
+
+.box2 line,
+.box2 rect,
+.box2 circle {
+  fill: #fff;
+  stroke: #FFC447;
+  stroke-width: 1.5px;
+}
+
+.box2 .center {
+  stroke-dasharray: 3,3;
+}
+
+.box2 .outlier {
+  fill: none;
+  stroke: #ccc;
+}
+
+.box2 text {
+    fill: #FFC447;
+}
+
+/**/
 #header {
     /*margin-bottom: 0;*/
 }
