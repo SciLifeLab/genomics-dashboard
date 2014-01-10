@@ -1,3 +1,8 @@
+/*
+ * Array of colours suited for time series colours etc
+ */
+var timeseriesColors = ["#5B87FF", "#FFC447", "#865BFF", "#FFE147"]; // colors for four series, add more?
+
 /**
  * Calculates difference in days between two dates
  * @param {Date} date1	A Date object
@@ -577,7 +582,6 @@ function drawRunChart(dataset, divID, clines, width, height, padding, maxY) {
     }
     // Create circles
     // draw circles and lines for each time series
-    var circleColors = ["#5B87FF", "orange"]; // only colors for two series, add more?
     var lines = [];
     var circles = svg.selectAll("circle")
            .data(dataset)
@@ -585,7 +589,7 @@ function drawRunChart(dataset, divID, clines, width, height, padding, maxY) {
            ;
     for(var i=0; i < numSeries; i++) {
         var seriesIndex = i + 4;
-        var color = circleColors[i];
+        var color = timeseriesColors[i]; //timeseriesColors is a global array
         
         circles.append("circle")
            .attr("cx", function(d) {
@@ -758,17 +762,24 @@ function drawRunChart(dataset, divID, clines, width, height, padding, maxY) {
  * @param {Object} dataset  Parsed data
  * @param {String} divID Id of DOM div to where plot should reside
  * @param {Number} plotHeight plot height
+ * @param {Number} [timeseries=1] the timeseries for which to draw the boxplot. Affects the color
  */
-function drawBoxPlot(dataset, divID, plotHeight, maxY, bottom_margin) {
+function drawBoxPlot(dataset, divID, plotHeight, maxY, bottom_margin, timeseries) {
     var margin = {top: 30, right: 20, bottom: 30, left: 20},
         width = 60 - margin.left - margin.right,
         //height = 450 - margin.top - margin.bottom;
         //height = 400 - margin.top - margin.bottom;
         height = plotHeight - margin.top - margin.bottom;
     // DOM id for svg object
-
     var svgID = divID + "SVG";
     //console.log("svgID: " + svgID);
+    
+    var boxClass = "box";
+    if (timeseries == 2) {
+        boxClass = "box2"; // affects which class and css used for graph elements
+    }
+    console.log("timeseries: " + timeseries + ", boxclass: " + boxClass);
+    
     var min = Infinity,
         max = -Infinity;
     
@@ -797,7 +808,8 @@ function drawBoxPlot(dataset, divID, plotHeight, maxY, bottom_margin) {
         svg = d3.select("#" + divID).selectAll("svg")
             .data(dataset)
             .enter().append("svg")
-            .attr("class", "box")
+            //.attr("class", "box")
+            .attr("class", boxClass)
             .attr("id", svgID)
             .attr("width", width + margin.left + margin.right)
             .attr("height", height + margin.bottom + margin.top)
@@ -1059,9 +1071,10 @@ function drawProcessPanels(sample_json, plotDate, startDate, height, draw_width)
 
     /* **** RecCtrl delivery times data sets **** */
     var recCtrlDataset = generateRunchartDataset(reduced, startDate, plotDate, recCtrl.startKey, recCtrl.endKey, true);
+    // add second time series
     recCtrlDataset = addToRunchartDataset(reduced, recCtrlDataset, startDate, plotDate, recCtrl.startKey, recCtrl.endKey2, true);
     console.log(recCtrlDataset);
-    var recCtrlBpDataset = generateGenericBoxDataset(recCtrlDataset, 5);
+    var recCtrlBpDataset = generateGenericBoxDataset(recCtrlDataset, 5); // boxplot to use second time series
 
     /* **** Libprep delivery times data sets **** */
     var libPrepDataset = generateRunchartDataset(reduced, startDate, plotDate, libPrep.startKey, libPrep.endKey, true, "Finished library", true); 
@@ -1092,7 +1105,7 @@ function drawProcessPanels(sample_json, plotDate, startDate, height, draw_width)
     drawBoxPlot(totalBpDataset, "total_bp", height);
     
     drawRunChart(recCtrlDataset, "rec_ctrl_rc", [2], rc_width, height, 30, maxStepY);
-    drawBoxPlot(recCtrlBpDataset, "rec_ctrl_bp", height, maxStepY);
+    drawBoxPlot(recCtrlBpDataset, "rec_ctrl_bp", height, maxStepY, 30, 2); // force css for class box2
         
     drawRunChart(libPrepDataset, "lib_prep_rc", [2.5], rc_width, height, 30, maxStepY); 
     drawBoxPlot(libPrepBpDataset, "lib_prep_bp", height, maxStepY); 
