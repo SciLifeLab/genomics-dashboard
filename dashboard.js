@@ -506,26 +506,31 @@ function drawRunChart(dataset, divID, clines, width, height, padding, maxY) {
     }
     // check how many time series there are in the data set
     var numSeries = dataset[0].length - 4; // There are four other pieces of information for each project
-    //console.log(numSeries);
-    
-    
+        
     // DOM id for svg object
     var svgID = divID + "SVG";
     
     // DOM id for data line
-    var dataLineID = divID + "data_line";
+    var dataLineID = divID + "_data_line";
     
 
     
     // Time format
     var dateFormat = d3.time.format("%Y-%m-%d");
 
-    // Get a handle to the tooltip div
+    // Get a handle to the tooltip div & calculate appropriate size for mouseover
     var tooltipDiv = d3.select(".tooltip");
+    var tooltipHeight = tooltipDiv.style("height");
+    // remove last two letters: "px" & turn into an integer
+    tooltipHeight = parseInt(tooltipHeight.substring(0, tooltipHeight.length - 2));
+    var tooltipRowHeight = "13"; // 13px per row
+    var extraTooltipRows = numSeries - 1; // add space for an extra row(s) if more than one time series
+    var tooltipNewHeight = tooltipHeight + (extraTooltipRows * tooltipRowHeight);
+    
     
     //Create scale functions
     if(maxY == undefined) {
-        maxY = d3.max(dataset, function(d) { return d[4]; });
+        maxY = d3.max(dataset, function(d) { return d[4]; }); // This doesn't handle multiple time series...
     }
     var xScale = d3.scale.linear()
             .domain([0, dataset.length])
@@ -551,7 +556,6 @@ function drawRunChart(dataset, divID, clines, width, height, padding, maxY) {
     // Get SVG element (or create a new if not existing)
     var svg = d3.select("#" + svgID);
     var newchart = false;
-    //if(svg == undefined) {
     if(svg[0][0] == null) {
         newchart = true;
         //Create new SVG element
@@ -571,9 +575,9 @@ function drawRunChart(dataset, divID, clines, width, height, padding, maxY) {
         linesToRemove.remove();
         
     }
-    //Create circles
-    // trying to draw more than one time series
-    var circleColors = ["#5B87FF", "orange"];
+    // Create circles
+    // draw circles and lines for each time series
+    var circleColors = ["#5B87FF", "orange"]; // only colors for two series, add more?
     var lines = [];
     var circles = svg.selectAll("circle")
            .data(dataset)
@@ -581,9 +585,7 @@ function drawRunChart(dataset, divID, clines, width, height, padding, maxY) {
            ;
     for(var i=0; i < numSeries; i++) {
         var seriesIndex = i + 4;
-        //var color = circleColors[i-4];
         var color = circleColors[i];
-        //console.log(color);
         
         circles.append("circle")
            .attr("cx", function(d) {
@@ -595,13 +597,15 @@ function drawRunChart(dataset, divID, clines, width, height, padding, maxY) {
                 if (isNaN(cyPos)) {
                     cyPos = -10;
                 }
-                //return yScale(d[seriesIndex]);
                 return yScale(cyPos);
            })
            .attr("fill", color)
            .attr("r", 4)
            .on("mouseover", function(d) {
-                var days = d[seriesIndex];
+                var timeString = "";
+                for (j = 4; j < (numSeries + 4); j++) {
+                    timeString += d[j] + " days<br/>";
+                }
                 d3.select(this)
                   .attr("r", 7)
                   ;
@@ -611,19 +615,23 @@ function drawRunChart(dataset, divID, clines, width, height, padding, maxY) {
                     .style("opacity", .9);		
                 tooltipDiv.html(d[1] + "<br/>"
                                 + dateFormat(d[3]) + "<br/>"
-                                + days + " days"
+                                + timeString
                                 )	
                     .style("left", (d3.event.pageX) + "px")		
-                    .style("top", (d3.event.pageY - 28) + "px");	    
+                    .style("top", (d3.event.pageY - 28) + "px")
+                    .style("height", (tooltipNewHeight + "px"))
+                    ;	    
            })
            .on("mouseout", function(d) { //Remove the tooltip
                 d3.select(this)
                   .attr("r", 4)
                   ;
-                // Make tooltip div invisible
+                // Make tooltip div invisible & reset height
                 tooltipDiv.transition()		
                 .duration(300)		
-                .style("opacity", 0);
+                .style("opacity", 0)
+                .style("height", (tooltipHeight + "px"))
+                ;
            })
            .on("click", function(d) {
                     var projID = d[1];
@@ -635,16 +643,14 @@ function drawRunChart(dataset, divID, clines, width, height, padding, maxY) {
         // Add line (needs sorted array for lines to make sense)        
         var line = d3.svg.line()
             .x(function(d) { return xScale(d[0]); })
-            //.y(function(d) { return yScale(d[4]); });
             .y(function(d) {
                 var y = d[seriesIndex];
-                if (isNaN(y)) {
+                if (isNaN(y)) { // hack to handle missing data
                     y = -10;
                 }
                 return yScale(y);
             })
-            ;
-            
+            ;           
         svg.append("path")
               .attr("class", "line")
               .attr("d", line(dataset))
