@@ -5,7 +5,7 @@
 ### RNA ###
 * P576
 
-      missing close date in statusdb
+        missing close date in statusdb
 
 * P653
 
