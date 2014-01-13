@@ -287,6 +287,10 @@ function generateQueueLaneLPStackDataset(json, cmpDate) {
         if(closeDate != "0000-00-00") { continue; }
         
         // skip samples already done, but where dates are missing in lims
+        var libQCDate = v["QC library finished"];
+        if (libQCDate != "0000-00-00") { continue; }
+        var seqStartDate = v["Sequencing start"];
+        if (seqStartDate != "0000-00-00") { continue; }
         var seqFinishedDate = v["All samples sequenced"];
         if (seqFinishedDate != "0000-00-00") { continue; }
         
@@ -392,9 +396,13 @@ function generateQueueLaneFLStackDataset(json, cmpDate) {
         // skip closed projects
         var closeDate = v["Close date"];
         if(closeDate != "0000-00-00") { continue; }
-        
+
+        // skip samples already done, but where dates are missing in lims
+        var seqStartDate = v["Sequencing start"];
+        if (seqStartDate != "0000-00-00") { continue; }
         var seqFinishedDate = v["All samples sequenced"];
         if (seqFinishedDate != "0000-00-00") { continue; }
+
         var queueDate = v["Queue date"];
         //var prepStartDate = v["Lib prep start"];
         var seqStartDate = v["Sequencing start"];
@@ -514,6 +522,10 @@ function generateQueueSampleStackDataset(json, cmpDate) {
         
         
         // skip samples already done, but where dates are missing in lims
+        var libQCDate = v["QC library finished"];
+        if (libQCDate != "0000-00-00") { continue; }
+        var seqStartDate = v["Sequencing start"];
+        if (seqStartDate != "0000-00-00") { continue; }
         var seqFinishedDate = v["All samples sequenced"];
         if (seqFinishedDate != "0000-00-00") { continue; }
 
@@ -540,6 +552,7 @@ function generateQueueSampleStackDataset(json, cmpDate) {
             if(projects[pid] == undefined) {
                 projects[pid] = { queueDate: queueDate}
             }
+            
         }
         
     }
@@ -609,10 +622,11 @@ function generateLibprepSampleLoadDataset(json, cmpDate) {
     for (var i = 0; i < rows.length; i++) {
         var k = rows[i]["key"];
         var pid = k[0];
-        var pn = k[1];
+        var type = k[1];
         var appl = k[2];
         var sampleID = k[4];
         if (appl == "Finished library") { continue; } // fin lib projects not of interest
+        if (type != "Production") { continue; } // only Production of interest
         if(appl == null) { appl = "Other";}
 
         //console.log(sampleID);
@@ -637,6 +651,8 @@ function generateLibprepSampleLoadDataset(json, cmpDate) {
         
         
         // skip samples already done, but where dates are missing in lims
+        var seqStartDate = v["Sequencing start"];
+        if (seqStartDate != "0000-00-00") { continue; }
         var seqFinishedDate = v["All samples sequenced"];
         if (seqFinishedDate != "0000-00-00") { continue; }
 
@@ -660,7 +676,7 @@ function generateLibprepSampleLoadDataset(json, cmpDate) {
             applBins[applCat][pid] += 1;
 
             if(projects[pid] == undefined) {
-                projects[pid] = { queueDate: queueDate, projName: pn}
+                projects[pid] = { queueDate: queueDate, pid: pid}
             }
         }
         
@@ -719,9 +735,10 @@ function generateLibprepLaneLoadDataset(json, cmpDate) {
     for (var i = 0; i < rows.length; i++) {
         var k = rows[i]["key"];
         var pid = k[0];
-        var pn = k[1];
+        var type = k[1];
         var appl = k[2];
         if (appl == "Finished library") { continue; } // skip fin lib projects
+        if (type != "Production") { continue; } // only Production of interest
 
         
         // Determine which platform
@@ -739,6 +756,8 @@ function generateLibprepLaneLoadDataset(json, cmpDate) {
         if(closeDate != "0000-00-00") { continue; }
         
         // skip samples already done, but where dates are missing in lims
+        var seqStartDate = v["Sequencing start"];
+        if (seqStartDate != "0000-00-00") { continue; }
         var seqFinishedDate = v["All samples sequenced"];
         if (seqFinishedDate != "0000-00-00") { continue; }
         
@@ -770,7 +789,7 @@ function generateLibprepLaneLoadDataset(json, cmpDate) {
             pfBins[pf][pid] += v["Lanes"];
 
             if(projects[pid] == undefined) {
-                projects[pid] = { queueDate: queueDate, projName: pn}
+                projects[pid] = { queueDate: queueDate, pid: pid}
             }
         }
         
@@ -827,9 +846,10 @@ function generateSeqLoadDataset(json, cmpDate) {
         //console.log("looping through json array: 1");
         var k = rows[i]["key"];
         var pid = k[0];
-        var pn = k[1];
+        var type = k[1];
         var appl = k[2];
         var sid = k[4];
+        if (type != "Production") { continue; } // only Production of interest
 
         // Determine which platform
         var pf = k[3];
@@ -859,7 +879,7 @@ function generateSeqLoadDataset(json, cmpDate) {
         if (stepStartDate != "0000-00-00" &&
             libQCDate <= cmpDateStr &&
             seqDoneDate == "0000-00-00") {
-            //console.log(pf + ", " + pid + ", " + v["Lanes"]);
+            console.log(pf + ", " + pid + ": " + sid + ", " + v["Lanes"]);
 
             // create bins for the platforms if they don't exist
             if(pfBins[pf] == undefined) {
@@ -879,7 +899,7 @@ function generateSeqLoadDataset(json, cmpDate) {
             pfBins[pf][pid] += v["Lanes"];
 
             if(projects[pid] == undefined) {
-                projects[pid] = { queueDate: queueDate, projName: pn}
+                projects[pid] = { queueDate: queueDate, pid: pid}
             }
         }
         
