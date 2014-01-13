@@ -64,16 +64,16 @@ function(doc) {
       //  final_validation = LP.prep_finished_date
       //}
 
-      // capture earliest lib prep start
-      // NOW DONE above at sample level.
-      // This bit of code should be commented out on production server
-      //if(LP["prep_start_date"]) {
-      //  if (lib_prep_start == "0000-00-00") {
-      //    lib_prep_start = LP["prep_start_date"];
-      //  } else if (LP["prep_start_date"]<lib_prep_start) {
-      //    lib_prep_start = LP["prep_start_date"];
-      //  }
-      //}
+      // capture earliest lib prep start if not set at sample/first_prep_start_date
+      // done above at sample level.
+      // 
+      if(LP["prep_start_date"]) {
+        if (lib_prep_start == "0000-00-00") {
+          lib_prep_start = LP["prep_start_date"];
+        } else if (LP["prep_start_date"]<lib_prep_start) {
+          lib_prep_start = LP["prep_start_date"];
+        }
+      }
 
       var passed_prep = (LP["prep_status"] == "PASSED");
 
