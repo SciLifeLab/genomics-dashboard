@@ -39,16 +39,43 @@ function sortByApplication (a, b) {
     var aAppl;
     var bAppl;
     for (var i = 0; i < a.length; i++) {
-        if(a[i]["y"] != 0) { aAppl = map[a[i]["x"]]; aQ = a[i]["queueDate"]; }
-        if(b[i]["y"] != 0) { bAppl = map[b[i]["x"]]; bQ = b[i]["queueDate"]; }
+        if(a[i]["y"] != 0) { aAppl = map[a[i]["x"]]; aQ = a[i]["queueDate"]; aArr = a[i]["arrivalDate"]; aPid = a[i]["pid"];}
+        if(b[i]["y"] != 0) { bAppl = map[b[i]["x"]]; bQ = b[i]["queueDate"]; bArr = b[i]["arrivalDate"]; bPid = b[i]["pid"];}
     }
     if(aAppl < bAppl) return -1;
     if(aAppl > bAppl) return 1;
     if(aQ < bQ ) return -1;
     if(aQ > bQ ) return 1;
+    if(aArr < bArr ) return -1;
+    if(aArr > bArr ) return 1;   
+    if(aPid < bPid ) return -1;
+    if(aPid > bPid ) return 1;   
     return 0;
 }
 
+
+function getFirstInQueue(data) {
+    var qD = "9999-99-99";
+    var arrD = "9999-99-99";
+    var firstPid;
+    for (var i = 0; i < data.length; i++) {
+        if (data[i][0]["queueDate"] < qD) {
+            qD = data[i][0]["queueDate"];
+            arrD = data[i][0]["arrivalDate"];
+            firstPid = data[i][0]["pid"];
+        } else if (data[i][0]["queueDate"] == qD) {
+            if (data[i][0]["arrivalDate"] < arrD) {
+                arrD = data[i][0]["arrivalDate"];
+                firstPid = data[i][0]["pid"];
+            } else if (data[i][0]["arrivalDate"] == arrD) {
+                if (data[i][0]["pid"] < firstPid) {
+                    firstPid = data[i][0]["pid"];
+                }
+            }
+        }
+    }
+    return firstPid;
+}
 /**
  * Calculates number of projects per domain (x value) in a layer object data set
  * @param {Array} dataset  Array of array of layer objects
@@ -488,6 +515,9 @@ function generateQueueSampleStackDataset(json, cmpDate) {
     }
     //console.log(applBins);
     
+    // array to capture libprep start dates
+    var libPrepStartDates = [];
+    
     var projects = {};
     // loop through each sample and add upp lane load per project
     for (var i = 0; i < rows.length; i++) {
@@ -529,8 +559,11 @@ function generateQueueSampleStackDataset(json, cmpDate) {
         var seqFinishedDate = v["All samples sequenced"];
         if (seqFinishedDate != "0000-00-00") { continue; }
 
+        var arrivalDate = v["Arrival date"];
         var queueDate = v["Queue date"];
         var prepStartDate = v["Lib prep start"];
+        libPrepStartDates.push(prepStartDate);
+        
         // this is for libprep projects
         if (queueDate != "0000-00-00" &&
             queueDate <= cmpDateStr &&
@@ -550,7 +583,7 @@ function generateQueueSampleStackDataset(json, cmpDate) {
             applBins[applCat][pid] += 1;
 
             if(projects[pid] == undefined) {
-                projects[pid] = { queueDate: queueDate}
+                projects[pid] = { queueDate: queueDate, arrivalDate: arrivalDate }
             }
             
         }
@@ -558,19 +591,37 @@ function generateQueueSampleStackDataset(json, cmpDate) {
     }
     //console.log(pfBins);
     
+    // get the last prep start date
+        // filter function to remove duplicates
+    function onlyUnique(value, index, self) { 
+        return self.indexOf(value) === index;
+    }
+    var libPrepStartDates = libPrepStartDates.filter( onlyUnique );
+    libPrepStartDates.sort();
+    
+    var ps = libPrepStartDates.pop(); // last date
+    while (ps > cmpDateStr ) { // continue pop'ing until last date is less than comparison date
+        ps = libPrepStartDates.pop();
+    }
+    var lastLibPrepStart = ps;
+    var daysSincePrepStart = daydiff(new Date(lastLibPrepStart), cmpDate);
+    
     // put into "layer structure", sort & then add up y0's
     for (var projID in applBins["DNA"]) {
         var projArr = [];
         //for (c in cat) {
         for (i = 0; i < cat.length; i++) {
-             var o = { x: cat[i], y: applBins[cat[i]][projID], pid: projID, queueDate: projects[projID]["queueDate"] };
+            var o = { x: cat[i], y: applBins[cat[i]][projID], pid: projID, queueDate: projects[projID]["queueDate"], arrivalDate: projects[projID]["arrivalDate"] };
             projArr.push(o);
         }
         dataArray.push(projArr);
     }
     // change to sort by application
-    dataArray.sort(sortByApplication);
-    
+    dataArray.sort(sortByApplication); // by application & queue date - arrival date - project ID
+
+    var firstInQueuePid = getFirstInQueue(dataArray);
+    console.log("first in queue pid: " + firstInQueuePid);
+
     var tot = { DNA: 0, RNA: 0, SeqCap: 0, Other: 0};
     
     for (var i = 0; i < dataArray.length; i++) {
@@ -578,6 +629,11 @@ function generateQueueSampleStackDataset(json, cmpDate) {
             var a = dataArray[i][j]["x"];
             dataArray[i][j]["y0"] = tot[a];
             tot[a] += dataArray[i][j]["y"];
+            //if (i == 0) { // add info about time since last libprep start for the project first in queue
+            if (dataArray[i][j]["pid"] == firstInQueuePid) { // add info about time since last libprep start for the project first in queue
+                dataArray[i][j]["lastLibPrep"] = lastLibPrepStart;
+                dataArray[i][j]["daysSincePrepStart"] = daysSincePrepStart;
+            }
         }
     }
     //console.log(dataArray);
@@ -1018,12 +1074,17 @@ function drawStackedBars (dataset, divID, width, height, unit, showFirstInQueue)
             .style("fill", function(d, i) {
                 var col = d3.rgb("#5B87FF");
                 if(i%2 == 0) { col = col.brighter(); }
-                
+
+                // Handle vis que regarding time since last prep start
+                var dayLimit = 7;
                 if (showFirstInQueue) {
-                    if (i == 0) {
-                        col = timeseriesColors[1];
-                        //col = "red";
-                    }
+                    if (d[0].daysSincePrepStart != undefined) {
+                        if (d[0].daysSincePrepStart > dayLimit ) {
+                            col = "red"
+                        } else {
+                            col = timeseriesColors[1];
+                        }
+                     }
                 } 
                 return col;
 
