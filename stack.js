@@ -879,7 +879,7 @@ function generateSeqLoadDataset(json, cmpDate) {
         if (stepStartDate != "0000-00-00" &&
             libQCDate <= cmpDateStr &&
             seqDoneDate == "0000-00-00") {
-            console.log(pf + ", " + pid + ": " + sid + ", " + v["Lanes"]);
+            //console.log(pf + ", " + pid + ": " + sid + ", " + v["Lanes"]);
 
             // create bins for the platforms if they don't exist
             if(pfBins[pf] == undefined) {
@@ -1062,7 +1062,7 @@ function drawStackedBars (dataset, divID, width, height, unit, padding) {
             })
             .on("click", function(d) {
                      var projID = d.pid;
-                     var url = "http://genomics-status.scilifelab.se/projects/" + projID;
+                     var url = "https://genomics-status.scilifelab.se/projects/" + projID;
                      window.open(url, "genomics-status");
             })
             ;
