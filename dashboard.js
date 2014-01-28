@@ -11,7 +11,7 @@ var timeseriesColors = ["#5B87FF", "#FFC447", "#865BFF", "#FFE147"]; // colors f
  */
 function daydiff(date1, date2) { 
         var day = 1000*60*60*24;
-        var diff = Math.ceil((date2.getTime()-date1.getTime())/(day));
+        var diff = Math.floor((date2.getTime()-date1.getTime())/(day));
         return diff;				
 }
 
