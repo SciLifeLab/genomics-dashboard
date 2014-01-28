@@ -945,9 +945,9 @@ function generateSeqLoadDataset(json, cmpDate) {
  * @param {Number} width    plot width
  * @param {Number} height   plot height
  * @param {String} [unit="lanes"] Unit of values. Used for bar legend 
- * @param {Number} [padding=30] plot padding
+ * @param {Boolean} [showFirstInQueue=false] If first in queue project should be indicated visually
  */
-function drawStackedBars (dataset, divID, width, height, unit, padding) {
+function drawStackedBars (dataset, divID, width, height, unit, showFirstInQueue) {
     //console.log(dataset)
     var w = width,
         h = height,
@@ -1017,8 +1017,16 @@ function drawStackedBars (dataset, divID, width, height, unit, padding) {
             .attr("class", "project")
             .style("fill", function(d, i) {
                 var col = d3.rgb("#5B87FF");
-                if(i%2 == 0) { return col.brighter(); }
+                if(i%2 == 0) { col = col.brighter(); }
+                
+                if (showFirstInQueue) {
+                    if (i == 0) {
+                        col = timeseriesColors[1];
+                        //col = "red";
+                    }
+                } 
                 return col;
+
             }) 
             .style("stroke", function(d, i) {
                 return "white";
@@ -1226,7 +1234,7 @@ function drawRCStackedBars (dataset, divID, width, height) {
                 .style("left", (d3.event.pageX) + "px")		
                 .style("top", (d3.event.pageY - 28) + "px")
                 .style("height", (tooltipNewHeight + "px"))
-                .style("width", (tooltipNewWidth + "px"))
+                //.style("width", (tooltipNewWidth + "px"))
                 ;	    
         })
         .on("mouseout", function(d) { //Remove the tooltip
@@ -1235,7 +1243,7 @@ function drawRCStackedBars (dataset, divID, width, height) {
             .duration(100)		
             .style("opacity", 0)
             .style("height", (tooltipHeight + "px"))
-            .style("width", (tooltipWidth + "px"))
+            //.style("width", (tooltipWidth + "px"))
             ;
                //d3.select("#tooltipA").remove();
         })

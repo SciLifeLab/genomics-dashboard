@@ -1031,10 +1031,11 @@ function drawProcessPanels(sample_json, plotDate, startDate, height, draw_width)
     var sampleLoadLibprep = generateLibprepSampleLoadDataset(sample_json, today);
     var laneLoadLibprep = generateLibprepLaneLoadDataset(sample_json, today);
     var seqLoad = generateSeqLoadDataset(sample_json, today);
-        
+    
+    console.log(sampleQueue);    
 
     drawRCStackedBars(recCtrlLoad, "ongoing_bc_plot", bar_width * 1, panelHeights);
-    drawStackedBars (sampleQueue, "queue_sample_load_lp", bar_width * 4, panelHeights, "samples");
+    drawStackedBars (sampleQueue, "queue_sample_load_lp", bar_width * 4, panelHeights, "samples", true);
     drawStackedBars (libprepLaneQueue, "queue_lane_load_lp", bar_width * 2, panelHeights, "lanes");
     drawStackedBars (finlibLaneQueue, "queue_lane_load_fl", bar_width * 2, panelHeights, "lanes");
     drawStackedBars(sampleLoadLibprep, "libprep_sample_load", bar_width * 4, panelHeights, "samples");
@@ -1068,7 +1069,6 @@ function drawProcessPanels(sample_json, plotDate, startDate, height, draw_width)
     var recCtrlDataset = generateRunchartDataset(reduced, startDate, plotDate, recCtrl.startKey, recCtrl.endKey, true);
     // add second time series
     recCtrlDataset = addToRunchartDataset(reduced, recCtrlDataset, startDate, plotDate, recCtrl.startKey, recCtrl.endKey2, true);
-    console.log(recCtrlDataset);
     var recCtrlBpDataset = generateGenericBoxDataset(recCtrlDataset, 5); // boxplot to use second time series
 
     /* **** Libprep delivery times data sets **** */
