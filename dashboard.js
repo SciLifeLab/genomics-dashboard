@@ -114,6 +114,15 @@ function reduceToProject(jsonview) {
     for (var i = 0; i < rows.length; i++) {
         var keys = rows[i]["key"];
         var values = rows[i]["value"];
+        
+        // skip aborted projects
+        var aborted_date = values["Aborted date"];
+        if (aborted_date != null) {
+            //console.log("Skipping " + keys[0]);
+            continue;
+        }
+
+        
         var pid = keys[0]; // project id
         var type = keys[1]; // type = Production || Applications
         var appl = keys[2]; // application
