@@ -6,3 +6,6 @@
 - [x] KPI data definitions Gdocs spreadsheet to md document
 - [x] Pull request on current code
 - [x] Change to draw more than one time series in runcharts
+- [] Update dates_and_load_per_sample map-reduce function to emit project abort date and sample status. Done on local (v2 function). Move to dev, and then ask for transfer to Prod
+- [x] Update code to skip aborted projects
+- [] Update code to skip aborted samples
