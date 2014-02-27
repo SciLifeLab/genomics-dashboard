@@ -210,6 +210,13 @@ function generateRecCtrlStackDataset(json, cmpDate) {
         }
         
         var v = rows[i]["value"];
+
+        // skip aborted projects
+        var aborted_date = v["Aborted date"];
+        if (aborted_date != null) {
+            //console.log("Skipping " + keys[0]);
+            continue;
+        }
         
         // skip closed projects
         var closeDate = v["Close date"];
@@ -308,6 +315,13 @@ function generateQueueLaneLPStackDataset(json, cmpDate) {
         }
         
         var v = rows[i]["value"];
+
+        // skip aborted projects
+        var aborted_date = v["Aborted date"];
+        if (aborted_date != null) {
+            //console.log("Skipping " + keys[0]);
+            continue;
+        }
         
         // skip closed projects
         var closeDate = v["Close date"];
@@ -420,6 +434,12 @@ function generateQueueLaneFLStackDataset(json, cmpDate) {
         
         var v = rows[i]["value"];
 
+        // skip aborted projects
+        var aborted_date = v["Aborted date"];
+        if (aborted_date != null) {
+            //console.log("Skipping " + keys[0]);
+            continue;
+        }
         // skip closed projects
         var closeDate = v["Close date"];
         if(closeDate != "0000-00-00") { continue; }
@@ -546,6 +566,12 @@ function generateQueueSampleStackDataset(json, cmpDate) {
         }
         
         var v = rows[i]["value"];
+        // skip aborted projects
+        var aborted_date = v["Aborted date"];
+        if (aborted_date != null) {
+            //console.log("Skipping " + keys[0]);
+            continue;
+        }
         // skip closed projects
         var closeDate = v["Close date"];
         if(closeDate != "0000-00-00") { continue; }
@@ -701,6 +727,12 @@ function generateLibprepSampleLoadDataset(json, cmpDate) {
         }
         
         var v = rows[i]["value"];
+        // skip aborted projects
+        var aborted_date = v["Aborted date"];
+        if (aborted_date != null) {
+            //console.log("Skipping " + keys[0]);
+            continue;
+        }
         // skip closed projects
         var closeDate = v["Close date"];
         if(closeDate != "0000-00-00") { continue; }
@@ -807,6 +839,12 @@ function generateLibprepLaneLoadDataset(json, cmpDate) {
         }
         
         var v = rows[i]["value"];
+        // skip aborted projects
+        var aborted_date = v["Aborted date"];
+        if (aborted_date != null) {
+            //console.log("Skipping " + keys[0]);
+            continue;
+        }
         // skip closed projects
         var closeDate = v["Close date"];
         if(closeDate != "0000-00-00") { continue; }
@@ -917,6 +955,12 @@ function generateSeqLoadDataset(json, cmpDate) {
         }
         
         var v = rows[i]["value"];
+        // skip aborted projects
+        var aborted_date = v["Aborted date"];
+        if (aborted_date != null) {
+            //console.log("Skipping " + keys[0]);
+            continue;
+        }
         // skip closed projects
         var closeDate = v["Close date"];
         if(closeDate != "0000-00-00") { continue; }
