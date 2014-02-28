@@ -115,10 +115,14 @@ function reduceToProject(jsonview) {
         var keys = rows[i]["key"];
         var values = rows[i]["value"];
         
-        // skip aborted projects
+        // skip aborted *projects*
         var aborted_date = values["Aborted date"];
         if (aborted_date != null) {
             //console.log("Skipping " + keys[0]);
+            continue;
+        }
+        // Skip aborted *samples*
+        if (values["Status"] == "Aborted") {
             continue;
         }
 
@@ -147,6 +151,7 @@ function reduceToProject(jsonview) {
                     }
                     prepStarts[currVal].push( projects[pid]); // add project object   
                 }
+                // set values
                 if(valKey == "Samples" || valKey == "Lanes") {
                     projects[pid][valKey] += values[valKey];
                 } else if (valKey.indexOf("start") != -1 ) { // get earliest start dates
@@ -1041,7 +1046,7 @@ function drawProcessPanels(sample_json, plotDate, startDate, height, draw_width)
     var laneLoadLibprep = generateLibprepLaneLoadDataset(sample_json, today);
     var seqLoad = generateSeqLoadDataset(sample_json, today);
     
-    console.log(sampleQueue);    
+    //console.log(sampleQueue);    
 
     drawRCStackedBars(recCtrlLoad, "ongoing_bc_plot", bar_width * 1, panelHeights);
     drawStackedBars (sampleQueue, "queue_sample_load_lp", bar_width * 4, panelHeights, "samples", true);
