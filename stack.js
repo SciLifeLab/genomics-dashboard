@@ -217,6 +217,10 @@ function generateRecCtrlStackDataset(json, cmpDate) {
             //console.log("Skipping " + keys[0]);
             continue;
         }
+        // Skip aborted *samples*
+        if (v["Status"] == "Aborted") {
+            continue;
+        }
         
         // skip closed projects
         var closeDate = v["Close date"];
@@ -320,6 +324,10 @@ function generateQueueLaneLPStackDataset(json, cmpDate) {
         var aborted_date = v["Aborted date"];
         if (aborted_date != null) {
             //console.log("Skipping " + keys[0]);
+            continue;
+        }
+        // Skip aborted *samples*
+        if (v["Status"] == "Aborted") {
             continue;
         }
         
@@ -438,6 +446,10 @@ function generateQueueLaneFLStackDataset(json, cmpDate) {
         var aborted_date = v["Aborted date"];
         if (aborted_date != null) {
             //console.log("Skipping " + keys[0]);
+            continue;
+        }
+        // Skip aborted *samples*
+        if (v["Status"] == "Aborted") {
             continue;
         }
         // skip closed projects
@@ -572,6 +584,10 @@ function generateQueueSampleStackDataset(json, cmpDate) {
             //console.log("Skipping " + keys[0]);
             continue;
         }
+        // Skip aborted *samples*
+        if (v["Status"] == "Aborted") {
+            continue;
+        }
         // skip closed projects
         var closeDate = v["Close date"];
         if(closeDate != "0000-00-00") { continue; }
@@ -646,7 +662,7 @@ function generateQueueSampleStackDataset(json, cmpDate) {
     dataArray.sort(sortByApplication); // by application & queue date - arrival date - project ID
 
     var firstInQueuePid = getFirstInQueue(dataArray);
-    console.log("first in queue pid: " + firstInQueuePid);
+    //console.log("first in queue pid: " + firstInQueuePid);
 
     var tot = { DNA: 0, RNA: 0, SeqCap: 0, Other: 0};
     
@@ -731,6 +747,10 @@ function generateLibprepSampleLoadDataset(json, cmpDate) {
         var aborted_date = v["Aborted date"];
         if (aborted_date != null) {
             //console.log("Skipping " + keys[0]);
+            continue;
+        }
+        // Skip aborted *samples*
+        if (v["Status"] == "Aborted") {
             continue;
         }
         // skip closed projects
@@ -843,6 +863,10 @@ function generateLibprepLaneLoadDataset(json, cmpDate) {
         var aborted_date = v["Aborted date"];
         if (aborted_date != null) {
             //console.log("Skipping " + keys[0]);
+            continue;
+        }
+        // Skip aborted *samples*
+        if (v["Status"] == "Aborted") {
             continue;
         }
         // skip closed projects
@@ -959,6 +983,10 @@ function generateSeqLoadDataset(json, cmpDate) {
         var aborted_date = v["Aborted date"];
         if (aborted_date != null) {
             //console.log("Skipping " + keys[0]);
+            continue;
+        }
+        // Skip aborted *samples*
+        if (v["Status"] == "Aborted") {
             continue;
         }
         // skip closed projects
