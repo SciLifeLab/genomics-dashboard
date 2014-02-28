@@ -196,6 +196,10 @@ circle {
   shape-rendering: crispEdges;
 }
 
+#ongoing_bc_plot svg text {
+    pointer-events: none;    
+}
+
 #fs_prog_bc h2 {
     margin-bottom: 5px;
 }
