@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>Genomics Production Dashboard</title>
+		<script type="text/javascript" src="d3/d3.v3.js"></script>
+        <script type="text/javascript" src="d3/box.js"></script>
+	    <script type="text/javascript" src="d3/colorbrewer.js"></script>
+		<script type="text/javascript" src="dashboard.js"></script>
+		<!--<script type="text/javascript" src="dashboard_problems.js"></script>-->
+		<script type="text/javascript" src="stack.js"></script>
+		<script type="text/javascript" src="goals.js"></script>
+        <link rel="stylesheet" type="text/css" href="goals.css">
+	</head>
+	<body>
+        <!--Empty invisible tooltip div-->
+        <div class="tooltip" style="opacity: 0"></div>
+  
+
+		<div id="header">
+            <div id="header_title">
+                <h1 id="title">Genomics Process status</h1>
+                <span id="date"></span> - <em></em>
+            </div>
+        </div>
+        <br class="clear">
+        <div id="status_panels">
+            <!--Delivery time run chart-->
+            <div id="total_del_times" class="times_panel">
+                <h2>Total delivery times - <span id="total_legend">RNA, DNA, and SeqCap projects</span></h2>
+                <h3>Production (Queue date - All samples sequenced)</h3>
+                <div id="total_rc">
+                    <h3>Run chart</h3>
+                    <!--<h3 id="total_rc_legend">All projects</h3>-->
+                </div>
+                <div id="total_bp" class="boxplot_panel">
+                    <h3>Variability</h3>
+                    <!--<h3 id="total_bp_legend">All projects</h3>-->
+                </div>
+            </div>
+            
+        </div>
+		<script type="text/javascript">
+            // Reload window every hour
+            var oneHour = 1000*60*60;
+            window.setTimeout(function() {
+                        window.location.reload();
+                },
+                //20000
+                oneHour
+            );
+
+            var today = new Date(); // today
+			var twelveWeeks = new Date( today.getTime() - 12 * 7 * 1000*60*60*24);
+			var twentysixWeeks = new Date( today.getTime() - 26 * 7 * 1000*60*60*24);
+            var yearStart = new Date("2014-01-01");
+            //console.log("yearStart:" + yearStart + ", today: " + today);
+			var winWidth = window.innerWidth;
+            var winHeight = window.innerHeight;
+            //console.log("w: " + winWidth + ", h: " + winHeight);
+			
+			var panelHeights = (winHeight - 210) / 2;						
+			var drawWidth = (winWidth - 500);
+            
+            var rc_width = drawWidth / 2;
+            
+            //var dateStr = today.getFullYear() + "-" + today.getMonth() + "-" + today.getDate();    
+            var dateStr = today.toDateString();    
+			d3.select("#date")
+                .text(dateStr);
+            
+            /* 
+            * Database server source
+            */ 
+            var dbSource = "local" // local, dev or "" (=tools)
+            
+            /*
+             * Get data for projects & draw
+             */
+            var dataUrl = "getCouchDbData.php?db=projects&design=genomics-dashboard&view=dates_and_load_per_sample&reduce=false&" + dbSource;
+            d3.json(dataUrl, function(json){
+                var dataSet = generateStandardRunchartDataset (json, yearStart, today, "Queue date", "All samples sequenced");
+                console.log(dataSet);
+                var totalBpDataset = generateFilteredGenericBoxDataset(dataSet, 4, 6);
+                drawGoalRunChart(dataSet, "total_rc", [6], rc_width, panelHeights, 30);
+                drawBoxPlot(totalBpDataset, "total_bp", panelHeights);
+ 
+                //drawProcessPanels(json, today, twelveWeeks, panelHeights, drawWidth);
+            });
+                    
+
+ 
+		</script>
+
+
+	</body>
+</html>
