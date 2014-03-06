@@ -34,6 +34,13 @@ circle {
   /*fill: #5B87FF;*/
 }
 
+.first_series_heading {
+    color: #5B87FF;
+}
+.second_series_heading {
+    color: #FFC447;
+}
+
 .axis path,
 .axis line {
   fill: none;
