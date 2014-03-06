@@ -95,7 +95,8 @@
             </div>
             <div id="rec_ctrl_del_times" class="times_panel">
                 <h2 id="rec_ctrl_legend">Rec control delivery times - All projects</h2>
-                <h3>Production (Open date - Queue date)</h3>
+                <h3 class="first_series_heading">Production (Open date - Queue date)</h3>
+                <h3 class="second_series_heading">Production (Rec ctrl start - Queue date)</h3>
                 <div id="rec_ctrl_rc">
                     <h3>Run chart</h3>
                     <!--<h3 id="rec_ctrl_rc_legend">All projects</h3>-->
@@ -107,7 +108,8 @@
             </div>
             <div id="lib_prep_del_times" class="times_panel">
                 <h2 id="lib_prep_legend">Lib prep delivery times - Lib prep projects</h2>
-                <h3>Production (Queue date - Library QC)</h3>
+                <h3 class="first_series_heading">Production (Queue date - Library QC)</h3>
+                <h3 class="second_series_heading">Production (Lib prep start - Library QC)</h3>
                 <div id="lib_prep_rc">
                     <h3>Run chart</h3>
                     <!--<h3 id="lib_prep_rc_legend">All projects</h3>-->
@@ -119,7 +121,8 @@
             </div>
             <div id="seq_del_times" class="times_panel">
                 <h2>Sequencing delivery times - <span id="seq_legend">All projects</span></h2>
-                <h3>Production (Library QC - All samples sequenced)</h3>
+                <h3 class="first_series_heading">Production (Library QC - All samples sequenced)</h3>
+                <h3 class="second_series_heading">Production (Seq start - All samples sequenced)</h3>
                 <div id="seq_rc">
                     <h3>Run chart</h3>
                     <!--<h3 id="seq_rc_legend">All projects</h3>-->
@@ -185,12 +188,13 @@
             /* 
             * Database server source
             */ 
-            var dbSource = "" // local, dev or "" (=tools)
+            var dbSource = "local" // local, dev or "" (=tools)
             
             /*
              * Get data for projects & draw
              */
-            var dataUrl = "getCouchDbData.php?db=projects&design=genomics-dashboard&view=dates_and_load_per_sample&reduce=false&" + dbSource;
+            //var dataUrl = "getCouchDbData.php?db=projects&design=genomics-dashboard&view=dates_and_load_per_sample&reduce=false&" + dbSource;
+            var dataUrl = "getCouchDbData.php?db=projects&design=genomics-dashboard&view=dates_and_load_per_sample_v2&reduce=false&" + dbSource;
             d3.json(dataUrl, function(json){
                 drawProcessPanels(json, today, twelveWeeks, panelHeights, drawWidth);
             });
