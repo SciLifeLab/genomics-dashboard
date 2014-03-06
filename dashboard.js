@@ -196,6 +196,10 @@ function reduceToProject(jsonview) {
             "value": newValue
         }
         outRows.push(newRow);
+        // a bit of debugging code
+        if (pid == "P931") {
+            console.log(newRow);
+        }
     }
     
     // sort in queue order 
@@ -994,20 +998,24 @@ function drawProcessPanels(sample_json, plotDate, startDate, height, draw_width)
     // keys for time calculations
     var total = {
         startKey: "Queue date",
-        endKey: "All samples sequenced"
+        endKey: "All samples sequenced" // Change to All raw data delivered when this works
     };
     var recCtrl = {
         startKey: "Arrival date",
+        startKey2: "Rec ctrl start",
         endKey: "Queue date",
         endKey2: "Rec ctrl start"
     };
     var libPrep = {
         startKey: "Queue date",
+        startKey2: "Lib prep start",
         endKey: "QC library finished"
     };
     var seq = {
         startKey: "QC library finished",
-        endKey: "All samples sequenced"
+        startKey2: "Sequencing start",
+        startKey3: "All samples sequenced", // start for bioinfo qc
+        endKey: "All samples sequenced" // Change to All raw data delivered when this works
     };
     
     
@@ -1082,22 +1090,31 @@ function drawProcessPanels(sample_json, plotDate, startDate, height, draw_width)
     /* **** RecCtrl delivery times data sets **** */
     var recCtrlDataset = generateRunchartDataset(reduced, startDate, plotDate, recCtrl.startKey, recCtrl.endKey, true);
     // add second time series
-    recCtrlDataset = addToRunchartDataset(reduced, recCtrlDataset, startDate, plotDate, recCtrl.startKey, recCtrl.endKey2, true);
+    recCtrlDataset = addToRunchartDataset(reduced, recCtrlDataset, startDate, plotDate, recCtrl.startKey2, recCtrl.endKey, true);
     var recCtrlBpDataset = generateGenericBoxDataset(recCtrlDataset, 5); // boxplot to use second time series
 
     /* **** Libprep delivery times data sets **** */
     var libPrepDataset = generateRunchartDataset(reduced, startDate, plotDate, libPrep.startKey, libPrep.endKey, true, "Finished library", true); 
+    // add second time series
+    libPrepDataset = addToRunchartDataset(reduced, libPrepDataset, startDate, plotDate, libPrep.startKey2, libPrep.endKey, true);
     var libPrepBpDataset = generateGenericBoxDataset(libPrepDataset, 4);
     
     /* **** Seq datasets for all projects **** */
     var seqDataset = generateRunchartDataset(reduced, startDate, plotDate, seq.startKey, seq.endKey, true); 
+        // add second time series
+    seqDataset = addToRunchartDataset(reduced, seqDataset, startDate, plotDate, seq.startKey2, seq.endKey, true);
     var seqBpDataset = generateGenericBoxDataset(seqDataset, 4);
+
         /* ** Subsets ** */
         // MiSeq projects
     var seqMiSeqDataset = generateRunchartDataset(reduced, startDate, plotDate, seq.startKey, seq.endKey, true, "MiSeq"); 
+            // add second time series
+    seqMiSeqDataset = addToRunchartDataset(reduced, seqMiSeqDataset, startDate, plotDate, seq.startKey2, seq.endKey, true, "MiSeq");
     var seqBpMiSeqDataset = generateGenericBoxDataset(seqMiSeqDataset, 4);
         // HiSeq projects
     var seqHiSeqDataset = generateRunchartDataset(reduced, startDate, plotDate, seq.startKey, seq.endKey, true, "HiSeq"); 
+            // add second time series
+    seqHiSeqDataset = addToRunchartDataset(reduced, seqHiSeqDataset, startDate, plotDate, seq.startKey2, seq.endKey, true, "HiSeq");
     var seqBpHiSeqDataset =generateGenericBoxDataset(seqHiSeqDataset, 4);
 
     
