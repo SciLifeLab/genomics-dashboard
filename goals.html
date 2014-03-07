@@ -77,7 +77,7 @@
             /*
              * Get data for projects & draw
              */
-            var dataUrl = "getCouchDbData.php?db=projects&design=genomics-dashboard&view=dates_and_load_per_sample_v2&reduce=false&" + dbSource;
+            var dataUrl = "getCouchDbData.php?db=projects&design=genomics-dashboard&view=dates_and_load_per_sample_dev&reduce=false&" + dbSource;
             d3.json(dataUrl, function(json){
                 var reduced = reduceToProject(json);
                 console.log(reduced);
