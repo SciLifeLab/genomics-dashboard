@@ -20,14 +20,27 @@ function(doc) {
     //if(open_date < "2013-07-01") { exit; } // this filter should not be used
   }
 
+  // Find all raw data delivered (if present)
+  var all_raw_data_delivered = "0000-00-00";
+  if (doc.details["all_raw_data_delivered"] > all_raw_data_delivered) {
+    all_raw_data_delivered = doc.details["all_raw_data_delivered"];
+  }
+
   // close date
   var close_date = "0000-00-00";
   if (doc["close_date"] > close_date) {
     close_date = doc["close_date"];
   }
 
+  // Find aborted date (if present)
+  var aborted_date = "0000-00-00";
+  if (doc.details["aborted"] > aborted_date) {
+    aborted_date = doc.details["aborted"];
+  }
+
   // go through each sample
   for (sample in doc["samples"]){
+
     // Find Rec ctrl start
     var initial_qc_start = "0000-00-00";
     if(doc["samples"][sample]["first_initial_qc_start_date"] > initial_qc_start) { 
@@ -105,6 +118,11 @@ function(doc) {
 
     } // library prep
 
+    // sample status
+    var status = doc["samples"][sample]["details"]["status_(manual)"];
+    if(!status) { status = null; }
+
+ 
     if (sequence_start_date == "9999-99-99") { sequence_start_date = "0000-00-00"; }
     //NEW! Emit what we have all variables should be set before so will be ok at emit
     //if (!("library_prep" in doc["samples"][sample])) {
@@ -116,11 +134,13 @@ function(doc) {
     KPI["QC library finished"] = final_validation;
     KPI["Sequencing start"] = sequence_start_date;
     KPI["All samples sequenced"] = final_sequence_date;
+    KPI["All raw data delivered"] = all_raw_data_delivered;
     KPI["Close date"] = close_date;
+    KPI["Aborted date"]  = aborted_date;
     KPI["Samples"] = 1;
     KPI["Lanes"] = lanes_per_sample;
+    KPI["Status"] = status;
     
-//    emit([doc["project_id"], doc["project_name"], application, sequencing_platform, sample], KPI);
     emit([doc["project_id"], type, application, sequencing_platform, sample], KPI);
     
   } // sample
