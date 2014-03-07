@@ -600,6 +600,7 @@ function drawRunChart(dataset, divID, clines, width, height, padding, maxY) {
     }
     // Create circles
     // draw circles and lines for each time series
+    var circleRadius = 3;
     var lines = [];
     var circles = svg.selectAll("circle")
            .data(dataset)
@@ -622,14 +623,14 @@ function drawRunChart(dataset, divID, clines, width, height, padding, maxY) {
                 return yScale(cyPos);
            })
            .attr("fill", color)
-           .attr("r", 4)
+           .attr("r", circleRadius)
            .on("mouseover", function(d) {
                 var timeString = "";
                 for (j = 4; j < (numSeries + 4); j++) {
                     timeString += d[j] + " days<br/>";
                 }
                 d3.select(this)
-                  .attr("r", 7)
+                  .attr("r", circleRadius + 2)
                   ;
                 // Make tooltip div visible and fill with appropriate text
                 tooltipDiv.transition()		
@@ -646,7 +647,7 @@ function drawRunChart(dataset, divID, clines, width, height, padding, maxY) {
            })
            .on("mouseout", function(d) { //Remove the tooltip
                 d3.select(this)
-                  .attr("r", 4)
+                  .attr("r", circleRadius)
                   ;
                 // Make tooltip div invisible & reset height
                 tooltipDiv.transition()		
