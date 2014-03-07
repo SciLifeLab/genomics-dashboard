@@ -213,7 +213,7 @@ function generateRecCtrlStackDataset(json, cmpDate) {
 
         // skip aborted projects
         var aborted_date = v["Aborted date"];
-        if (aborted_date != null) {
+        if (aborted_date != "0000-00-00") {
             //console.log("Skipping " + keys[0]);
             continue;
         }
@@ -322,7 +322,7 @@ function generateQueueLaneLPStackDataset(json, cmpDate) {
 
         // skip aborted projects
         var aborted_date = v["Aborted date"];
-        if (aborted_date != null) {
+        if (aborted_date != "0000-00-00") {
             //console.log("Skipping " + keys[0]);
             continue;
         }
@@ -444,7 +444,7 @@ function generateQueueLaneFLStackDataset(json, cmpDate) {
 
         // skip aborted projects
         var aborted_date = v["Aborted date"];
-        if (aborted_date != null) {
+        if (aborted_date != "0000-00-00") {
             //console.log("Skipping " + keys[0]);
             continue;
         }
@@ -580,7 +580,7 @@ function generateQueueSampleStackDataset(json, cmpDate) {
         var v = rows[i]["value"];
         // skip aborted projects
         var aborted_date = v["Aborted date"];
-        if (aborted_date != null) {
+        if (aborted_date != "0000-00-00") {
             //console.log("Skipping " + keys[0]);
             continue;
         }
@@ -745,7 +745,7 @@ function generateLibprepSampleLoadDataset(json, cmpDate) {
         var v = rows[i]["value"];
         // skip aborted projects
         var aborted_date = v["Aborted date"];
-        if (aborted_date != null) {
+        if (aborted_date != "0000-00-00") {
             //console.log("Skipping " + keys[0]);
             continue;
         }
@@ -861,7 +861,7 @@ function generateLibprepLaneLoadDataset(json, cmpDate) {
         var v = rows[i]["value"];
         // skip aborted projects
         var aborted_date = v["Aborted date"];
-        if (aborted_date != null) {
+        if (aborted_date != "0000-00-00") {
             //console.log("Skipping " + keys[0]);
             continue;
         }
@@ -981,7 +981,7 @@ function generateSeqLoadDataset(json, cmpDate) {
         var v = rows[i]["value"];
         // skip aborted projects
         var aborted_date = v["Aborted date"];
-        if (aborted_date != null) {
+        if (aborted_date != "0000-00-00") {
             //console.log("Skipping " + keys[0]);
             continue;
         }

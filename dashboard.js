@@ -117,7 +117,7 @@ function reduceToProject(jsonview) {
         
         // skip aborted *projects*
         var aborted_date = values["Aborted date"];
-        if (aborted_date != null) {
+        if (aborted_date != "0000-00-00") {
             //console.log("Skipping " + keys[0]);
             continue;
         }
@@ -988,8 +988,9 @@ function drawBarchartPlot(dataset, divID, width, height, bottom_padding, maxY) {
  */
 function drawProcessPanels(sample_json, plotDate, startDate, height, draw_width){
     // Reduce sample data to project level
+    //console.log(sample_json);
     var reduced = reduceToProject(sample_json);
-    //console.log(reduced);
+    console.log(reduced);
 
     //// Add invisible tooltip div for mouseovers
     //var tooltipDiv = d3.select("body").append("div")	
