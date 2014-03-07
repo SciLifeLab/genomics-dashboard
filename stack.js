@@ -217,8 +217,8 @@ function generateRecCtrlStackDataset(json, cmpDate) {
             //console.log("Skipping " + keys[0]);
             continue;
         }
-        // Skip aborted *samples*
-        if (v["Status"] == "Aborted") {
+        // Skip aborted or finished *samples*
+        if (v["Status"] == "Aborted" || v["Status"] == "Finished" ) {
             continue;
         }
         
@@ -326,8 +326,8 @@ function generateQueueLaneLPStackDataset(json, cmpDate) {
             //console.log("Skipping " + keys[0]);
             continue;
         }
-        // Skip aborted *samples*
-        if (v["Status"] == "Aborted") {
+        // Skip aborted or finished *samples*
+        if (v["Status"] == "Aborted" || v["Status"] == "Finished" ) {
             continue;
         }
         
@@ -448,8 +448,8 @@ function generateQueueLaneFLStackDataset(json, cmpDate) {
             //console.log("Skipping " + keys[0]);
             continue;
         }
-        // Skip aborted *samples*
-        if (v["Status"] == "Aborted") {
+        // Skip aborted or finished *samples*
+        if (v["Status"] == "Aborted" || v["Status"] == "Finished" ) {
             continue;
         }
         // skip closed projects
@@ -584,8 +584,8 @@ function generateQueueSampleStackDataset(json, cmpDate) {
             //console.log("Skipping " + keys[0]);
             continue;
         }
-        // Skip aborted *samples*
-        if (v["Status"] == "Aborted") {
+        // Skip aborted or finished *samples*
+        if (v["Status"] == "Aborted" || v["Status"] == "Finished" ) {
             continue;
         }
         // skip closed projects
@@ -749,8 +749,8 @@ function generateLibprepSampleLoadDataset(json, cmpDate) {
             //console.log("Skipping " + keys[0]);
             continue;
         }
-        // Skip aborted *samples*
-        if (v["Status"] == "Aborted") {
+        // Skip aborted or finished *samples*
+        if (v["Status"] == "Aborted" || v["Status"] == "Finished" ) {
             continue;
         }
         // skip closed projects
@@ -865,8 +865,8 @@ function generateLibprepLaneLoadDataset(json, cmpDate) {
             //console.log("Skipping " + keys[0]);
             continue;
         }
-        // Skip aborted *samples*
-        if (v["Status"] == "Aborted") {
+        // Skip aborted or finished *samples*
+        if (v["Status"] == "Aborted" || v["Status"] == "Finished" ) {
             continue;
         }
         // skip closed projects
@@ -985,8 +985,8 @@ function generateSeqLoadDataset(json, cmpDate) {
             //console.log("Skipping " + keys[0]);
             continue;
         }
-        // Skip aborted *samples*
-        if (v["Status"] == "Aborted") {
+        // Skip aborted or finished *samples*
+        if (v["Status"] == "Aborted" || v["Status"] == "Finished" ) {
             continue;
         }
         // skip closed projects
