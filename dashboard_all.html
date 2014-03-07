@@ -84,6 +84,7 @@
             <div id="total_del_times" class="times_panel">
                 <h2>Total delivery times - <span id="total_legend">All projects</span></h2>
                 <h3>Production (Queue date - All samples sequenced)</h3>
+                <h3 style="visibility: hidden">Hidden heading</h3> <!--To make drawing panels level with each other-->
                 <div id="total_rc">
                     <h3>Run chart</h3>
                     <!--<h3 id="total_rc_legend">All projects</h3>-->
@@ -188,13 +189,13 @@
             /* 
             * Database server source
             */ 
-            var dbSource = "local" // local, dev or "" (=tools)
+            var dbSource = "dev" // local, dev or "" (=tools)
             
             /*
              * Get data for projects & draw
              */
-            //var dataUrl = "getCouchDbData.php?db=projects&design=genomics-dashboard&view=dates_and_load_per_sample&reduce=false&" + dbSource;
-            var dataUrl = "getCouchDbData.php?db=projects&design=genomics-dashboard&view=dates_and_load_per_sample_v2&reduce=false&" + dbSource;
+            var dataUrl = "getCouchDbData.php?db=projects&design=genomics-dashboard&view=dates_and_load_per_sample&reduce=false&" + dbSource;
+            //var dataUrl = "getCouchDbData.php?db=projects&design=genomics-dashboard&view=dates_and_load_per_sample_dev&reduce=false&" + dbSource;
             d3.json(dataUrl, function(json){
                 drawProcessPanels(json, today, twelveWeeks, panelHeights, drawWidth);
             });
