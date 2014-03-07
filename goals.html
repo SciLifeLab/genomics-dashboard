@@ -77,9 +77,12 @@
             /*
              * Get data for projects & draw
              */
-            var dataUrl = "getCouchDbData.php?db=projects&design=genomics-dashboard&view=dates_and_load_per_sample&reduce=false&" + dbSource;
+            var dataUrl = "getCouchDbData.php?db=projects&design=genomics-dashboard&view=dates_and_load_per_sample_v2&reduce=false&" + dbSource;
             d3.json(dataUrl, function(json){
-                var dataSet = generateStandardRunchartDataset (json, yearStart, today, "Queue date", "All samples sequenced");
+                var reduced = reduceToProject(json);
+                console.log(reduced);
+
+                var dataSet = generateStandardRunchartDataset (reduced, yearStart, today, "Queue date", "All samples sequenced");
                 console.log(dataSet);
                 var totalBpDataset = generateFilteredGenericBoxDataset(dataSet, 4, 6);
                 drawGoalRunChart(dataSet, "total_rc", [6], rc_width, panelHeights, 30);

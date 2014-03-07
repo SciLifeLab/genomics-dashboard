@@ -37,7 +37,7 @@ function generateStandardRunchartDataset (jsonview, dateRangeStart, dateRangeEnd
             var sampleDateTo = values[dateToKey];
             var done = true;
             if (sampleDateTo == "0000-00-00") {
-                sampleDateTo = dateFormat(dateRangeEnd);
+                sampleDateTo = dateFormat(dateRangeEnd); // set to dateRangeEnd (e.g. comparison date)
                 done = false;
             }
             if(projects[pid] == undefined) {
