@@ -785,7 +785,7 @@ function drawRunChart(dataset, divID, clines, width, height, padding, maxY) {
  */
 function drawBoxPlot(dataset, divID, plotHeight, maxY, bottom_margin, timeseries) {
     var margin = {top: 30, right: 20, bottom: 30, left: 20},
-        width = 60 - margin.left - margin.right,
+        width = 54 - margin.left - margin.right,
         //height = 450 - margin.top - margin.bottom;
         //height = 400 - margin.top - margin.bottom;
         height = plotHeight - margin.top - margin.bottom;
@@ -1029,7 +1029,8 @@ function drawProcessPanels(sample_json, plotDate, startDate, height, draw_width)
     /* 
      *  4 run chart panels on the lower half
      */ 
-    var rc_width = draw_width / 4; // 
+    //var rc_width = draw_width / 4; // 
+    var rc_width = draw_width / 4 - 20; // take away some width to fit in extra boxplots
 
     /* Upper half panels 
      ***********************************************************
@@ -1093,19 +1094,22 @@ function drawProcessPanels(sample_json, plotDate, startDate, height, draw_width)
     var recCtrlDataset = generateRunchartDataset(reduced, startDate, plotDate, recCtrl.startKey, recCtrl.endKey, true);
     // add second time series
     recCtrlDataset = addToRunchartDataset(reduced, recCtrlDataset, startDate, plotDate, recCtrl.startKey2, recCtrl.endKey, true);
-    var recCtrlBpDataset = generateGenericBoxDataset(recCtrlDataset, 5); // boxplot to use second time series
+    var recCtrlBpDataset = generateGenericBoxDataset(recCtrlDataset, 4); // boxplot to use second time series
+    var recCtrlBpDataset2 = generateGenericBoxDataset(recCtrlDataset, 5); // boxplot to use second time series
 
     /* **** Libprep delivery times data sets **** */
     var libPrepDataset = generateRunchartDataset(reduced, startDate, plotDate, libPrep.startKey, libPrep.endKey, true, "Finished library", true); 
     // add second time series
     libPrepDataset = addToRunchartDataset(reduced, libPrepDataset, startDate, plotDate, libPrep.startKey2, libPrep.endKey, true);
     var libPrepBpDataset = generateGenericBoxDataset(libPrepDataset, 4);
+    var libPrepBpDataset2 = generateGenericBoxDataset(libPrepDataset, 5);
     
     /* **** Seq datasets for all projects **** */
     var seqDataset = generateRunchartDataset(reduced, startDate, plotDate, seq.startKey, seq.endKey, true); 
         // add second time series
     seqDataset = addToRunchartDataset(reduced, seqDataset, startDate, plotDate, seq.startKey2, seq.endKey, true);
     var seqBpDataset = generateGenericBoxDataset(seqDataset, 4);
+    var seqBpDataset2 = generateGenericBoxDataset(seqDataset, 5);
 
         /* ** Subsets ** */
         // MiSeq projects
@@ -1113,11 +1117,13 @@ function drawProcessPanels(sample_json, plotDate, startDate, height, draw_width)
             // add second time series
     seqMiSeqDataset = addToRunchartDataset(reduced, seqMiSeqDataset, startDate, plotDate, seq.startKey2, seq.endKey, true, "MiSeq");
     var seqBpMiSeqDataset = generateGenericBoxDataset(seqMiSeqDataset, 4);
+    var seqBpMiSeqDataset2 = generateGenericBoxDataset(seqMiSeqDataset, 5);
         // HiSeq projects
     var seqHiSeqDataset = generateRunchartDataset(reduced, startDate, plotDate, seq.startKey, seq.endKey, true, "HiSeq"); 
             // add second time series
     seqHiSeqDataset = addToRunchartDataset(reduced, seqHiSeqDataset, startDate, plotDate, seq.startKey2, seq.endKey, true, "HiSeq");
     var seqBpHiSeqDataset =generateGenericBoxDataset(seqHiSeqDataset, 4);
+    var seqBpHiSeqDataset2 =generateGenericBoxDataset(seqHiSeqDataset, 5);
 
     
     // get highest value in the runchart data sets to set a common scale
@@ -1129,17 +1135,20 @@ function drawProcessPanels(sample_json, plotDate, startDate, height, draw_width)
 
     /* ***** Draw the panels with the first data **** */
     // Redrawing of subsets for total & seq times is done in the setInterval call below
-    drawRunChart(totalRcDataset, "total_rc", [6, 4, 10], rc_width, height, 30);
+    drawRunChart(totalRcDataset, "total_rc", [6, 4, 10], rc_width + 10, height, 30);
     drawBoxPlot(totalBpDataset, "total_bp", height);
     
     drawRunChart(recCtrlDataset, "rec_ctrl_rc", [2], rc_width, height, 30, maxStepY);
-    drawBoxPlot(recCtrlBpDataset, "rec_ctrl_bp", height, maxStepY, 30, 2); // force css for class box2
+    drawBoxPlot(recCtrlBpDataset, "rec_ctrl_bp1", height, maxStepY, 30, 1); // force css for class box1
+    drawBoxPlot(recCtrlBpDataset2, "rec_ctrl_bp2", height, maxStepY, 30, 2); // force css for class box2
         
     drawRunChart(libPrepDataset, "lib_prep_rc", [2.5], rc_width, height, 30, maxStepY); 
-    drawBoxPlot(libPrepBpDataset, "lib_prep_bp", height, maxStepY); 
+    drawBoxPlot(libPrepBpDataset, "lib_prep_bp1", height, maxStepY, 30, 1); 
+    drawBoxPlot(libPrepBpDataset2, "lib_prep_bp2", height, maxStepY, 30, 2); // force css for class box2
     
     drawRunChart(seqDataset, "seq_rc", [3], rc_width, height, 30, maxStepY);
-    drawBoxPlot(seqBpDataset, "seq_bp", height, maxStepY);
+    drawBoxPlot(seqBpDataset, "seq_bp1", height, maxStepY, 30, 1);
+    drawBoxPlot(seqBpDataset2, "seq_bp2", height, maxStepY, 30, 2); // force css for class box2
     
     
 
@@ -1163,7 +1172,8 @@ function drawProcessPanels(sample_json, plotDate, startDate, height, draw_width)
                 d3.select("#total_legend").attr("style", "color: default").text("All projects");
                 
                 drawRunChart(seqDataset, "seq_rc", [3], rc_width, height, 30, maxStepY);
-                drawBoxPlot(seqBpDataset, "seq_bp", height, maxStepY);
+                drawBoxPlot(seqBpDataset, "seq_bp1", height, maxStepY);
+                drawBoxPlot(seqBpDataset2, "seq_bp2", height, maxStepY, 30, 2);
                 d3.select("#seq_legend").attr("style", "color: default").text("All projects");
                 
                 setNo++;
@@ -1190,7 +1200,8 @@ function drawProcessPanels(sample_json, plotDate, startDate, height, draw_width)
                 d3.select("#total_legend").attr("style", "color: orange").text("MiSeq projects");
                 
                 drawRunChart(seqMiSeqDataset, "seq_rc", [3], rc_width, height, 30, maxStepY);
-                drawBoxPlot(seqBpMiSeqDataset, "seq_bp", height, maxStepY);
+                drawBoxPlot(seqBpMiSeqDataset, "seq_bp1", height, maxStepY);
+                drawBoxPlot(seqBpMiSeqDataset2, "seq_bp2", height, maxStepY, 30, 2);
                 d3.select("#seq_legend").attr("style", "color: orange").text("MiSeq projects");
                 setNo++;
                 
@@ -1202,7 +1213,8 @@ function drawProcessPanels(sample_json, plotDate, startDate, height, draw_width)
                 d3.select("#total_legend").attr("style", "color: orange").text("HiSeq projects");
                 
                 drawRunChart(seqHiSeqDataset, "seq_rc", [3], rc_width, height, 30, maxStepY);
-                drawBoxPlot(seqBpHiSeqDataset, "seq_bp", height, maxStepY);
+                drawBoxPlot(seqBpHiSeqDataset, "seq_bp1", height, maxStepY);
+                drawBoxPlot(seqBpHiSeqDataset2, "seq_bp2", height, maxStepY, 30, 2);
                 d3.select("#seq_legend").attr("style", "color: orange").text("HiSeq projects");
                 setNo = 1;
                 
