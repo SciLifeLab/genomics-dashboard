@@ -105,6 +105,8 @@
                 <div id="rec_ctrl_bp" class="boxplot_panel">
                     <h3>Variability</h3>
                     <!--<h3 id="rec_ctrl_bp_legend">All projects</h3>-->
+                    <div id="rec_ctrl_bp1" class="boxplot_panel"></div>
+                    <div id="rec_ctrl_bp2" class="boxplot_panel"></div>
                 </div>
             </div>
             <div id="lib_prep_del_times" class="times_panel">
@@ -118,6 +120,8 @@
                 <div id="lib_prep_bp" class="boxplot_panel">
                     <h3>Variability</h3>
                     <!--<h3 id="lib_prep_bp_legend">All projects</h3>-->
+                    <div id="lib_prep_bp1" class="boxplot_panel"></div>
+                    <div id="lib_prep_bp2" class="boxplot_panel"></div>
                 </div>
             </div>
             <div id="seq_del_times" class="times_panel">
@@ -131,6 +135,8 @@
                 <div id="seq_bp" class="boxplot_panel">
                     <h3>Variability</h3>
                     <!--<h3 id="seq_bp_legend">All projects</h3>-->
+                    <div id="seq_bp1" class="boxplot_panel"></div>
+                    <div id="seq_bp2" class="boxplot_panel"></div>
                 </div>
             </div>
             <br class="clear">
@@ -180,6 +186,7 @@
 			
 			var panelHeights = (winHeight - 230) / 2;						
 			var drawWidth = (winWidth - 500);
+			//var drawWidth = (winWidth - 600);
 
             //var dateStr = today.getFullYear() + "-" + today.getMonth() + "-" + today.getDate();    
             var dateStr = today.toDateString();    
@@ -189,13 +196,13 @@
             /* 
             * Database server source
             */ 
-            var dbSource = "dev" // local, dev or "" (=tools)
+            var dbSource = "local" // local, dev or "" (=tools)
             
             /*
              * Get data for projects & draw
              */
-            var dataUrl = "getCouchDbData.php?db=projects&design=genomics-dashboard&view=dates_and_load_per_sample&reduce=false&" + dbSource;
-            //var dataUrl = "getCouchDbData.php?db=projects&design=genomics-dashboard&view=dates_and_load_per_sample_dev&reduce=false&" + dbSource;
+            //var dataUrl = "getCouchDbData.php?db=projects&design=genomics-dashboard&view=dates_and_load_per_sample&reduce=false&" + dbSource;
+            var dataUrl = "getCouchDbData.php?db=projects&design=genomics-dashboard&view=dates_and_load_per_sample_dev&reduce=false&" + dbSource;
             d3.json(dataUrl, function(json){
                 drawProcessPanels(json, today, twelveWeeks, panelHeights, drawWidth);
             });
