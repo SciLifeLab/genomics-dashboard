@@ -51,14 +51,14 @@ function generateStandardRunchartDataset (jsonview, dateRangeStart, dateRangeEnd
                                     "daydiff": daydiff(new Date(sampleDateFrom), new Date(sampleDateTo)),
                                     "done": done
                                 }
-            } else {
-                if(sampleDateFrom < projects[pid]["fromDate"]) { projects[pid]["fromDate"] = sampleDateFrom; }
-                if(sampleDateTo > projects[pid]["toDate"]) { projects[pid]["toDate"] = sampleDateTo; }
-                projects[pid]["daydiff"] = daydiff(new Date(projects[pid]["fromDate"]), new Date(projects[pid]["toDate"]));
-                projects[pid]["num_samples"]++;
-                if (projects[pid]["done"] == true && done == false) {
-                    projects[pid]["done"] = false; //set to false if one sample in the project isn't done
-                }
+            //} else {
+            //    if(sampleDateFrom < projects[pid]["fromDate"]) { projects[pid]["fromDate"] = sampleDateFrom; }
+            //    if(sampleDateTo > projects[pid]["toDate"]) { projects[pid]["toDate"] = sampleDateTo; }
+            //    projects[pid]["daydiff"] = daydiff(new Date(projects[pid]["fromDate"]), new Date(projects[pid]["toDate"]));
+            //    projects[pid]["num_samples"]++;
+            //    if (projects[pid]["done"] == true && done == false) {
+            //        projects[pid]["done"] = false; //set to false if one sample in the project isn't done
+            //    }
                 
             }
         }
