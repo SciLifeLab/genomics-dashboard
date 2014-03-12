@@ -19,6 +19,8 @@ function(doc) {
     open_date = doc["open_date"];
     //if(open_date < "2013-07-01") { exit; } // this filter should not be used
   }
+  // Find all samples sequenced (if present)
+  var ass = doc["details"]["all_samples_sequenced"];
 
   // Find all raw data delivered (if present)
   var all_raw_data_delivered = "0000-00-00";
@@ -108,8 +110,11 @@ function(doc) {
         if(sequence_start_date > LP["sample_run_metrics"][sample_run_metrics]["sequencing_start_date"]) {
           sequence_start_date = LP["sample_run_metrics"][sample_run_metrics]["sequencing_start_date"];
         }
+
         // sequence end date
-        if(final_sequence_date < LP["sample_run_metrics"][sample_run_metrics]["sequencing_finish_date"]) {
+        if (ass != null) { // checking for date set manually at project level in lims
+          final_sequence_date = ass;
+        } else if (final_sequence_date < LP["sample_run_metrics"][sample_run_metrics]["sequencing_finish_date"]) {
           final_sequence_date = LP["sample_run_metrics"][sample_run_metrics]["sequencing_finish_date"];
         } else if (final_sequence_date < LP["sample_run_metrics"][sample_run_metrics]["sequencing_run_QC_finished"]) { // some older(?) projects only have info on seq_run_QC_finished
           final_sequence_date = LP["sample_run_metrics"][sample_run_metrics]["sequencing_run_QC_finished"];
@@ -122,6 +127,10 @@ function(doc) {
     var status = doc["samples"][sample]["details"]["status_(manual)"];
     if(!status) { status = null; }
 
+    // in the case sample run metrics is missing, and all samples sequenced date is available
+    if(final_sequence_date == "0000-00-00" && ass != null) {
+      final_sequence_date = ass;
+    }
  
     if (sequence_start_date == "9999-99-99") { sequence_start_date = "0000-00-00"; }
     //NEW! Emit what we have all variables should be set before so will be ok at emit
