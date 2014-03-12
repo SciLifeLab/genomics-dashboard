@@ -110,6 +110,10 @@ function reduceToProject(jsonview) {
     var projects = {};
     var prepStarts = {};
     
+    // switches for debugging 
+    var debug = false;
+    var debugID = "P931";
+    
     // Loop through all samples
     for (var i = 0; i < rows.length; i++) {
         var keys = rows[i]["key"];
@@ -140,11 +144,14 @@ function reduceToProject(jsonview) {
                             }
             for (var valKey in values) {
                 projects[pid][valKey] = values[valKey]; // intialize all data for proj with values of first sample
+                if (debug && pid == debugID) { console.log(sid + " " + valKey + ": " + values[valKey]); }
             }
         } else {
             // update data with appropriat date, or sum up lanes or samples
             for (var valKey in values) {
                 var currVal = values[valKey];
+                if (debug && pid == debugID) { console.log(sid + " " + valKey + ": " + values[valKey]); }
+                
                 if (valKey == "Lib prep start") { // capture prep start dates
                     if (prepStarts[currVal] == undefined) { // no data for this date, so initialize array
                         prepStarts[currVal] = [ ]; 
@@ -197,9 +204,7 @@ function reduceToProject(jsonview) {
         }
         outRows.push(newRow);
         // a bit of debugging code
-        if (pid == "P931") {
-            console.log(newRow);
-        }
+        if (debug && pid == debugID) { console.log(newRow); }
     }
     
     // sort in queue order 
@@ -988,7 +993,7 @@ function drawBarchartPlot(dataset, divID, width, height, bottom_padding, maxY) {
  */
 function drawProcessPanels(sample_json, plotDate, startDate, height, draw_width){
     // Reduce sample data to project level
-    //console.log(sample_json);
+    console.log(sample_json);
     var reduced = reduceToProject(sample_json);
     console.log(reduced);
 
