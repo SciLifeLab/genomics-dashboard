@@ -112,9 +112,7 @@ function(doc) {
         }
 
         // sequence end date
-        if (ass != null) { // checking for date set manually at project level in lims
-          final_sequence_date = ass;
-        } else if (final_sequence_date < LP["sample_run_metrics"][sample_run_metrics]["sequencing_finish_date"]) {
+        if (final_sequence_date < LP["sample_run_metrics"][sample_run_metrics]["sequencing_finish_date"]) {
           final_sequence_date = LP["sample_run_metrics"][sample_run_metrics]["sequencing_finish_date"];
         } else if (final_sequence_date < LP["sample_run_metrics"][sample_run_metrics]["sequencing_run_QC_finished"]) { // some older(?) projects only have info on seq_run_QC_finished
           final_sequence_date = LP["sample_run_metrics"][sample_run_metrics]["sequencing_run_QC_finished"];
@@ -127,7 +125,7 @@ function(doc) {
     var status = doc["samples"][sample]["details"]["status_(manual)"];
     if(!status) { status = null; }
 
-    // in the case sample run metrics is missing, and all samples sequenced date is available
+    // in the case final_sequence_date has not been set, and all samples sequenced date is available
     if(final_sequence_date == "0000-00-00" && ass != null) {
       final_sequence_date = ass;
     }
