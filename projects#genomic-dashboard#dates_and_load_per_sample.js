@@ -114,8 +114,8 @@ function(doc) {
         // sequence end date
         if (final_sequence_date < LP["sample_run_metrics"][sample_run_metrics]["sequencing_finish_date"]) {
           final_sequence_date = LP["sample_run_metrics"][sample_run_metrics]["sequencing_finish_date"];
-        } else if (final_sequence_date < LP["sample_run_metrics"][sample_run_metrics]["sequencing_run_QC_finished"]) { // some older(?) projects only have info on seq_run_QC_finished
-          final_sequence_date = LP["sample_run_metrics"][sample_run_metrics]["sequencing_run_QC_finished"];
+        //} else if (final_sequence_date < LP["sample_run_metrics"][sample_run_metrics]["sequencing_run_QC_finished"]) { // some older(?) projects only have info on seq_run_QC_finished
+        //  final_sequence_date = LP["sample_run_metrics"][sample_run_metrics]["sequencing_run_QC_finished"];
         }
       } // sequence
 
