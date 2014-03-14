@@ -19,8 +19,7 @@
 
 		<div id="header">
             <div id="header_title">
-                <h1 id="title">Genomics Process status</h1>
-                <span id="date"></span> - <em></em>
+                <h1 id="title">Production performance goal</h1>
             </div>
         </div>
         <br class="clear">
@@ -28,6 +27,7 @@
             <!--Delivery time run chart-->
             <div id="total_del_times" class="times_panel">
                 <h2>Total delivery times - <span id="total_legend">RNA, DNA, and SeqCap projects</span></h2>
+                Projects started between 2014-01-01 - <span id="date"></span>
                 <h3>Production (Queue date - All samples sequenced)</h3>
                 <div id="total_rc">
                     <h3>Run chart</h3>
@@ -64,8 +64,10 @@
             
             var rc_width = drawWidth / 2;
             
-            //var dateStr = today.getFullYear() + "-" + today.getMonth() + "-" + today.getDate();    
-            var dateStr = today.toDateString();    
+            var dateFormat = d3.time.format("%Y-%m-%d");    
+            //var dateStr = today.toDateString();
+            var dateStr = dateFormat(today);
+            
 			d3.select("#date")
                 .text(dateStr);
             

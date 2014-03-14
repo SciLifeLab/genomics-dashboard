@@ -135,8 +135,8 @@ circle {
     font-size: 1.7em;
 }
 #date {
-  font-size: 1.3em;
-  font-weight: bold;
+  /*font-size: 1.3em;*/
+  /*font-weight: bold;*/
 }
 
 .times_panel {
