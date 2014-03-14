@@ -85,8 +85,9 @@
                 var dataSet = generateStandardRunchartDataset (reduced, yearStart, today, "Queue date", "All samples sequenced");
                 console.log(dataSet);
                 var totalBpDataset = generateFilteredGenericBoxDataset(dataSet, 4, 6);
+                var maxY = d3.max(dataSet, function(d) {return d[4];});
                 drawGoalRunChart(dataSet, "total_rc", [6], rc_width, panelHeights, 30);
-                drawBoxPlot(totalBpDataset, "total_bp", panelHeights);
+                drawBoxPlot(totalBpDataset, "total_bp", panelHeights, maxY);
  
                 //drawProcessPanels(json, today, twelveWeeks, panelHeights, drawWidth);
             });
