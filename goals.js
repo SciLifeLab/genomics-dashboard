@@ -95,7 +95,7 @@ function generateStandardRunchartDataset (jsonview, dateRangeStart, dateRangeEnd
                 //new Date(projects[pid]["toDate"]),
                 projects[pid]["daydiff"],
                 toDate,
-                done
+                projects[pid]["done"]
             ]);
         }
         
@@ -245,9 +245,11 @@ function drawGoalRunChart(dataset, divID, clines, width, height, padding, maxY) 
            //.attr("fill", color)
            .attr("fill", function(d) {
                 if (d[6] == false) {
-                    return timeseriesColors[2];
+                    //return timeseriesColors[2];
+                    return "red";
                 } else {
                     return timeseriesColors[0];
+                    //return "darkgreen";
                 }
             })
            .attr("r", 4)
