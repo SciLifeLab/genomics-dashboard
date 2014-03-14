@@ -47,12 +47,14 @@ circle {
   /*stroke: black;*/
   stroke: #CCCCCC;
   shape-rendering: crispEdges;
+  pointer-events: none;			
 }
 
 .axis text {
   font-family: sans-serif;
   font-size: 12px;
   fill:#CCCCCC;
+  pointer-events: none;			
 }
 
 .axis_label {
@@ -61,6 +63,7 @@ circle {
   fill: #CCCCCC;
   text-anchor: middle;
   text-anchor: end;
+  pointer-events: none;			
 }
 
 .line {
