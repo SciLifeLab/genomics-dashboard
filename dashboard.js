@@ -111,8 +111,8 @@ function reduceToProject(jsonview) {
     var prepStarts = {};
     
     // switches for debugging 
-    var debug = false;
-    var debugID = "P931";
+    var debug = true;
+    var debugID = "P946";
     
     // Loop through all samples
     for (var i = 0; i < rows.length; i++) {
