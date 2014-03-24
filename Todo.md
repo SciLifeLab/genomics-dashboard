@@ -14,8 +14,8 @@
 - [x] **Lib prep RC** 1st time series: *Queue date* to *Library QC*, 2nd time series: *Libprep start* to *Library QC*
 - [x] **Sequencing RC** 1st time series: *Library QC* to *All samples sequenced*, 2nd time series: *Sequencing start* to *All samples sequenced*
 - [x] Add different coloured explanatory headings above RC panels
-- [ ] **RecCtrl RC** Add boxplot for 1st time series
-- [ ] **Lib prep RC** Add boxplot for 2nd time series
-- [ ] **Sequencing RC** Add boxplot for 2nd time series
+- [x] **RecCtrl RC** Add boxplot for 1st time series
+- [x] **Lib prep RC** Add boxplot for 2nd time series
+- [x] **Sequencing RC** Add boxplot for 2nd time series
 - [ ] Total delivery time RC: change end date to *All raw data delivered*
 - [ ] Sequencing RC: change end date to *All raw data delivered*
