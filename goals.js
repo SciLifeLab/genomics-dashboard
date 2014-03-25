@@ -169,7 +169,7 @@ function drawGoalRunChart(dataset, divID, clines, width, height, padding, maxY) 
     // remove last two letters: "px" & turn into an integer
     tooltipHeight = parseInt(tooltipHeight.substring(0, tooltipHeight.length - 2));
     var tooltipRowHeight = "13"; // 13px per row
-    var extraTooltipRows = numSeries - 1; // add space for an extra row(s) if more than one time series
+    var extraTooltipRows = numSeries; // add space for an extra row(s) if more than one time series + 1 for the no. of samples
     var tooltipNewHeight = tooltipHeight + (extraTooltipRows * tooltipRowHeight);
     
     
@@ -243,7 +243,6 @@ function drawGoalRunChart(dataset, divID, clines, width, height, padding, maxY) 
                 }
                 return yScale(cyPos);
            })
-           //.attr("fill", color)
            .attr("fill", function(d) {
                 if (d[6] == false) {
                     //return timeseriesColors[2];
@@ -253,11 +252,17 @@ function drawGoalRunChart(dataset, divID, clines, width, height, padding, maxY) 
                     //return "darkgreen";
                 }
             })
-           .attr("r", 4)
+           .attr("r", function(d) {
+                return 1 + Math.sqrt(d[2]);    
+            })
            .on("mouseover", function(d) {
                 var timeString = "";
                 for (j = 4; j < (numSeries + 4); j++) {
-                    timeString += d[j] + " days<br/>";
+                    timeString += d[j] + " days";
+                }
+                var sizeUnit = "sample";
+                if (d[2]>1) {
+                    sizeUnit += "s";
                 }
                 d3.select(this)
                   .attr("r", 7)
@@ -268,7 +273,8 @@ function drawGoalRunChart(dataset, divID, clines, width, height, padding, maxY) 
                     .style("opacity", .9);		
                 tooltipDiv.html(d[1] + "<br/>"
                                 + dateFormat(d[3]) + "<br/>"
-                                + timeString
+                                + timeString + "<br/>"
+                                + d[2] + " " + sizeUnit
                                 )	
                     .style("left", (d3.event.pageX) + "px")		
                     .style("top", (d3.event.pageY - 28) + "px")
@@ -277,7 +283,9 @@ function drawGoalRunChart(dataset, divID, clines, width, height, padding, maxY) 
            })
            .on("mouseout", function(d) { //Remove the tooltip
                 d3.select(this)
-                  .attr("r", 4)
+                    .attr("r", function(d) {
+                         return 1 + Math.sqrt(d[2]);    
+                     })
                   ;
                 // Make tooltip div invisible & reset height
                 tooltipDiv.transition()		
