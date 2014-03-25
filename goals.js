@@ -35,6 +35,7 @@ function generateStandardRunchartDataset (jsonview, dateRangeStart, dateRangeEnd
             
             var sampleDateFrom = values[dateFromKey];
             var sampleDateTo = values[dateToKey];
+            var numSamples = values["Samples"];
             var done = true;
             if (sampleDateTo == "0000-00-00") {
                 sampleDateTo = dateFormat(dateRangeEnd); // set to dateRangeEnd (e.g. comparison date)
@@ -45,7 +46,7 @@ function generateStandardRunchartDataset (jsonview, dateRangeStart, dateRangeEnd
                                     "type": type,
                                     "appl": appl,
                                     "pf": pf,
-                                    "num_samples": 1,
+                                    "num_samples": numSamples,
                                     "fromDate": sampleDateFrom,
                                     "toDate": sampleDateTo,
                                     "daydiff": daydiff(new Date(sampleDateFrom), new Date(sampleDateTo)),
