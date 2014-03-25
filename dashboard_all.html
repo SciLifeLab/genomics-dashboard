@@ -201,8 +201,8 @@
             /*
              * Get data for projects & draw
              */
-            //var dataUrl = "getCouchDbData.php?db=projects&design=genomics-dashboard&view=dates_and_load_per_sample&reduce=false&" + dbSource;
-            var dataUrl = "getCouchDbData.php?db=projects&design=genomics-dashboard&view=dates_and_load_per_sample_dev&reduce=false&" + dbSource;
+            var dataUrl = "getCouchDbData.php?db=projects&design=genomics-dashboard&view=dates_and_load_per_sample&reduce=false&" + dbSource;
+            //var dataUrl = "getCouchDbData.php?db=projects&design=genomics-dashboard&view=dates_and_load_per_sample_dev&reduce=false&" + dbSource;
             d3.json(dataUrl, function(json){
                 drawProcessPanels(json, today, twelveWeeks, panelHeights, drawWidth);
             });
