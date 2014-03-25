@@ -11,7 +11,7 @@ var timeseriesColors = ["#5B87FF", "#FFC447", "#865BFF", "#FFE147"]; // colors f
  */
 function daydiff(date1, date2) { 
         var day = 1000*60*60*24;
-        var diff = Math.ceil((date2.getTime()-date1.getTime())/(day));
+        var diff = Math.floor((date2.getTime()-date1.getTime())/(day));
         return diff;				
 }
 
@@ -110,10 +110,27 @@ function reduceToProject(jsonview) {
     var projects = {};
     var prepStarts = {};
     
+    // switches for debugging 
+    var debug = true;
+    var debugID = "P946";
+    
     // Loop through all samples
     for (var i = 0; i < rows.length; i++) {
         var keys = rows[i]["key"];
         var values = rows[i]["value"];
+        
+        // skip aborted *projects*
+        var aborted_date = values["Aborted date"];
+        if (aborted_date != "0000-00-00") {
+            //console.log("Skipping " + keys[0]);
+            continue;
+        }
+        // Skip aborted *samples*
+        if (values["Status"] == "Aborted") {
+            continue;
+        }
+
+        
         var pid = keys[0]; // project id
         var type = keys[1]; // type = Production || Applications
         var appl = keys[2]; // application
@@ -127,17 +144,21 @@ function reduceToProject(jsonview) {
                             }
             for (var valKey in values) {
                 projects[pid][valKey] = values[valKey]; // intialize all data for proj with values of first sample
+                if (debug && pid == debugID) { console.log(sid + " " + valKey + ": " + values[valKey]); }
             }
         } else {
             // update data with appropriat date, or sum up lanes or samples
             for (var valKey in values) {
                 var currVal = values[valKey];
+                if (debug && pid == debugID) { console.log(sid + " " + valKey + ": " + values[valKey]); }
+                
                 if (valKey == "Lib prep start") { // capture prep start dates
                     if (prepStarts[currVal] == undefined) { // no data for this date, so initialize array
                         prepStarts[currVal] = [ ]; 
                     }
                     prepStarts[currVal].push( projects[pid]); // add project object   
                 }
+                // set values
                 if(valKey == "Samples" || valKey == "Lanes") {
                     projects[pid][valKey] += values[valKey];
                 } else if (valKey.indexOf("start") != -1 ) { // get earliest start dates
@@ -182,6 +203,8 @@ function reduceToProject(jsonview) {
             "value": newValue
         }
         outRows.push(newRow);
+        // a bit of debugging code
+        if (debug && pid == debugID) { console.log(newRow); }
     }
     
     // sort in queue order 
@@ -582,6 +605,7 @@ function drawRunChart(dataset, divID, clines, width, height, padding, maxY) {
     }
     // Create circles
     // draw circles and lines for each time series
+    var circleRadius = 3;
     var lines = [];
     var circles = svg.selectAll("circle")
            .data(dataset)
@@ -604,14 +628,14 @@ function drawRunChart(dataset, divID, clines, width, height, padding, maxY) {
                 return yScale(cyPos);
            })
            .attr("fill", color)
-           .attr("r", 4)
+           .attr("r", circleRadius)
            .on("mouseover", function(d) {
                 var timeString = "";
                 for (j = 4; j < (numSeries + 4); j++) {
                     timeString += d[j] + " days<br/>";
                 }
                 d3.select(this)
-                  .attr("r", 7)
+                  .attr("r", circleRadius + 2)
                   ;
                 // Make tooltip div visible and fill with appropriate text
                 tooltipDiv.transition()		
@@ -628,7 +652,7 @@ function drawRunChart(dataset, divID, clines, width, height, padding, maxY) {
            })
            .on("mouseout", function(d) { //Remove the tooltip
                 d3.select(this)
-                  .attr("r", 4)
+                  .attr("r", circleRadius)
                   ;
                 // Make tooltip div invisible & reset height
                 tooltipDiv.transition()		
@@ -639,7 +663,7 @@ function drawRunChart(dataset, divID, clines, width, height, padding, maxY) {
            })
            .on("click", function(d) {
                     var projID = d[1];
-                    var url = "http://genomics-status.scilifelab.se/projects/" + projID;
+                    var url = "https://genomics-status.scilifelab.se/projects/" + projID;
                     window.open(url, "genomics-status");
            })
         ;
@@ -766,7 +790,7 @@ function drawRunChart(dataset, divID, clines, width, height, padding, maxY) {
  */
 function drawBoxPlot(dataset, divID, plotHeight, maxY, bottom_margin, timeseries) {
     var margin = {top: 30, right: 20, bottom: 30, left: 20},
-        width = 60 - margin.left - margin.right,
+        width = 54 - margin.left - margin.right,
         //height = 450 - margin.top - margin.bottom;
         //height = 400 - margin.top - margin.bottom;
         height = plotHeight - margin.top - margin.bottom;
@@ -969,8 +993,9 @@ function drawBarchartPlot(dataset, divID, width, height, bottom_padding, maxY) {
  */
 function drawProcessPanels(sample_json, plotDate, startDate, height, draw_width){
     // Reduce sample data to project level
+    console.log(sample_json);
     var reduced = reduceToProject(sample_json);
-    //console.log(reduced);
+    console.log(reduced);
 
     //// Add invisible tooltip div for mouseovers
     //var tooltipDiv = d3.select("body").append("div")	
@@ -980,20 +1005,24 @@ function drawProcessPanels(sample_json, plotDate, startDate, height, draw_width)
     // keys for time calculations
     var total = {
         startKey: "Queue date",
-        endKey: "All samples sequenced"
+        endKey: "All samples sequenced" // Change to All raw data delivered when this works
     };
     var recCtrl = {
         startKey: "Arrival date",
+        startKey2: "Rec ctrl start",
         endKey: "Queue date",
         endKey2: "Rec ctrl start"
     };
     var libPrep = {
         startKey: "Queue date",
+        startKey2: "Lib prep start",
         endKey: "QC library finished"
     };
     var seq = {
         startKey: "QC library finished",
-        endKey: "All samples sequenced"
+        startKey2: "Sequencing start",
+        startKey3: "All samples sequenced", // start for bioinfo qc
+        endKey: "All samples sequenced" // Change to All raw data delivered when this works
     };
     
     
@@ -1005,7 +1034,8 @@ function drawProcessPanels(sample_json, plotDate, startDate, height, draw_width)
     /* 
      *  4 run chart panels on the lower half
      */ 
-    var rc_width = draw_width / 4; // 
+    //var rc_width = draw_width / 4; // 
+    var rc_width = draw_width / 4 - 20; // take away some width to fit in extra boxplots
 
     /* Upper half panels 
      ***********************************************************
@@ -1031,10 +1061,11 @@ function drawProcessPanels(sample_json, plotDate, startDate, height, draw_width)
     var sampleLoadLibprep = generateLibprepSampleLoadDataset(sample_json, today);
     var laneLoadLibprep = generateLibprepLaneLoadDataset(sample_json, today);
     var seqLoad = generateSeqLoadDataset(sample_json, today);
-        
+    
+    //console.log(sampleQueue);    
 
     drawRCStackedBars(recCtrlLoad, "ongoing_bc_plot", bar_width * 1, panelHeights);
-    drawStackedBars (sampleQueue, "queue_sample_load_lp", bar_width * 4, panelHeights, "samples");
+    drawStackedBars (sampleQueue, "queue_sample_load_lp", bar_width * 4, panelHeights, "samples", true);
     drawStackedBars (libprepLaneQueue, "queue_lane_load_lp", bar_width * 2, panelHeights, "lanes");
     drawStackedBars (finlibLaneQueue, "queue_lane_load_fl", bar_width * 2, panelHeights, "lanes");
     drawStackedBars(sampleLoadLibprep, "libprep_sample_load", bar_width * 4, panelHeights, "samples");
@@ -1067,24 +1098,37 @@ function drawProcessPanels(sample_json, plotDate, startDate, height, draw_width)
     /* **** RecCtrl delivery times data sets **** */
     var recCtrlDataset = generateRunchartDataset(reduced, startDate, plotDate, recCtrl.startKey, recCtrl.endKey, true);
     // add second time series
-    recCtrlDataset = addToRunchartDataset(reduced, recCtrlDataset, startDate, plotDate, recCtrl.startKey, recCtrl.endKey2, true);
-    console.log(recCtrlDataset);
-    var recCtrlBpDataset = generateGenericBoxDataset(recCtrlDataset, 5); // boxplot to use second time series
+    recCtrlDataset = addToRunchartDataset(reduced, recCtrlDataset, startDate, plotDate, recCtrl.startKey2, recCtrl.endKey, true);
+    var recCtrlBpDataset = generateGenericBoxDataset(recCtrlDataset, 4); // boxplot to use second time series
+    var recCtrlBpDataset2 = generateGenericBoxDataset(recCtrlDataset, 5); // boxplot to use second time series
 
     /* **** Libprep delivery times data sets **** */
     var libPrepDataset = generateRunchartDataset(reduced, startDate, plotDate, libPrep.startKey, libPrep.endKey, true, "Finished library", true); 
+    // add second time series
+    libPrepDataset = addToRunchartDataset(reduced, libPrepDataset, startDate, plotDate, libPrep.startKey2, libPrep.endKey, true);
     var libPrepBpDataset = generateGenericBoxDataset(libPrepDataset, 4);
+    var libPrepBpDataset2 = generateGenericBoxDataset(libPrepDataset, 5);
     
     /* **** Seq datasets for all projects **** */
     var seqDataset = generateRunchartDataset(reduced, startDate, plotDate, seq.startKey, seq.endKey, true); 
+        // add second time series
+    seqDataset = addToRunchartDataset(reduced, seqDataset, startDate, plotDate, seq.startKey2, seq.endKey, true);
     var seqBpDataset = generateGenericBoxDataset(seqDataset, 4);
+    var seqBpDataset2 = generateGenericBoxDataset(seqDataset, 5);
+
         /* ** Subsets ** */
         // MiSeq projects
     var seqMiSeqDataset = generateRunchartDataset(reduced, startDate, plotDate, seq.startKey, seq.endKey, true, "MiSeq"); 
+            // add second time series
+    seqMiSeqDataset = addToRunchartDataset(reduced, seqMiSeqDataset, startDate, plotDate, seq.startKey2, seq.endKey, true, "MiSeq");
     var seqBpMiSeqDataset = generateGenericBoxDataset(seqMiSeqDataset, 4);
+    var seqBpMiSeqDataset2 = generateGenericBoxDataset(seqMiSeqDataset, 5);
         // HiSeq projects
     var seqHiSeqDataset = generateRunchartDataset(reduced, startDate, plotDate, seq.startKey, seq.endKey, true, "HiSeq"); 
+            // add second time series
+    seqHiSeqDataset = addToRunchartDataset(reduced, seqHiSeqDataset, startDate, plotDate, seq.startKey2, seq.endKey, true, "HiSeq");
     var seqBpHiSeqDataset =generateGenericBoxDataset(seqHiSeqDataset, 4);
+    var seqBpHiSeqDataset2 =generateGenericBoxDataset(seqHiSeqDataset, 5);
 
     
     // get highest value in the runchart data sets to set a common scale
@@ -1096,17 +1140,20 @@ function drawProcessPanels(sample_json, plotDate, startDate, height, draw_width)
 
     /* ***** Draw the panels with the first data **** */
     // Redrawing of subsets for total & seq times is done in the setInterval call below
-    drawRunChart(totalRcDataset, "total_rc", [6, 4, 10], rc_width, height, 30);
+    drawRunChart(totalRcDataset, "total_rc", [6, 4, 10], rc_width + 10, height, 30);
     drawBoxPlot(totalBpDataset, "total_bp", height);
     
     drawRunChart(recCtrlDataset, "rec_ctrl_rc", [2], rc_width, height, 30, maxStepY);
-    drawBoxPlot(recCtrlBpDataset, "rec_ctrl_bp", height, maxStepY, 30, 2); // force css for class box2
+    drawBoxPlot(recCtrlBpDataset, "rec_ctrl_bp1", height, maxStepY, 30, 1); // force css for class box1
+    drawBoxPlot(recCtrlBpDataset2, "rec_ctrl_bp2", height, maxStepY, 30, 2); // force css for class box2
         
     drawRunChart(libPrepDataset, "lib_prep_rc", [2.5], rc_width, height, 30, maxStepY); 
-    drawBoxPlot(libPrepBpDataset, "lib_prep_bp", height, maxStepY); 
+    drawBoxPlot(libPrepBpDataset, "lib_prep_bp1", height, maxStepY, 30, 1); 
+    drawBoxPlot(libPrepBpDataset2, "lib_prep_bp2", height, maxStepY, 30, 2); // force css for class box2
     
     drawRunChart(seqDataset, "seq_rc", [3], rc_width, height, 30, maxStepY);
-    drawBoxPlot(seqBpDataset, "seq_bp", height, maxStepY);
+    drawBoxPlot(seqBpDataset, "seq_bp1", height, maxStepY, 30, 1);
+    drawBoxPlot(seqBpDataset2, "seq_bp2", height, maxStepY, 30, 2); // force css for class box2
     
     
 
@@ -1130,7 +1177,8 @@ function drawProcessPanels(sample_json, plotDate, startDate, height, draw_width)
                 d3.select("#total_legend").attr("style", "color: default").text("All projects");
                 
                 drawRunChart(seqDataset, "seq_rc", [3], rc_width, height, 30, maxStepY);
-                drawBoxPlot(seqBpDataset, "seq_bp", height, maxStepY);
+                drawBoxPlot(seqBpDataset, "seq_bp1", height, maxStepY);
+                drawBoxPlot(seqBpDataset2, "seq_bp2", height, maxStepY, 30, 2);
                 d3.select("#seq_legend").attr("style", "color: default").text("All projects");
                 
                 setNo++;
@@ -1157,7 +1205,8 @@ function drawProcessPanels(sample_json, plotDate, startDate, height, draw_width)
                 d3.select("#total_legend").attr("style", "color: orange").text("MiSeq projects");
                 
                 drawRunChart(seqMiSeqDataset, "seq_rc", [3], rc_width, height, 30, maxStepY);
-                drawBoxPlot(seqBpMiSeqDataset, "seq_bp", height, maxStepY);
+                drawBoxPlot(seqBpMiSeqDataset, "seq_bp1", height, maxStepY);
+                drawBoxPlot(seqBpMiSeqDataset2, "seq_bp2", height, maxStepY, 30, 2);
                 d3.select("#seq_legend").attr("style", "color: orange").text("MiSeq projects");
                 setNo++;
                 
@@ -1169,7 +1218,8 @@ function drawProcessPanels(sample_json, plotDate, startDate, height, draw_width)
                 d3.select("#total_legend").attr("style", "color: orange").text("HiSeq projects");
                 
                 drawRunChart(seqHiSeqDataset, "seq_rc", [3], rc_width, height, 30, maxStepY);
-                drawBoxPlot(seqBpHiSeqDataset, "seq_bp", height, maxStepY);
+                drawBoxPlot(seqBpHiSeqDataset, "seq_bp1", height, maxStepY);
+                drawBoxPlot(seqBpHiSeqDataset2, "seq_bp2", height, maxStepY, 30, 2);
                 d3.select("#seq_legend").attr("style", "color: orange").text("HiSeq projects");
                 setNo = 1;
                 

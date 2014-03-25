@@ -1,8 +1,21 @@
 # Todo
 
-- [x] Rename map-reduce view. Suggestion:
-  - genomics-dashboard/dates_and_load_per_sample
+- [x] Rename map-reduce view to *genomics-dashboard/dates_and_load_per_sample*
 - [x] Map-reduce function [dates_and_load_per_sample](http://127.0.0.1:5984/_utils/database.html?projects/_design/genomics-dashboard/_view/dates_and_load_per_sample) from local server to production server
 - [x] KPI data definitions Gdocs spreadsheet to md document
 - [x] Pull request on current code
 - [x] Change to draw more than one time series in runcharts
+- [x] Update dates_and_load_per_sample map-reduce function to emit project abort date, sample status, and *All raw data delivered*. (Code in _dev view)
+- [x] Update dates_and_load_per_sample map-reduce function on tools-dev
+- [ ] Update dates_and_load_per_sample map-reduce function on tools. *Guillermo to execute*
+- [x] Update code to skip aborted projects
+- [x] Update code to skip aborted samples
+- [x] **RecCtrl RC** 1st time series: *Arrival date* to *Queue date*, 2nd time series: *Rec ctrl start* to *Queue date*
+- [x] **Lib prep RC** 1st time series: *Queue date* to *Library QC*, 2nd time series: *Libprep start* to *Library QC*
+- [x] **Sequencing RC** 1st time series: *Library QC* to *All samples sequenced*, 2nd time series: *Sequencing start* to *All samples sequenced*
+- [x] Add different coloured explanatory headings above RC panels
+- [x] **RecCtrl RC** Add boxplot for 1st time series
+- [x] **Lib prep RC** Add boxplot for 2nd time series
+- [x] **Sequencing RC** Add boxplot for 2nd time series
+- [ ] Total delivery time RC: change end date to *All raw data delivered*
+- [ ] Sequencing RC: change end date to *All raw data delivered*

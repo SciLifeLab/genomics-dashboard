@@ -19,6 +19,14 @@ function(doc) {
     open_date = doc["open_date"];
     //if(open_date < "2013-07-01") { exit; } // this filter should not be used
   }
+  // Find all samples sequenced (if present)
+  var ass = doc["details"]["all_samples_sequenced"];
+
+  // Find all raw data delivered (if present)
+  var all_raw_data_delivered = "0000-00-00";
+  if (doc.details["all_raw_data_delivered"] > all_raw_data_delivered) {
+    all_raw_data_delivered = doc.details["all_raw_data_delivered"];
+  }
 
   // close date
   var close_date = "0000-00-00";
@@ -26,8 +34,15 @@ function(doc) {
     close_date = doc["close_date"];
   }
 
+  // Find aborted date (if present)
+  var aborted_date = "0000-00-00";
+  if (doc.details["aborted"] > aborted_date) {
+    aborted_date = doc.details["aborted"];
+  }
+
   // go through each sample
   for (sample in doc["samples"]){
+
     // Find Rec ctrl start
     var initial_qc_start = "0000-00-00";
     if(doc["samples"][sample]["first_initial_qc_start_date"] > initial_qc_start) { 
@@ -64,16 +79,16 @@ function(doc) {
       //  final_validation = LP.prep_finished_date
       //}
 
-      // capture earliest lib prep start
-      // NOW DONE above at sample level.
-      // This bit of code should be commented out on production server
-      //if(LP["prep_start_date"]) {
-      //  if (lib_prep_start == "0000-00-00") {
-      //    lib_prep_start = LP["prep_start_date"];
-      //  } else if (LP["prep_start_date"]<lib_prep_start) {
-      //    lib_prep_start = LP["prep_start_date"];
-      //  }
-      //}
+      // capture earliest lib prep start if not set at sample/first_prep_start_date
+      // done above at sample level.
+      // 
+      if(LP["prep_start_date"]) {
+        if (lib_prep_start == "0000-00-00") {
+          lib_prep_start = LP["prep_start_date"];
+        } else if (LP["prep_start_date"]<lib_prep_start) {
+          lib_prep_start = LP["prep_start_date"];
+        }
+      }
 
       var passed_prep = (LP["prep_status"] == "PASSED");
 
@@ -95,16 +110,26 @@ function(doc) {
         if(sequence_start_date > LP["sample_run_metrics"][sample_run_metrics]["sequencing_start_date"]) {
           sequence_start_date = LP["sample_run_metrics"][sample_run_metrics]["sequencing_start_date"];
         }
+
         // sequence end date
-        if(final_sequence_date < LP["sample_run_metrics"][sample_run_metrics]["sequencing_finish_date"]) {
+        if (final_sequence_date < LP["sample_run_metrics"][sample_run_metrics]["sequencing_finish_date"]) {
           final_sequence_date = LP["sample_run_metrics"][sample_run_metrics]["sequencing_finish_date"];
-        } else if (final_sequence_date < LP["sample_run_metrics"][sample_run_metrics]["sequencing_run_QC_finished"]) { // some older(?) projects only have info on seq_run_QC_finished
-          final_sequence_date = LP["sample_run_metrics"][sample_run_metrics]["sequencing_run_QC_finished"];
+        //} else if (final_sequence_date < LP["sample_run_metrics"][sample_run_metrics]["sequencing_run_QC_finished"]) { // some older(?) projects only have info on seq_run_QC_finished
+        //  final_sequence_date = LP["sample_run_metrics"][sample_run_metrics]["sequencing_run_QC_finished"];
         }
       } // sequence
 
     } // library prep
 
+    // sample status
+    var status = doc["samples"][sample]["details"]["status_(manual)"];
+    if(!status) { status = null; }
+
+    // in the case final_sequence_date has not been set, and all samples sequenced date is available
+    if(final_sequence_date == "0000-00-00" && ass != null) {
+      final_sequence_date = ass;
+    }
+ 
     if (sequence_start_date == "9999-99-99") { sequence_start_date = "0000-00-00"; }
     //NEW! Emit what we have all variables should be set before so will be ok at emit
     //if (!("library_prep" in doc["samples"][sample])) {
@@ -116,11 +141,13 @@ function(doc) {
     KPI["QC library finished"] = final_validation;
     KPI["Sequencing start"] = sequence_start_date;
     KPI["All samples sequenced"] = final_sequence_date;
+    KPI["All raw data delivered"] = all_raw_data_delivered;
     KPI["Close date"] = close_date;
+    KPI["Aborted date"]  = aborted_date;
     KPI["Samples"] = 1;
     KPI["Lanes"] = lanes_per_sample;
+    KPI["Status"] = status;
     
-//    emit([doc["project_id"], doc["project_name"], application, sequencing_platform, sample], KPI);
     emit([doc["project_id"], type, application, sequencing_platform, sample], KPI);
     
   } // sample

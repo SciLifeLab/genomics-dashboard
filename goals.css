@@ -1,7 +1,7 @@
 body {
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-  background: rgb(47, 47, 47);
-  color: #CCCCCC;
+  /*background: rgb(47, 47, 47);*/
+  /*color: #CCCCCC;*/
 }
 div {
     /*margin-top: 10px;*/
@@ -34,36 +34,26 @@ circle {
   /*fill: #5B87FF;*/
 }
 
-.first_series_heading {
-    color: #5B87FF;
-}
-.second_series_heading {
-    color: #FFC447;
-}
-
 .axis path,
 .axis line {
   fill: none;
-  /*stroke: black;*/
-  stroke: #CCCCCC;
+  stroke: black;
+  /*stroke: #CCCCCC;*/
   shape-rendering: crispEdges;
-  pointer-events: none;			
 }
 
 .axis text {
   font-family: sans-serif;
   font-size: 12px;
-  fill:#CCCCCC;
-  pointer-events: none;			
+  /*fill:#CCCCCC;*/
 }
 
 .axis_label {
   font-family: sans-serif;
   font-size: 10px;
-  fill: #CCCCCC;
+  /*fill: #CCCCCC;*/
   text-anchor: middle;
   text-anchor: end;
-  pointer-events: none;			
 }
 
 .line {
@@ -145,8 +135,8 @@ circle {
     font-size: 1.7em;
 }
 #date {
-  font-size: 1.3em;
-  font-weight: bold;
+  /*font-size: 1.3em;*/
+  /*font-weight: bold;*/
 }
 
 .times_panel {
@@ -202,12 +192,8 @@ circle {
   /*border: solid 1px #ccc;*/
   font: 10px sans-serif;
   /*fill: #CCC;*/
-  fill: #FFF;
+  /*fill: #FFF;*/
   shape-rendering: crispEdges;
-}
-
-#ongoing_bc_plot svg text {
-    pointer-events: none;    
 }
 
 #fs_prog_bc h2 {
@@ -227,18 +213,19 @@ circle {
   padding-left: 10px;
   /*background: lemonchiffon;*/
   /*background: yellow;*/
-  background-image: linear-gradient(bottom, rgb(21,21,21) 18%, rgb(93,93,93) 59%);
-  background-image: -o-linear-gradient(bottom, rgb(21,21,21) 18%, rgb(93,93,93) 59%);
-  background-image: -moz-linear-gradient(bottom, rgb(21,21,21) 18%, rgb(93,93,93) 59%);
-  background-image: -webkit-linear-gradient(bottom, rgb(21,21,21) 18%, rgb(93,93,93) 59%);
-  background-image: -ms-linear-gradient(bottom, rgb(21,21,21) 18%, rgb(93,93,93) 59%);  
-  background-image: -webkit-gradient(
-      linear,
-      left bottom,
-      left top,
-      color-stop(0.18, rgb(21,21,21)),
-      color-stop(0.59, rgb(93,93,93))
-  );
+  
+  /*background-image: linear-gradient(bottom, rgb(21,21,21) 18%, rgb(93,93,93) 59%);*/
+  /*background-image: -o-linear-gradient(bottom, rgb(21,21,21) 18%, rgb(93,93,93) 59%);*/
+  /*background-image: -moz-linear-gradient(bottom, rgb(21,21,21) 18%, rgb(93,93,93) 59%);*/
+  /*background-image: -webkit-linear-gradient(bottom, rgb(21,21,21) 18%, rgb(93,93,93) 59%);*/
+  /*background-image: -ms-linear-gradient(bottom, rgb(21,21,21) 18%, rgb(93,93,93) 59%);  */
+  /*background-image: -webkit-gradient(*/
+  /*    linear,*/
+  /*    left bottom,*/
+  /*    left top,*/
+  /*    color-stop(0.18, rgb(21,21,21)),*/
+  /*    color-stop(0.59, rgb(93,93,93))*/
+  /*);*/
 }
 /*#total_bp, #rec_ctrl_bp, #lib_prep_bp, #seq_bp {*/
 /*  float: left;*/
@@ -268,22 +255,24 @@ circle {
   /*margin-bottom: 30px;*/
   margin-bottom: 0px;
   margin-left: 0px;
-  padding-left: 0px;
-  padding-right: 0px;
+  padding-left: 10px;
+  padding-right: 10px;
   /*background: yellow;*/
-  background-image: linear-gradient(bottom, rgb(21,21,21) 18%, rgb(93,93,93) 59%);
-  background-image: -o-linear-gradient(bottom, rgb(21,21,21) 18%, rgb(93,93,93) 59%);
-  background-image: -moz-linear-gradient(bottom, rgb(21,21,21) 18%, rgb(93,93,93) 59%);
-  background-image: -webkit-linear-gradient(bottom, rgb(21,21,21) 18%, rgb(93,93,93) 59%);
-  background-image: -ms-linear-gradient(bottom, rgb(21,21,21) 18%, rgb(93,93,93) 59%);
   
-  background-image: -webkit-gradient(
-      linear,
-      left bottom,
-      left top,
-      color-stop(0.18, rgb(21,21,21)),
-      color-stop(0.59, rgb(93,93,93))
-  );
+  
+  /*background-image: linear-gradient(bottom, rgb(21,21,21) 18%, rgb(93,93,93) 59%);*/
+  /*background-image: -o-linear-gradient(bottom, rgb(21,21,21) 18%, rgb(93,93,93) 59%);*/
+  /*background-image: -moz-linear-gradient(bottom, rgb(21,21,21) 18%, rgb(93,93,93) 59%);*/
+  /*background-image: -webkit-linear-gradient(bottom, rgb(21,21,21) 18%, rgb(93,93,93) 59%);*/
+  /*background-image: -ms-linear-gradient(bottom, rgb(21,21,21) 18%, rgb(93,93,93) 59%);*/
+  /**/
+  /*background-image: -webkit-gradient(*/
+  /*    linear,*/
+  /*    left bottom,*/
+  /*    left top,*/
+  /*    color-stop(0.18, rgb(21,21,21)),*/
+  /*    color-stop(0.59, rgb(93,93,93))*/
+  /*);*/
 }
 .boxplot_panel line {
   
@@ -303,7 +292,7 @@ circle {
   font-family: sans-serif;
   font-size: 11px;
   /*fill: black; */
-  fill:#CCCCCC;
+  /*fill:#CCCCCC;*/
 }
 
 /*Trying alternative tooltip strategy for panels*/
@@ -327,7 +316,7 @@ div.tooltip {
   font-size: 11px;
   /*font-weight: bold;*/
   fill: teal;
-  fill: #CCCCCC;
+  /*fill: #CCCCCC;*/
 }
 
 /*Queue stacked bar panels*/
