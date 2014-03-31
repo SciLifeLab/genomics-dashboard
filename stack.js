@@ -1203,7 +1203,7 @@ function drawStackedBars (dataset, divID, width, height, unit, showFirstInQueue)
             })
             .on("click", function(d) {
                      var projID = d.pid;
-                     var url = "https://genomics-status.scilifelab.se/projects/" + projID;
+                     var url = "https://genomics-status.scilifelab.se/project/" + projID;
                      window.open(url, "genomics-status");
             })
             ;
@@ -1305,6 +1305,11 @@ function drawRCStackedBars (dataset, divID, width, height) {
         // remove last two letters: "px" & turn into an integer
     tooltipHeight = parseInt(tooltipHeight.substring(0, tooltipHeight.length - 2));
     var tooltipRowHeight = "13"; // 13px per row
+    // width
+    var tooltipWidth = tooltipDiv.style("width"); // original width
+        // remove last two letters: "px" & turn into an integer
+    tooltipWidth = parseInt(tooltipWidth.substring(0, tooltipWidth.length - 2));
+    var tooltipNewWidth = tooltipWidth + 20; // make room for two four-digit id's per row 
 
         
     // color scales
@@ -1367,16 +1372,16 @@ function drawRCStackedBars (dataset, divID, width, height) {
                 .style("left", (d3.event.pageX) + "px")		
                 .style("top", (d3.event.pageY - 28) + "px")
                 .style("height", (tooltipNewHeight + "px"))
-                //.style("width", (tooltipNewWidth + "px"))
+                .style("width", (tooltipNewWidth + "px"))
                 ;	    
         })
         .on("mouseout", function(d) { //Remove the tooltip
-            // Make tooltip div invisible
+            // Make tooltip div invisible & reset size to default
             tooltipDiv.transition()		
             .duration(100)		
             .style("opacity", 0)
             .style("height", (tooltipHeight + "px"))
-            //.style("width", (tooltipWidth + "px"))
+            .style("width", (tooltipWidth + "px"))
             ;
                //d3.select("#tooltipA").remove();
         })

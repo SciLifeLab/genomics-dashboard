@@ -296,7 +296,7 @@ function drawGoalRunChart(dataset, divID, clines, width, height, padding, maxY) 
            })
            .on("click", function(d) {
                     var projID = d[1];
-                    var url = "https://genomics-status.scilifelab.se/projects/" + projID;
+                    var url = "https://genomics-status.scilifelab.se/project/" + projID;
                     window.open(url, "genomics-status");
            })
         ;
