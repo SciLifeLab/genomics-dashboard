@@ -193,6 +193,7 @@ function reduceToProject(jsonview) {
             "QC library finished":projects[pid]["QC library finished"],
             "Sequencing start":projects[pid]["Sequencing start"],
             "All samples sequenced":projects[pid]["All samples sequenced"],
+            "All raw data delivered":projects[pid]["All raw data delivered"],
             "Close date":projects[pid]["Close date"],
             "Samples":projects[pid]["Samples"],
             "Lanes":parseFloat(Math.round(projects[pid]["Lanes"]).toFixed(2))
