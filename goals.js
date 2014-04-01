@@ -25,14 +25,13 @@ function generateStandardRunchartDataset (jsonview, dateRangeStart, dateRangeEnd
             var pf = keys[3]; // platform
             //var sid = keys[4]; // sample id
             if(type != "Production") { continue; }
-            if (appl != "Exome capture" &&
-                appl != "RNA-seq (total RNA)" &&
-                appl != "WG re-seq" &&
-                appl != "Metagenome") {
+            if (appl != "Exome capture" 
+                && appl != "RNA-seq (total RNA)" 
+                && appl != "WG re-seq" 
+                ) {
                 continue;
             }
-            
-            
+
             var sampleDateFrom = values[dateFromKey];
             var sampleDateTo = values[dateToKey];
             var numSamples = values["Samples"];
