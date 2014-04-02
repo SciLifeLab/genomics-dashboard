@@ -7,7 +7,7 @@
 - [x] Change to draw more than one time series in runcharts
 - [x] Update dates_and_load_per_sample map-reduce function to emit project abort date, sample status, and *All raw data delivered*. (Code in _dev view)
 - [x] Update dates_and_load_per_sample map-reduce function on tools-dev
-- [ ] Update dates_and_load_per_sample map-reduce function on tools. *Guillermo to execute*
+- [x] Update dates_and_load_per_sample map-reduce function on tools. *Guillermo to execute*
 - [x] Update code to skip aborted projects
 - [x] Update code to skip aborted samples
 - [x] **RecCtrl RC** 1st time series: *Arrival date* to *Queue date*, 2nd time series: *Rec ctrl start* to *Queue date*
@@ -19,3 +19,5 @@
 - [x] **Sequencing RC** Add boxplot for 2nd time series
 - [ ] Total delivery time RC: change end date to *All raw data delivered*
 - [ ] Sequencing RC: change end date to *All raw data delivered*
+- [x] Links to genomics status project page to use new url
+- [x] Tooltip width to cope with four-digit project IDs

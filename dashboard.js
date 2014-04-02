@@ -193,6 +193,7 @@ function reduceToProject(jsonview) {
             "QC library finished":projects[pid]["QC library finished"],
             "Sequencing start":projects[pid]["Sequencing start"],
             "All samples sequenced":projects[pid]["All samples sequenced"],
+            "All raw data delivered":projects[pid]["All raw data delivered"],
             "Close date":projects[pid]["Close date"],
             "Samples":projects[pid]["Samples"],
             "Lanes":parseFloat(Math.round(projects[pid]["Lanes"]).toFixed(2))
@@ -663,7 +664,7 @@ function drawRunChart(dataset, divID, clines, width, height, padding, maxY) {
            })
            .on("click", function(d) {
                     var projID = d[1];
-                    var url = "https://genomics-status.scilifelab.se/projects/" + projID;
+                    var url = "https://genomics-status.scilifelab.se/project/" + projID;
                     window.open(url, "genomics-status");
            })
         ;
