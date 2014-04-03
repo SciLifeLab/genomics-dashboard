@@ -1152,9 +1152,9 @@ function drawStackedBars (dataset, divID, width, height, unit, showFirstInQueue)
                 if (showFirstInQueue) {
                     if (d[0].daysSincePrepStart != undefined) {
                         if (d[0].daysSincePrepStart > dayLimit ) {
-                            col = "red"
-                        } else {
                             col = timeseriesColors[1];
+                        } else {
+                            col = timeseriesColors[2];
                         }
                      }
                 } 
