@@ -111,7 +111,7 @@ function reduceToProject(jsonview) {
     var prepStarts = {};
     
     // switches for debugging 
-    var debug = true;
+    var debug = false;
     var debugID = "P946";
     
     // Loop through all samples
@@ -994,14 +994,7 @@ function drawBarchartPlot(dataset, divID, width, height, bottom_padding, maxY) {
  */
 function drawProcessPanels(sample_json, plotDate, startDate, height, draw_width){
     // Reduce sample data to project level
-    console.log(sample_json);
     var reduced = reduceToProject(sample_json);
-    console.log(reduced);
-
-    //// Add invisible tooltip div for mouseovers
-    //var tooltipDiv = d3.select("body").append("div")	
-    //    .attr("class", "tooltip")				
-    //    .style("opacity", 0);    
     
     // keys for time calculations
     var total = {
@@ -1054,7 +1047,10 @@ function drawProcessPanels(sample_json, plotDate, startDate, height, draw_width)
                                    + " / " + parseFloat(numPreps.SeqCap/12).toFixed(2) + " / " + parseFloat(numPreps.Other/12).toFixed(2));
     ////////////////// end test bit
     
-    // The ongoing calculations
+    /* Upper half panels - The ongoing calculations
+     ***********************************************************
+    */
+        //Generate data sets
     var recCtrlLoad = generateRecCtrlStackDataset(sample_json, today);
     var sampleQueue = generateQueueSampleStackDataset(sample_json, today);
     var libprepLaneQueue = generateQueueLaneLPStackDataset(sample_json, today);
@@ -1065,16 +1061,26 @@ function drawProcessPanels(sample_json, plotDate, startDate, height, draw_width)
     
     //console.log(sampleQueue);    
 
-    drawRCStackedBars(recCtrlLoad, "ongoing_bc_plot", bar_width * 1, panelHeights);
-    drawStackedBars (sampleQueue, "queue_sample_load_lp", bar_width * 4, panelHeights, "samples", true);
-    drawStackedBars (libprepLaneQueue, "queue_lane_load_lp", bar_width * 2, panelHeights, "lanes");
-    drawStackedBars (finlibLaneQueue, "queue_lane_load_fl", bar_width * 2, panelHeights, "lanes");
-    drawStackedBars(sampleLoadLibprep, "libprep_sample_load", bar_width * 4, panelHeights, "samples");
-    drawStackedBars(laneLoadLibprep, "libprep_lane_load", bar_width * 2, panelHeights, "lanes");
-    drawStackedBars (seqLoad, "seq_load_stack", bar_width * 2, panelHeights, "lanes");
+        //Set the 'normal' max values for the different load visualizations
+    var rcNormalMax = 20; //# projects
+    var queueLpSampleLoadNormalMax = 200; //# samples in queue for libprep
+    var queueLpLaneLoadNormalMax = 60; //# lanes worth of samples in queue for libprep
+    var queueFlLaneLoadNormalMax = 30; //# lanes of finished libraries in queue for sequencing
+    var lpSampleLoadNormalMax = 200; //# samples in libprep
+    var lpLaneLoadNormalMax = 60; //# lanes worth of samples in libprep
+    var seqLaneLoadNormalMax = 100; //# lanes in sequencing
+    
+        //Draw the plots
+    drawRCStackedBars(recCtrlLoad, "ongoing_bc_plot", bar_width * 1, panelHeights, rcNormalMax);
+    drawStackedBars (sampleQueue, "queue_sample_load_lp", bar_width * 4, panelHeights, "samples", true, queueLpSampleLoadNormalMax);
+    drawStackedBars (libprepLaneQueue, "queue_lane_load_lp", bar_width * 2, panelHeights, "lanes", false, queueLpLaneLoadNormalMax);
+    drawStackedBars (finlibLaneQueue, "queue_lane_load_fl", bar_width * 2, panelHeights, "lanes", false, queueFlLaneLoadNormalMax);
+    drawStackedBars(sampleLoadLibprep, "libprep_sample_load", bar_width * 4, panelHeights, "samples", false, lpSampleLoadNormalMax);
+    drawStackedBars(laneLoadLibprep, "libprep_lane_load", bar_width * 2, panelHeights, "lanes", false, lpLaneLoadNormalMax);
+    drawStackedBars (seqLoad, "seq_load_stack", bar_width * 2, panelHeights, "lanes", false, seqLaneLoadNormalMax);
     
         
-    /* Lower half panels
+    /* Lower half panels - Runcharts and boxplots
      ***********************************************************
     */
     

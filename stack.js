@@ -1075,7 +1075,7 @@ function generateSeqLoadDataset(json, cmpDate) {
  * @param {String} [unit="lanes"] Unit of values. Used for bar legend 
  * @param {Boolean} [showFirstInQueue=false] If first in queue project should be indicated visually
  */
-function drawStackedBars (dataset, divID, width, height, unit, showFirstInQueue) {
+function drawStackedBars (dataset, divID, width, height, unit, showFirstInQueue, maxY) {
     //console.log(dataset)
     var w = width,
         h = height,
@@ -1133,9 +1133,39 @@ function drawStackedBars (dataset, divID, width, height, unit, showFirstInQueue)
         .attr("transform", "translate(" + p[3] + "," + (h - p[2]) + ")");
     
         
-        // Compute the x-domain (by platform) and y-domain (by top).
+        // Compute the x-domain (by platform) and y-domain.
         x.domain(dataset[0].map(function(d) { return d.x; }));
-        y.domain([0, d3.max(dataset[dataset.length - 1], function(d) { return d.y0 + d.y; })]);
+
+        var yMultiples = 1; // multiples of the set maxY needed to fit the data. Used to set colours to indicate that scales differ from "normal"
+        var dataYMax = d3.max(dataset[dataset.length - 1], function(d) { return d.y0 + d.y; }); // get the max of the data set
+            // check if the max of the data set will fit the 'normal' maxY passed to the function
+        var newMaxY = maxY;
+        while (newMaxY < dataYMax ) { //if not, increase drawing maxY
+            newMaxY += maxY;
+            yMultiples++;
+        }        
+        y.domain([0, newMaxY]); // compute the y-domain using the maxY that will fit the data set
+
+            //set colours for scales depending on how many multiples of maxY had to be used to fit the data set
+        var loadCol = "#fff";
+        if (yMultiples == 2) {
+            loadCol = "yellow";
+        } else if (yMultiples > 2) {
+            loadCol = "red";
+        }
+        
+        
+        
+        
+        
+        //var stackMax;
+        //if (maxY) {
+        //    stackMax = maxY;
+        //} else {
+        //    stackMax = d3.max(dataset[dataset.length - 1], function(d) { return d.y0 + d.y; });        
+        //}             
+        //console.log("stackMax: ", stackMax);
+        //y.domain([0, stackMax]);
     
         // Add a group for each project.
         var project = svg.selectAll("g.project")
@@ -1276,6 +1306,7 @@ function drawStackedBars (dataset, divID, width, height, unit, showFirstInQueue)
             .attr("x", -p[3] + 18)
             .attr("dy", ".35em")
             .text(d3.format(",d"))
+            .style("fill", loadCol)
             ;
     
 }
@@ -1287,7 +1318,7 @@ function drawStackedBars (dataset, divID, width, height, unit, showFirstInQueue)
  * @param {Number} width    plot width
  * @param {Number} height   plot height
  */
-function drawRCStackedBars (dataset, divID, width, height) {
+function drawRCStackedBars (dataset, divID, width, height, maxY) {
     var w = width,
         h = height,
         p = [30, 10, 30, 20], // t, r, b, l
@@ -1330,7 +1361,35 @@ function drawRCStackedBars (dataset, divID, width, height) {
         
     // Compute the x-domain (by platform) and y-domain (by top).
     x.domain(dataset[0].map(function(d) { return d.x; }));
-    y.domain([0, d3.max(dataset[dataset.length - 1], function(d) { return d.y0 + d.y; })]);
+
+    var yMultiples = 1; // multiples of the set maxY needed to fit the data. Used to set colours to indicate that scales differ from "normal"
+    var dataYMax = d3.max(dataset[dataset.length - 1], function(d) { return d.y0 + d.y; }); // get the max of the data set
+        // check if the max of the data set will fit the 'normal' maxY passed to the function
+    var newMaxY = maxY;
+    while (newMaxY < dataYMax ) { //if not, increase drawing maxY
+        newMaxY += maxY;
+        yMultiples++;
+    }        
+    y.domain([0, newMaxY]); // compute the y-domain using the maxY that will fit the data set
+
+        //set colours for scales depending on how many multiples of maxY had to be used to fit the data set
+    var loadCol = "#fff";
+    if (yMultiples == 2) {
+        loadCol = "yellow";
+    } else if (yMultiples > 2) {
+        loadCol = "red";
+    }
+
+    
+    //var stackMax;
+    //if (maxY) {
+    //    stackMax = maxY;
+    //} else {
+    //    stackMax = d3.max(dataset[dataset.length - 1], function(d) { return d.y0 + d.y; });        
+    //}             
+    //
+    //console.log("stackMax: ", stackMax);
+    //y.domain([0, stackMax]);
 
     // Add a group for each project.
     var project = svg.selectAll("g.project")
@@ -1441,5 +1500,6 @@ function drawRCStackedBars (dataset, divID, width, height) {
         .attr("x", -p[3] + 18)
         .attr("dy", ".35em")
         .text(d3.format(",d"))
+        .style("fill", loadCol)
         ;
 }
