@@ -65,6 +65,14 @@ circle {
   text-anchor: end;
   pointer-events: none;			
 }
+.axis_label_x {
+  font-family: sans-serif;
+  font-size: 10px;
+  fill: #CCCCCC;
+  text-anchor: middle;
+  text-anchor: end;
+  pointer-events: none;			
+}
 
 .line {
     fill: none;
