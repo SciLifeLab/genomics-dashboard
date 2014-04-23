@@ -1073,9 +1073,11 @@ function generateSeqLoadDataset(json, cmpDate) {
  * @param {Number} width    plot width
  * @param {Number} height   plot height
  * @param {String} [unit="lanes"] Unit of values. Used for bar legend 
- * @param {Boolean} [showFirstInQueue=false] If first in queue project should be indicated visually
+ * @param {Boolean} showFirstInQueue=false If first in queue project should be indicated visually
+ * @param {Number} maxY "Normal" max value for y-axis
+ * @param {Boolean} showNumWS If number of worksets should be shown
  */
-function drawStackedBars (dataset, divID, width, height, unit, showFirstInQueue, maxY) {
+function drawStackedBars (dataset, divID, width, height, unit, showFirstInQueue, maxY, showNumWS) {
     //console.log(dataset)
     var w = width,
         h = height,
@@ -1268,7 +1270,7 @@ function drawStackedBars (dataset, divID, width, height, unit, showFirstInQueue,
                 return t;                
             })
             ;        
-        if (unit == "samples"){
+        if (unit == "samples" && showNumWS){
             var loadText2 = svg.selectAll("g.load_label")
                 .data(x.domain())
                 .enter().append("svg:text")
