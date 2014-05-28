@@ -29,6 +29,27 @@ h4 {
 }
 br.clear { clear: both; }
 
+span.limit_1_legend {
+    background-color: #FFC447;
+    color: #FFC447;
+    font-size: 0.6em;
+    padding: 0 3px 0 3px;
+}
+
+span.limit_2_legend {
+    background-color: #FD464B;
+    color: #FD464B;
+    font-size: 0.6em;
+    padding: 0 3px 0 3px;
+    margin-left: 5px;
+}
+
+div.stack_legend {
+    float: right;
+    font-size: 0.6em;
+    margin: 0 10px 0 2px;
+}
+
 circle {
   /*fill: #D88F00;*/
   /*fill: #5B87FF;*/
