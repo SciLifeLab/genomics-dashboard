@@ -29,6 +29,19 @@ h4 {
 }
 br.clear { clear: both; }
 
+div.fiq_legend {
+    float: left;
+    font-size: 0.6em;
+    margin: 5px 10px 0 30px;
+}
+
+span.fiq_col_legend {
+    background-color: #865BFF;
+    color: #865BFF;
+    font-size: 0.6em;
+    padding: 0 3px 0 3px;
+}
+
 span.limit_1_legend {
     background-color: #FFC447;
     color: #FFC447;
@@ -45,9 +58,9 @@ span.limit_2_legend {
 }
 
 div.stack_legend {
-    float: right;
+    float: left;
     font-size: 0.6em;
-    margin: 0 10px 0 2px;
+    margin: 5px 10px 0 34px;
 }
 
 circle {
