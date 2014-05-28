@@ -239,6 +239,17 @@ function generateRunchartDataset (jsonview, dateRangeStart, dateRangeEnd, dateFr
         var rows = jsonview["rows"];
         var projects = {};
         
+        // Some debugging switches        
+        var listIdSwitch = false; // turn on listing of IDs in data set
+        var listStartKey = "QC library finished"; // specify dateFromKey to trigger ID listing
+        var listEndKey = "All samples sequenced"; // specify dateToKey to trigger ID listing
+            // parse debugging settings above
+        var listIDs = false;
+        if (dateFromKey == listStartKey && dateToKey == listEndKey && listIdSwitch) {
+            listIDs = true;
+            console.log(dateFromKey + " - " + dateToKey);
+        }
+        
         // Each row is one project
         for (var i = 0; i < rows.length; i++) {
             //console.log("looping through json array: 1");
@@ -305,7 +316,7 @@ function generateRunchartDataset (jsonview, dateRangeStart, dateRangeEnd, dateFr
                 pid,
                 projects[pid]["num_samples"],
                 new Date(projects[pid]["toDate"]),
-                projects[pid]["daydiff"]
+                projects[pid]["daydiff"],
             ]);
         }
         
@@ -314,7 +325,11 @@ function generateRunchartDataset (jsonview, dateRangeStart, dateRangeEnd, dateFr
         for (var j = 0; j < dataArray.length; j++) {
                 var tmpdata = dataArray[j];
                 tmpdata.unshift(j + 1);
-                //console.log(tmpdata[4]); // project ID
+                // if debugging project ids 
+                if (listIDs) {
+                    console.log(tmpdata[1] + "\t"+ tmpdata[5]);
+                }
+
         }
         return dataArray;
         
