@@ -17,6 +17,9 @@
     }
     if(isset($_GET['db'])) {
         $dbStr = $_GET['db'];
+        if(isset($_GET['local_dev'])) {
+            $dbStr = 'projects_dev';
+        }
     }
     if(isset($_GET['reduce'])) {
         $reduceStr = $_GET['reduce'];
@@ -40,7 +43,7 @@
     if(isset($_GET['dev'])) {
         $base_url = "http://$user_password@tools-dev.scilifelab.se:5984";
     }
-    if(isset($_GET['local'])) {
+    if(isset($_GET['local']) || isset($_GET['local_dev'])) {
         $base_url = "http://localhost:5984";
     }
 
