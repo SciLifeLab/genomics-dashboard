@@ -417,6 +417,11 @@ function generateQueueLaneFLStackDataset(json, cmpDate) {
     var dateFormat = d3.time.format("%Y-%m-%d");
     var cmpDateStr = dateFormat(cmpDate); // Turn cmp date into a string to compare to dates in data
 
+    // time limits in days to use for project bar colouring
+    var timeLimit1 = 10; // to lable yellow
+    var timeLimit2 = 20; // to lable red
+    
+    
     var dataArray = [];
     var rows = json["rows"];
     var pfBins = {};
@@ -489,7 +494,20 @@ function generateQueueLaneFLStackDataset(json, cmpDate) {
             pfBins[pf][pid] += v["Lanes"];
 
             if(projects[pid] == undefined) {
-                projects[pid] = { queueDate: queueDate}
+                // set a limit indicator based on how long the project has been going on
+                // the limit variables are set at the beginning of this function
+                // these limits can be used to set colouring of project bars
+                var ongoingTime = daydiff(new Date(queueDate), cmpDate);
+                var passedTimeLimit = 0;
+                
+                if (ongoingTime > timeLimit2) {
+                    passedTimeLimit = 2;
+                } else if (ongoingTime > timeLimit1) {
+                    passedTimeLimit = 1;
+                }
+                //console.log(pid + " passedTimeLimit: " + passedTimeLimit)
+                projects[pid] = { queueDate: queueDate, passedTimeLimit: passedTimeLimit }
+                //projects[pid] = { queueDate: queueDate}
             }
         }
         
@@ -498,8 +516,8 @@ function generateQueueLaneFLStackDataset(json, cmpDate) {
     
     // put into "layer structure", sort & then add up y0's
     for (var projID in pfBins["HiSeq"]) {
-        var hO = { x: "HiSeq", y: pfBins["HiSeq"][projID], pid: projID, queueDate: projects[projID]["queueDate"] };
-        var mO = { x: "MiSeq", y: pfBins["MiSeq"][projID], pid: projID, queueDate: projects[projID]["queueDate"] };
+        var hO = { x: "HiSeq", y: pfBins["HiSeq"][projID], pid: projID, queueDate: projects[projID]["queueDate"], passedTimeLimit: projects[projID]["passedTimeLimit"] };
+        var mO = { x: "MiSeq", y: pfBins["MiSeq"][projID], pid: projID, queueDate: projects[projID]["queueDate"], passedTimeLimit: projects[projID]["passedTimeLimit"] };
         dataArray.push([hO, mO]);
     }
     dataArray.sort(sortByPlatform);
@@ -536,7 +554,12 @@ function generateQueueSampleStackDataset(json, cmpDate) {
 
     var dateFormat = d3.time.format("%Y-%m-%d");
     var cmpDateStr = dateFormat(cmpDate); // Turn cmp date into a string to compare to dates in data
-
+    
+    // time limits in days to use for project bar colouring
+    var timeLimit1 = 10; // to lable yellow
+    var timeLimit2 = 20; // to lable red
+    
+    
     var dataArray = [];
     var rows = json["rows"];
     var applBins = {};
@@ -625,7 +648,19 @@ function generateQueueSampleStackDataset(json, cmpDate) {
             applBins[applCat][pid] += 1;
 
             if(projects[pid] == undefined) {
-                projects[pid] = { queueDate: queueDate, arrivalDate: arrivalDate }
+                // set a limit indicator based on how long the project has been going on
+                // the limit variables are set at the beginning of this function
+                // these limits can be used to set colouring of project bars
+                var ongoingTime = daydiff(new Date(queueDate), cmpDate);
+                var passedTimeLimit = 0;
+                
+                if (ongoingTime > timeLimit2) {
+                    passedTimeLimit = 2;
+                } else if (ongoingTime > timeLimit1) {
+                    passedTimeLimit = 1;
+                }
+                //console.log(pid + " passedTimeLimit: " + passedTimeLimit)
+                projects[pid] = { queueDate: queueDate, arrivalDate: arrivalDate, passedTimeLimit: passedTimeLimit }
             }
             
         }
@@ -653,7 +688,8 @@ function generateQueueSampleStackDataset(json, cmpDate) {
         var projArr = [];
         //for (c in cat) {
         for (i = 0; i < cat.length; i++) {
-            var o = { x: cat[i], y: applBins[cat[i]][projID], pid: projID, queueDate: projects[projID]["queueDate"], arrivalDate: projects[projID]["arrivalDate"] };
+            //var o = { x: cat[i], y: applBins[cat[i]][projID], pid: projID, queueDate: projects[projID]["queueDate"], arrivalDate: projects[projID]["arrivalDate"] };
+            var o = { x: cat[i], y: applBins[cat[i]][projID], pid: projID, queueDate: projects[projID]["queueDate"], arrivalDate: projects[projID]["arrivalDate"], passedTimeLimit: projects[projID]["passedTimeLimit"] };
             projArr.push(o);
         }
         dataArray.push(projArr);
@@ -704,6 +740,10 @@ function generateLibprepSampleLoadDataset(json, cmpDate) {
 
     var dateFormat = d3.time.format("%Y-%m-%d");
     var cmpDateStr = dateFormat(cmpDate); // Turn cmp date into a string to compare to dates in data
+
+    // time limits in days to use for project bar colouring
+    var timeLimit1 = 42; // to lable yellow
+    var timeLimit2 = 63; // to lable red
 
     var dataArray = [];
     var rows = json["rows"];
@@ -784,7 +824,19 @@ function generateLibprepSampleLoadDataset(json, cmpDate) {
             applBins[applCat][pid] += 1;
 
             if(projects[pid] == undefined) {
-                projects[pid] = { queueDate: queueDate, pid: pid}
+                // set a limit indicator based on how long the project has been going on
+                // the limit variables are set at the beginning of this function
+                // these limits can be used to set colouring of project bars
+                var ongoingTime = daydiff(new Date(queueDate), cmpDate);
+                var passedTimeLimit = 0;
+                
+                if (ongoingTime > timeLimit2) {
+                    passedTimeLimit = 2;
+                } else if (ongoingTime > timeLimit1) {
+                    passedTimeLimit = 1;
+                }
+                projects[pid] = { queueDate: queueDate, pid: pid, passedTimeLimit: passedTimeLimit }
+                //projects[pid] = { queueDate: queueDate, pid: pid}
             }
         }
         
@@ -795,7 +847,8 @@ function generateLibprepSampleLoadDataset(json, cmpDate) {
     for (var projID in applBins["DNA"]) {
         var projArr = [];
         for (i = 0; i < cat.length; i++) {
-             var o = { x: cat[i], y: applBins[cat[i]][projID], pid: projID, projName: projects[projID]["projName"], queueDate: projects[projID]["queueDate"] };
+            //var o = { x: cat[i], y: applBins[cat[i]][projID], pid: projID, projName: projects[projID]["projName"], queueDate: projects[projID]["queueDate"] };
+            var o = { x: cat[i], y: applBins[cat[i]][projID], pid: projID, projName: projects[projID]["projName"], queueDate: projects[projID]["queueDate"], passedTimeLimit: projects[projID]["passedTimeLimit"] };
             projArr.push(o);
         }
         dataArray.push(projArr);
@@ -955,6 +1008,11 @@ function generateSeqLoadDataset(json, cmpDate) {
     var dateFormat = d3.time.format("%Y-%m-%d");
     var cmpDateStr = dateFormat(cmpDate); // Turn cmp date into a string to compare to dates in data
 
+    // time limits in days to use for project bar colouring
+    var timeLimit1 = 42; // to lable yellow
+    var timeLimit2 = 63; // to lable red
+
+    
     var dataArray = [];
     var rows = json["rows"];
     var pfBins = {};
@@ -1027,7 +1085,19 @@ function generateSeqLoadDataset(json, cmpDate) {
             pfBins[pf][pid] += v["Lanes"];
 
             if(projects[pid] == undefined) {
-                projects[pid] = { queueDate: queueDate, pid: pid}
+                // set a limit indicator based on how long the project has been going on
+                // the limit variables are set at the beginning of this function
+                // these limits can be used to set colouring of project bars
+                var ongoingTime = daydiff(new Date(queueDate), cmpDate);
+                var passedTimeLimit = 0;
+                
+                if (ongoingTime > timeLimit2) {
+                    passedTimeLimit = 2;
+                } else if (ongoingTime > timeLimit1) {
+                    passedTimeLimit = 1;
+                }
+                projects[pid] = { queueDate: queueDate, pid: pid, passedTimeLimit: passedTimeLimit }
+                //projects[pid] = { queueDate: queueDate, pid: pid}
             }
         }
         
@@ -1036,8 +1106,8 @@ function generateSeqLoadDataset(json, cmpDate) {
     
     // put into "layer structure", sort & then add up y0's
     for (var projID in pfBins["HiSeq"]) {
-        var hO = { x: "HiSeq", y: pfBins["HiSeq"][projID], pid: projID, projName: projects[projID]["projName"], queueDate: projects[projID]["queueDate"] };
-        var mO = { x: "MiSeq", y: pfBins["MiSeq"][projID], pid: projID, projName: projects[projID]["projName"], queueDate: projects[projID]["queueDate"] };
+        var hO = { x: "HiSeq", y: pfBins["HiSeq"][projID], pid: projID, projName: projects[projID]["projName"], queueDate: projects[projID]["queueDate"], passedTimeLimit: projects[projID]["passedTimeLimit"] };
+        var mO = { x: "MiSeq", y: pfBins["MiSeq"][projID], pid: projID, projName: projects[projID]["projName"], queueDate: projects[projID]["queueDate"], passedTimeLimit: projects[projID]["passedTimeLimit"] };
         dataArray.push([hO, mO]);
     }
     dataArray.sort(sortByPlatform);
@@ -1086,6 +1156,11 @@ function drawStackedBars (dataset, divID, width, height, unit, showFirstInQueue,
         y = d3.scale.linear().range([0, h - p[0] - p[2]]),
         parse = d3.time.format("%m/%Y").parse,
         format = d3.time.format("%b");
+    
+    // Time limit colours
+    var limitCol1 = "#FFC447";
+    var limitCol2 = "#FD464B";
+
     
     if (unit == undefined) { unit = "lanes"}
     var fixedDigits = 1;
@@ -1178,16 +1253,27 @@ function drawStackedBars (dataset, divID, width, height, unit, showFirstInQueue,
             .style("fill", function(d, i) {
                 var col = d3.rgb("#5B87FF");
                 if(i%2 == 0) { col = col.brighter(); }
-
-                // Handle vis que regarding time since last prep start
+                
+                // set color dep on wait time since queue date
+                if (d[0].passedTimeLimit != undefined && d[0].passedTimeLimit > 0) {
+                    if (d[0].passedTimeLimit == 1) {
+                        col = limitCol1;
+                    } else {
+                        col = limitCol2;
+                    }
+                }
+                
+                // Handle vis que regarding time since last prep start for first in queue project
                 var dayLimit = 7;
                 if (showFirstInQueue) {
                     if (d[0].daysSincePrepStart != undefined) {
-                        if (d[0].daysSincePrepStart > dayLimit ) {
-                            col = timeseriesColors[1];
-                        } else {
-                            col = timeseriesColors[2];
-                        }
+                        //if (d[0].daysSincePrepStart > dayLimit ) {
+                        //    col = timeseriesColors[1];
+                        //} else {
+                        //    col = timeseriesColors[2];
+                        //}
+                        //col = "green";
+                        col = timeseriesColors[2];
                      }
                 } 
                 return col;
