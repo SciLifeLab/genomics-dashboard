@@ -111,8 +111,8 @@ function reduceToProject(jsonview) {
     var prepStarts = {};
     
     // switches for debugging 
-    var debug = true;
-    var debugID = "P946";
+    var debug = false;
+    var debugID = "P931";
     
     // Loop through all samples
     for (var i = 0; i < rows.length; i++) {
@@ -125,17 +125,17 @@ function reduceToProject(jsonview) {
             //console.log("Skipping " + keys[0]);
             continue;
         }
-        // Skip aborted *samples*
-        if (values["Status"] == "Aborted") {
-            continue;
-        }
-
+        
+        
+        // Handle aborted *samples*
+        var aborted = (values["Status"] == "Aborted");
         
         var pid = keys[0]; // project id
         var type = keys[1]; // type = Production || Applications
         var appl = keys[2]; // application
         var pf = keys[3]; // platform
         var sid = keys[4]; // sample id
+        // *** Need to handle start dates here even for aborted samples ****
         if(projects[pid] == undefined) { // new project, initialize with keys
             projects[pid] = {
                                 "type": type,
@@ -143,7 +143,7 @@ function reduceToProject(jsonview) {
                                 "pf": pf,
                             }
             for (var valKey in values) {
-                projects[pid][valKey] = values[valKey]; // intialize all data for proj with values of first sample
+                projects[pid][valKey] = values[valKey]; // intialize all data for proj with values of first sample. This is ok even if sample is aborted
                 if (debug && pid == debugID) { console.log(sid + " " + valKey + ": " + values[valKey]); }
             }
         } else {
@@ -159,11 +159,11 @@ function reduceToProject(jsonview) {
                     prepStarts[currVal].push( projects[pid]); // add project object   
                 }
                 // set values
-                if(valKey == "Samples" || valKey == "Lanes") {
+                if(!aborted && valKey == "Samples" || valKey == "Lanes") {
                     projects[pid][valKey] += values[valKey];
-                } else if (valKey.indexOf("start") != -1 ) { // get earliest start dates
+                } else if (valKey.indexOf("start") != -1 && currVal != "0000-00-00") { // get earliest start dates
                     if (currVal < projects[pid][valKey]) { projects[pid][valKey] = currVal; } // handles 0000-00-00 as well
-                } else { // get latest done dates, except 0000-00-00
+                } else if(!aborted){ // get latest done dates, except 0000-00-00
                     if (currVal == "0000-00-00" || projects[pid][valKey] == "0000-00-00") { // need to capture if date is already set to 0000-00-00
                         projects[pid][valKey] = "0000-00-00";
                     } else if (currVal > projects[pid][valKey]) {
@@ -239,6 +239,17 @@ function generateRunchartDataset (jsonview, dateRangeStart, dateRangeEnd, dateFr
         var rows = jsonview["rows"];
         var projects = {};
         
+        // Some debugging switches        
+        var listIdSwitch = false; // turn on listing of IDs in data set
+        var listStartKey = "QC library finished"; // specify dateFromKey to trigger ID listing
+        var listEndKey = "All samples sequenced"; // specify dateToKey to trigger ID listing
+            // parse debugging settings above
+        var listIDs = false;
+        if (dateFromKey == listStartKey && dateToKey == listEndKey && listIdSwitch) {
+            listIDs = true;
+            console.log(dateFromKey + " - " + dateToKey);
+        }
+        
         // Each row is one project
         for (var i = 0; i < rows.length; i++) {
             //console.log("looping through json array: 1");
@@ -305,7 +316,7 @@ function generateRunchartDataset (jsonview, dateRangeStart, dateRangeEnd, dateFr
                 pid,
                 projects[pid]["num_samples"],
                 new Date(projects[pid]["toDate"]),
-                projects[pid]["daydiff"]
+                projects[pid]["daydiff"],
             ]);
         }
         
@@ -314,7 +325,11 @@ function generateRunchartDataset (jsonview, dateRangeStart, dateRangeEnd, dateFr
         for (var j = 0; j < dataArray.length; j++) {
                 var tmpdata = dataArray[j];
                 tmpdata.unshift(j + 1);
-                //console.log(tmpdata[4]); // project ID
+                // if debugging project ids 
+                if (listIDs) {
+                    console.log(tmpdata[1] + "\t"+ tmpdata[5]);
+                }
+
         }
         return dataArray;
         
@@ -542,7 +557,7 @@ function drawRunChart(dataset, divID, clines, width, height, padding, maxY) {
     // DOM id for data line
     var dataLineID = divID + "_data_line";
     
-
+    var numProj = dataset.length;
     
     // Time format
     var dateFormat = d3.time.format("%Y-%m-%d");
@@ -574,7 +589,7 @@ function drawRunChart(dataset, divID, clines, width, height, padding, maxY) {
     var xAxis = d3.svg.axis()
                       .scale(xScale)
                       .orient("bottom")
-                      .ticks(5);
+                      .ticks(0);
     
     //Define Y axis
     var yAxis = d3.svg.axis()
@@ -712,7 +727,7 @@ function drawRunChart(dataset, divID, clines, width, height, padding, maxY) {
             .call(yAxis);       
     }
     // add axis labels
-    if(newchart) {
+    //if(newchart) {
         // y axis label
         svg.append("text")
             .attr("y", padding - 10 )
@@ -720,13 +735,17 @@ function drawRunChart(dataset, divID, clines, width, height, padding, maxY) {
             .attr("class", "axis_label")
             .text("days");
         // x axis label
+        if (!newchart) {
+            var labelToRemove = svg.selectAll(".axis_label_x");
+            labelToRemove.remove();
+        }
         svg.append("text")
             .attr("y", height - 3)
             .attr("x", width)
-            .attr("class", "axis_label")
-            .text("project #");
+            .attr("class", "axis_label_x")
+            .text(numProj + " project");
         
-    }
+    //}
     
     // define a straight line function for control lines
     var clLine = d3.svg.line()
@@ -994,14 +1013,7 @@ function drawBarchartPlot(dataset, divID, width, height, bottom_padding, maxY) {
  */
 function drawProcessPanels(sample_json, plotDate, startDate, height, draw_width){
     // Reduce sample data to project level
-    console.log(sample_json);
     var reduced = reduceToProject(sample_json);
-    console.log(reduced);
-
-    //// Add invisible tooltip div for mouseovers
-    //var tooltipDiv = d3.select("body").append("div")	
-    //    .attr("class", "tooltip")				
-    //    .style("opacity", 0);    
     
     // keys for time calculations
     var total = {
@@ -1054,7 +1066,10 @@ function drawProcessPanels(sample_json, plotDate, startDate, height, draw_width)
                                    + " / " + parseFloat(numPreps.SeqCap/12).toFixed(2) + " / " + parseFloat(numPreps.Other/12).toFixed(2));
     ////////////////// end test bit
     
-    // The ongoing calculations
+    /* Upper half panels - The ongoing calculations
+     ***********************************************************
+    */
+        //Generate data sets
     var recCtrlLoad = generateRecCtrlStackDataset(sample_json, today);
     var sampleQueue = generateQueueSampleStackDataset(sample_json, today);
     var libprepLaneQueue = generateQueueLaneLPStackDataset(sample_json, today);
@@ -1065,16 +1080,26 @@ function drawProcessPanels(sample_json, plotDate, startDate, height, draw_width)
     
     //console.log(sampleQueue);    
 
-    drawRCStackedBars(recCtrlLoad, "ongoing_bc_plot", bar_width * 1, panelHeights);
-    drawStackedBars (sampleQueue, "queue_sample_load_lp", bar_width * 4, panelHeights, "samples", true);
-    drawStackedBars (libprepLaneQueue, "queue_lane_load_lp", bar_width * 2, panelHeights, "lanes");
-    drawStackedBars (finlibLaneQueue, "queue_lane_load_fl", bar_width * 2, panelHeights, "lanes");
-    drawStackedBars(sampleLoadLibprep, "libprep_sample_load", bar_width * 4, panelHeights, "samples");
-    drawStackedBars(laneLoadLibprep, "libprep_lane_load", bar_width * 2, panelHeights, "lanes");
-    drawStackedBars (seqLoad, "seq_load_stack", bar_width * 2, panelHeights, "lanes");
+        //Set the 'normal' max values for the different load visualizations
+    var rcNormalMax = 20; //# projects
+    var queueLpSampleLoadNormalMax = 200; //# samples in queue for libprep
+    var queueLpLaneLoadNormalMax = 60; //# lanes worth of samples in queue for libprep
+    var queueFlLaneLoadNormalMax = 30; //# lanes of finished libraries in queue for sequencing
+    var lpSampleLoadNormalMax = 200; //# samples in libprep
+    var lpLaneLoadNormalMax = 60; //# lanes worth of samples in libprep
+    var seqLaneLoadNormalMax = 100; //# lanes in sequencing
+    
+        //Draw the plots
+    drawRCStackedBars(recCtrlLoad, "ongoing_bc_plot", bar_width * 1, panelHeights, rcNormalMax);
+    drawStackedBars (sampleQueue, "queue_sample_load_lp", bar_width * 4, panelHeights, "samples", true, queueLpSampleLoadNormalMax, true);
+    drawStackedBars (libprepLaneQueue, "queue_lane_load_lp", bar_width * 2, panelHeights, "lanes", false, queueLpLaneLoadNormalMax, false);
+    drawStackedBars (finlibLaneQueue, "queue_lane_load_fl", bar_width * 2, panelHeights, "lanes", false, queueFlLaneLoadNormalMax, false);
+    drawStackedBars(sampleLoadLibprep, "libprep_sample_load", bar_width * 4, panelHeights, "samples", false, lpSampleLoadNormalMax, false);
+    drawStackedBars(laneLoadLibprep, "libprep_lane_load", bar_width * 2, panelHeights, "lanes", false, lpLaneLoadNormalMax, false);
+    drawStackedBars (seqLoad, "seq_load_stack", bar_width * 2, panelHeights, "lanes", false, seqLaneLoadNormalMax, false);
     
         
-    /* Lower half panels
+    /* Lower half panels - Runcharts and boxplots
      ***********************************************************
     */
     

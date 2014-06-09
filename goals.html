@@ -26,7 +26,7 @@
         <div id="status_panels">
             <!--Delivery time run chart-->
             <div id="total_del_times" class="times_panel">
-                <h2>Total delivery times - <span id="total_legend">RNA, DNA, and SeqCap projects</span></h2>
+                <h2>Total delivery times - <span id="total_legend">RNA-seq (total RNA), WG re-seq, and Exome capture projects</span></h2>
                 Projects started between 2014-01-01 - <span id="date"></span>
                 <h3>Queue date - All samples sequenced</h3>
                 <div id="total_rc">
@@ -59,10 +59,10 @@
             var winHeight = window.innerHeight;
             //console.log("w: " + winWidth + ", h: " + winHeight);
 			
-			var panelHeights = (winHeight - 210) / 2;						
+			var panelHeights = (winHeight - 210);						
 			var drawWidth = (winWidth - 500);
             
-            var rc_width = drawWidth / 2;
+            var rc_width = drawWidth;
             
             var dateFormat = d3.time.format("%Y-%m-%d");    
             //var dateStr = today.toDateString();

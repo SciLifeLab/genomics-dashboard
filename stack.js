@@ -417,6 +417,11 @@ function generateQueueLaneFLStackDataset(json, cmpDate) {
     var dateFormat = d3.time.format("%Y-%m-%d");
     var cmpDateStr = dateFormat(cmpDate); // Turn cmp date into a string to compare to dates in data
 
+    // time limits in days to use for project bar colouring
+    var timeLimit1 = 10; // to lable yellow
+    var timeLimit2 = 20; // to lable red
+    
+    
     var dataArray = [];
     var rows = json["rows"];
     var pfBins = {};
@@ -489,7 +494,20 @@ function generateQueueLaneFLStackDataset(json, cmpDate) {
             pfBins[pf][pid] += v["Lanes"];
 
             if(projects[pid] == undefined) {
-                projects[pid] = { queueDate: queueDate}
+                // set a limit indicator based on how long the project has been going on
+                // the limit variables are set at the beginning of this function
+                // these limits can be used to set colouring of project bars
+                var ongoingTime = daydiff(new Date(queueDate), cmpDate);
+                var passedTimeLimit = 0;
+                
+                if (ongoingTime > timeLimit2) {
+                    passedTimeLimit = 2;
+                } else if (ongoingTime > timeLimit1) {
+                    passedTimeLimit = 1;
+                }
+                //console.log(pid + " passedTimeLimit: " + passedTimeLimit)
+                projects[pid] = { queueDate: queueDate, passedTimeLimit: passedTimeLimit }
+                //projects[pid] = { queueDate: queueDate}
             }
         }
         
@@ -498,8 +516,8 @@ function generateQueueLaneFLStackDataset(json, cmpDate) {
     
     // put into "layer structure", sort & then add up y0's
     for (var projID in pfBins["HiSeq"]) {
-        var hO = { x: "HiSeq", y: pfBins["HiSeq"][projID], pid: projID, queueDate: projects[projID]["queueDate"] };
-        var mO = { x: "MiSeq", y: pfBins["MiSeq"][projID], pid: projID, queueDate: projects[projID]["queueDate"] };
+        var hO = { x: "HiSeq", y: pfBins["HiSeq"][projID], pid: projID, queueDate: projects[projID]["queueDate"], passedTimeLimit: projects[projID]["passedTimeLimit"] };
+        var mO = { x: "MiSeq", y: pfBins["MiSeq"][projID], pid: projID, queueDate: projects[projID]["queueDate"], passedTimeLimit: projects[projID]["passedTimeLimit"] };
         dataArray.push([hO, mO]);
     }
     dataArray.sort(sortByPlatform);
@@ -536,7 +554,12 @@ function generateQueueSampleStackDataset(json, cmpDate) {
 
     var dateFormat = d3.time.format("%Y-%m-%d");
     var cmpDateStr = dateFormat(cmpDate); // Turn cmp date into a string to compare to dates in data
-
+    
+    // time limits in days to use for project bar colouring
+    var timeLimit1 = 10; // to lable yellow
+    var timeLimit2 = 20; // to lable red
+    
+    
     var dataArray = [];
     var rows = json["rows"];
     var applBins = {};
@@ -625,7 +648,19 @@ function generateQueueSampleStackDataset(json, cmpDate) {
             applBins[applCat][pid] += 1;
 
             if(projects[pid] == undefined) {
-                projects[pid] = { queueDate: queueDate, arrivalDate: arrivalDate }
+                // set a limit indicator based on how long the project has been going on
+                // the limit variables are set at the beginning of this function
+                // these limits can be used to set colouring of project bars
+                var ongoingTime = daydiff(new Date(queueDate), cmpDate);
+                var passedTimeLimit = 0;
+                
+                if (ongoingTime > timeLimit2) {
+                    passedTimeLimit = 2;
+                } else if (ongoingTime > timeLimit1) {
+                    passedTimeLimit = 1;
+                }
+                //console.log(pid + " passedTimeLimit: " + passedTimeLimit)
+                projects[pid] = { queueDate: queueDate, arrivalDate: arrivalDate, passedTimeLimit: passedTimeLimit }
             }
             
         }
@@ -653,7 +688,8 @@ function generateQueueSampleStackDataset(json, cmpDate) {
         var projArr = [];
         //for (c in cat) {
         for (i = 0; i < cat.length; i++) {
-            var o = { x: cat[i], y: applBins[cat[i]][projID], pid: projID, queueDate: projects[projID]["queueDate"], arrivalDate: projects[projID]["arrivalDate"] };
+            //var o = { x: cat[i], y: applBins[cat[i]][projID], pid: projID, queueDate: projects[projID]["queueDate"], arrivalDate: projects[projID]["arrivalDate"] };
+            var o = { x: cat[i], y: applBins[cat[i]][projID], pid: projID, queueDate: projects[projID]["queueDate"], arrivalDate: projects[projID]["arrivalDate"], passedTimeLimit: projects[projID]["passedTimeLimit"] };
             projArr.push(o);
         }
         dataArray.push(projArr);
@@ -704,6 +740,10 @@ function generateLibprepSampleLoadDataset(json, cmpDate) {
 
     var dateFormat = d3.time.format("%Y-%m-%d");
     var cmpDateStr = dateFormat(cmpDate); // Turn cmp date into a string to compare to dates in data
+
+    // time limits in days to use for project bar colouring
+    var timeLimit1 = 42; // to lable yellow
+    var timeLimit2 = 63; // to lable red
 
     var dataArray = [];
     var rows = json["rows"];
@@ -784,7 +824,19 @@ function generateLibprepSampleLoadDataset(json, cmpDate) {
             applBins[applCat][pid] += 1;
 
             if(projects[pid] == undefined) {
-                projects[pid] = { queueDate: queueDate, pid: pid}
+                // set a limit indicator based on how long the project has been going on
+                // the limit variables are set at the beginning of this function
+                // these limits can be used to set colouring of project bars
+                var ongoingTime = daydiff(new Date(queueDate), cmpDate);
+                var passedTimeLimit = 0;
+                
+                if (ongoingTime > timeLimit2) {
+                    passedTimeLimit = 2;
+                } else if (ongoingTime > timeLimit1) {
+                    passedTimeLimit = 1;
+                }
+                projects[pid] = { queueDate: queueDate, pid: pid, passedTimeLimit: passedTimeLimit }
+                //projects[pid] = { queueDate: queueDate, pid: pid}
             }
         }
         
@@ -795,7 +847,8 @@ function generateLibprepSampleLoadDataset(json, cmpDate) {
     for (var projID in applBins["DNA"]) {
         var projArr = [];
         for (i = 0; i < cat.length; i++) {
-             var o = { x: cat[i], y: applBins[cat[i]][projID], pid: projID, projName: projects[projID]["projName"], queueDate: projects[projID]["queueDate"] };
+            //var o = { x: cat[i], y: applBins[cat[i]][projID], pid: projID, projName: projects[projID]["projName"], queueDate: projects[projID]["queueDate"] };
+            var o = { x: cat[i], y: applBins[cat[i]][projID], pid: projID, projName: projects[projID]["projName"], queueDate: projects[projID]["queueDate"], passedTimeLimit: projects[projID]["passedTimeLimit"] };
             projArr.push(o);
         }
         dataArray.push(projArr);
@@ -955,6 +1008,11 @@ function generateSeqLoadDataset(json, cmpDate) {
     var dateFormat = d3.time.format("%Y-%m-%d");
     var cmpDateStr = dateFormat(cmpDate); // Turn cmp date into a string to compare to dates in data
 
+    // time limits in days to use for project bar colouring
+    var timeLimit1 = 42; // to lable yellow
+    var timeLimit2 = 63; // to lable red
+
+    
     var dataArray = [];
     var rows = json["rows"];
     var pfBins = {};
@@ -1027,7 +1085,19 @@ function generateSeqLoadDataset(json, cmpDate) {
             pfBins[pf][pid] += v["Lanes"];
 
             if(projects[pid] == undefined) {
-                projects[pid] = { queueDate: queueDate, pid: pid}
+                // set a limit indicator based on how long the project has been going on
+                // the limit variables are set at the beginning of this function
+                // these limits can be used to set colouring of project bars
+                var ongoingTime = daydiff(new Date(queueDate), cmpDate);
+                var passedTimeLimit = 0;
+                
+                if (ongoingTime > timeLimit2) {
+                    passedTimeLimit = 2;
+                } else if (ongoingTime > timeLimit1) {
+                    passedTimeLimit = 1;
+                }
+                projects[pid] = { queueDate: queueDate, pid: pid, passedTimeLimit: passedTimeLimit }
+                //projects[pid] = { queueDate: queueDate, pid: pid}
             }
         }
         
@@ -1036,8 +1106,8 @@ function generateSeqLoadDataset(json, cmpDate) {
     
     // put into "layer structure", sort & then add up y0's
     for (var projID in pfBins["HiSeq"]) {
-        var hO = { x: "HiSeq", y: pfBins["HiSeq"][projID], pid: projID, projName: projects[projID]["projName"], queueDate: projects[projID]["queueDate"] };
-        var mO = { x: "MiSeq", y: pfBins["MiSeq"][projID], pid: projID, projName: projects[projID]["projName"], queueDate: projects[projID]["queueDate"] };
+        var hO = { x: "HiSeq", y: pfBins["HiSeq"][projID], pid: projID, projName: projects[projID]["projName"], queueDate: projects[projID]["queueDate"], passedTimeLimit: projects[projID]["passedTimeLimit"] };
+        var mO = { x: "MiSeq", y: pfBins["MiSeq"][projID], pid: projID, projName: projects[projID]["projName"], queueDate: projects[projID]["queueDate"], passedTimeLimit: projects[projID]["passedTimeLimit"] };
         dataArray.push([hO, mO]);
     }
     dataArray.sort(sortByPlatform);
@@ -1073,9 +1143,11 @@ function generateSeqLoadDataset(json, cmpDate) {
  * @param {Number} width    plot width
  * @param {Number} height   plot height
  * @param {String} [unit="lanes"] Unit of values. Used for bar legend 
- * @param {Boolean} [showFirstInQueue=false] If first in queue project should be indicated visually
+ * @param {Boolean} showFirstInQueue=false If first in queue project should be indicated visually
+ * @param {Number} maxY "Normal" max value for y-axis
+ * @param {Boolean} showNumWS If number of worksets should be shown
  */
-function drawStackedBars (dataset, divID, width, height, unit, showFirstInQueue) {
+function drawStackedBars (dataset, divID, width, height, unit, showFirstInQueue, maxY, showNumWS) {
     //console.log(dataset)
     var w = width,
         h = height,
@@ -1084,6 +1156,11 @@ function drawStackedBars (dataset, divID, width, height, unit, showFirstInQueue)
         y = d3.scale.linear().range([0, h - p[0] - p[2]]),
         parse = d3.time.format("%m/%Y").parse,
         format = d3.time.format("%b");
+    
+    // Time limit colours
+    var limitCol1 = "#FFC447";
+    var limitCol2 = "#FD464B";
+
     
     if (unit == undefined) { unit = "lanes"}
     var fixedDigits = 1;
@@ -1133,9 +1210,39 @@ function drawStackedBars (dataset, divID, width, height, unit, showFirstInQueue)
         .attr("transform", "translate(" + p[3] + "," + (h - p[2]) + ")");
     
         
-        // Compute the x-domain (by platform) and y-domain (by top).
+        // Compute the x-domain (by platform) and y-domain.
         x.domain(dataset[0].map(function(d) { return d.x; }));
-        y.domain([0, d3.max(dataset[dataset.length - 1], function(d) { return d.y0 + d.y; })]);
+
+        var yMultiples = 1; // multiples of the set maxY needed to fit the data. Used to set colours to indicate that scales differ from "normal"
+        var dataYMax = d3.max(dataset[dataset.length - 1], function(d) { return d.y0 + d.y; }); // get the max of the data set
+            // check if the max of the data set will fit the 'normal' maxY passed to the function
+        var newMaxY = maxY;
+        while (newMaxY < dataYMax ) { //if not, increase drawing maxY
+            newMaxY += maxY;
+            yMultiples++;
+        }        
+        y.domain([0, newMaxY]); // compute the y-domain using the maxY that will fit the data set
+
+            //set colours for scales depending on how many multiples of maxY had to be used to fit the data set
+        var loadCol = "#fff";
+        if (yMultiples == 2) {
+            loadCol = "yellow";
+        } else if (yMultiples > 2) {
+            loadCol = "red";
+        }
+        
+        
+        
+        
+        
+        //var stackMax;
+        //if (maxY) {
+        //    stackMax = maxY;
+        //} else {
+        //    stackMax = d3.max(dataset[dataset.length - 1], function(d) { return d.y0 + d.y; });        
+        //}             
+        //console.log("stackMax: ", stackMax);
+        //y.domain([0, stackMax]);
     
         // Add a group for each project.
         var project = svg.selectAll("g.project")
@@ -1146,16 +1253,27 @@ function drawStackedBars (dataset, divID, width, height, unit, showFirstInQueue)
             .style("fill", function(d, i) {
                 var col = d3.rgb("#5B87FF");
                 if(i%2 == 0) { col = col.brighter(); }
-
-                // Handle vis que regarding time since last prep start
+                
+                // set color dep on wait time since queue date
+                if (d[0].passedTimeLimit != undefined && d[0].passedTimeLimit > 0) {
+                    if (d[0].passedTimeLimit == 1) {
+                        col = limitCol1;
+                    } else {
+                        col = limitCol2;
+                    }
+                }
+                
+                // Handle vis que regarding time since last prep start for first in queue project
                 var dayLimit = 7;
                 if (showFirstInQueue) {
                     if (d[0].daysSincePrepStart != undefined) {
-                        if (d[0].daysSincePrepStart > dayLimit ) {
-                            col = "red"
-                        } else {
-                            col = timeseriesColors[1];
-                        }
+                        //if (d[0].daysSincePrepStart > dayLimit ) {
+                        //    col = timeseriesColors[1];
+                        //} else {
+                        //    col = timeseriesColors[2];
+                        //}
+                        //col = "green";
+                        col = timeseriesColors[2];
                      }
                 } 
                 return col;
@@ -1238,7 +1356,7 @@ function drawStackedBars (dataset, divID, width, height, unit, showFirstInQueue)
                 return t;                
             })
             ;        
-        if (unit == "samples"){
+        if (unit == "samples" && showNumWS){
             var loadText2 = svg.selectAll("g.load_label")
                 .data(x.domain())
                 .enter().append("svg:text")
@@ -1276,6 +1394,7 @@ function drawStackedBars (dataset, divID, width, height, unit, showFirstInQueue)
             .attr("x", -p[3] + 18)
             .attr("dy", ".35em")
             .text(d3.format(",d"))
+            .style("fill", loadCol)
             ;
     
 }
@@ -1287,7 +1406,7 @@ function drawStackedBars (dataset, divID, width, height, unit, showFirstInQueue)
  * @param {Number} width    plot width
  * @param {Number} height   plot height
  */
-function drawRCStackedBars (dataset, divID, width, height) {
+function drawRCStackedBars (dataset, divID, width, height, maxY) {
     var w = width,
         h = height,
         p = [30, 10, 30, 20], // t, r, b, l
@@ -1330,7 +1449,35 @@ function drawRCStackedBars (dataset, divID, width, height) {
         
     // Compute the x-domain (by platform) and y-domain (by top).
     x.domain(dataset[0].map(function(d) { return d.x; }));
-    y.domain([0, d3.max(dataset[dataset.length - 1], function(d) { return d.y0 + d.y; })]);
+
+    var yMultiples = 1; // multiples of the set maxY needed to fit the data. Used to set colours to indicate that scales differ from "normal"
+    var dataYMax = d3.max(dataset[dataset.length - 1], function(d) { return d.y0 + d.y; }); // get the max of the data set
+        // check if the max of the data set will fit the 'normal' maxY passed to the function
+    var newMaxY = maxY;
+    while (newMaxY < dataYMax ) { //if not, increase drawing maxY
+        newMaxY += maxY;
+        yMultiples++;
+    }        
+    y.domain([0, newMaxY]); // compute the y-domain using the maxY that will fit the data set
+
+        //set colours for scales depending on how many multiples of maxY had to be used to fit the data set
+    var loadCol = "#fff";
+    if (yMultiples == 2) {
+        loadCol = "yellow";
+    } else if (yMultiples > 2) {
+        loadCol = "red";
+    }
+
+    
+    //var stackMax;
+    //if (maxY) {
+    //    stackMax = maxY;
+    //} else {
+    //    stackMax = d3.max(dataset[dataset.length - 1], function(d) { return d.y0 + d.y; });        
+    //}             
+    //
+    //console.log("stackMax: ", stackMax);
+    //y.domain([0, stackMax]);
 
     // Add a group for each project.
     var project = svg.selectAll("g.project")
@@ -1441,5 +1588,6 @@ function drawRCStackedBars (dataset, divID, width, height) {
         .attr("x", -p[3] + 18)
         .attr("dy", ".35em")
         .text(d3.format(",d"))
+        .style("fill", loadCol)
         ;
 }
