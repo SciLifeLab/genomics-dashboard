@@ -1252,7 +1252,7 @@ function drawStackedBars (dataset, divID, width, height, unit, showFirstInQueue,
             .attr("class", "project")
             .style("fill", function(d, i) {
                 var col = d3.rgb("#5B87FF");
-                if(i%2 == 0) { col = col.brighter(); }
+                if(i%2 == 0) { col = col.brighter(); } // #82c0ff - spell out instead?
                 
                 // set color dep on wait time since queue date
                 if (d[0].passedTimeLimit != undefined && d[0].passedTimeLimit > 0) {
