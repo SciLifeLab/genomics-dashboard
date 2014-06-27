@@ -1011,10 +1011,11 @@ function drawBarchartPlot(dataset, divID, width, height, bottom_padding, maxY) {
  * @param {Number} height panel plot height
  * @param {Number} draw_width available drawing widths
  */
-function drawProcessPanels(sample_json, plotDate, startDate, height, draw_width){
+function drawProcessPanels(sample_json, plotDate, startDate, height, draw_width, ptype){
     // Reduce sample data to project level
     var reduced = reduceToProject(sample_json);
     
+    ptype = typeof ptype !== undefined ? ptype : "Production"; //Default is production, unless something else is given
     // keys for time calculations
     var total = {
         startKey: "Queue date",
@@ -1071,14 +1072,14 @@ function drawProcessPanels(sample_json, plotDate, startDate, height, draw_width)
     */
         //Generate data sets
     var recCtrlLoad = generateRecCtrlStackDataset(sample_json, today);
-    var sampleQueue = generateQueueSampleStackDataset(sample_json, today);
-    var libprepLaneQueue = generateQueueLaneLPStackDataset(sample_json, today);
-    var finlibLaneQueue = generateQueueLaneFLStackDataset(sample_json, today);
-    var sampleLoadLibprep = generateLibprepSampleLoadDataset(sample_json, today);
-    var laneLoadLibprep = generateLibprepLaneLoadDataset(sample_json, today);
-    var seqLoad = generateSeqLoadDataset(sample_json, today);
+    var sampleQueue = generateQueueSampleStackDataset(sample_json, today, ptype);
+    var libprepLaneQueue = generateQueueLaneLPStackDataset(sample_json, today, ptype);
+    var finlibLaneQueue = generateQueueLaneFLStackDataset(sample_json, today, ptype);
+    var sampleLoadLibprep = generateLibprepSampleLoadDataset(sample_json, today, ptype);
+    var laneLoadLibprep = generateLibprepLaneLoadDataset(sample_json, today, ptype);
+    var seqLoad = generateSeqLoadDataset(sample_json, today, ptype);
     
-    //console.log(sampleQueue);    
+    console.log(sampleQueue);    
 
         //Set the 'normal' max values for the different load visualizations
     var rcNormalMax = 20; //# projects
