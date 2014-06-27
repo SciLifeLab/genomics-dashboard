@@ -434,7 +434,7 @@ function generateQueueLaneFLStackDataset(json, cmpDate, ptype) {
         var pid = k[0];
         var type = k[1];
         var appl = k[2];
-        if (type != ptype){ continue; } // only Production of interest - is this true?? 
+        if (type != ptype){ continue; } // only ptype are of interest - is this true?? 
         if (appl != "Finished library") { continue; } // skip fin lib projects
 
         // Determine which platform

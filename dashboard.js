@@ -1079,7 +1079,7 @@ function drawProcessPanels(sample_json, plotDate, startDate, height, draw_width,
     var laneLoadLibprep = generateLibprepLaneLoadDataset(sample_json, today, ptype);
     var seqLoad = generateSeqLoadDataset(sample_json, today, ptype);
     
-    console.log(sampleQueue);    
+    //console.log(sampleQueue);    
 
         //Set the 'normal' max values for the different load visualizations
     var rcNormalMax = 20; //# projects
