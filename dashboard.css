@@ -29,15 +29,34 @@ h4 {
 }
 br.clear { clear: both; }
 
-div.fiq_legend {
+div.stack_legend_h3 {
     float: left;
     font-size: 0.6em;
     margin: 5px 10px 0 30px;
+}
+div.stack_legend_h4 {
+    float: left;
+    font-size: 0.6em;
+    margin: 5px 10px 0 34px;
 }
 
 span.fiq_col_legend {
     background-color: #865BFF;
     color: #865BFF;
+    font-size: 0.6em;
+    padding: 0 3px 0 3px;
+}
+
+span.norm1_col_legend {
+    background-color: #82c0ff;
+    color: #82c0ff;
+    font-size: 0.6em;
+    padding: 0 3px 0 3px;
+}
+
+span.norm2_col_legend {
+    background-color: #5B87FF;
+    color: #5B87FF;
     font-size: 0.6em;
     padding: 0 3px 0 3px;
 }
@@ -57,11 +76,6 @@ span.limit_2_legend {
     margin-left: 5px;
 }
 
-div.stack_legend {
-    float: left;
-    font-size: 0.6em;
-    margin: 5px 10px 0 34px;
-}
 
 circle {
   /*fill: #D88F00;*/
