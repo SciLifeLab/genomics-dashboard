@@ -42,15 +42,18 @@
 				<div id="load_charts">
 					<div id="queue_lp_load"> <!--was queue_sample_load - rename-->
 						<h3 style="float: left">Lib prep</h3>
-                        <div class="fiq_legend" style="float: left">
+                        <div class="stack_legend_h3">
                             <span class="fiq_col_legend">1</span>
                             first in queue
+                            <span class="norm1_col_legend">1</span>
+                            <span class="norm2_col_legend">1</span>
+                            &le;10 days in prod
                         </div>
                         <br class="clear">
 						
                         <div id="queue_sample_load_lp"> <!--NEW-->
                             <h4 style="float: left">Samples</h4>
-                            <div class="stack_legend">
+                            <div class="stack_legend_h4">
                                 <span class="limit_1_legend">1</span>
                                 &gt;10 days in prod
 
@@ -76,10 +79,16 @@
                 <h2>Ongoing - <?php echo (isset($_GET['ptype'])? $_GET['ptype']: 'Production'); ?> (started, but not delivered)</h2>
                 <div id="ongoing_load_charts">
                     <div id="libprep_load">
-                        <h3>Lib prep</h3>
+                        <h3 style="float: left; margin-right: 22px">Lib prep</h3>
+                        <div class="stack_legend_h3">
+                            <span class="norm1_col_legend">1</span>
+                            <span class="norm2_col_legend">1</span>
+                            &le;6 weeks in prod
+                        </div>
+                        <br class="clear">
                          <div id="libprep_sample_load">
                             <h4 style="float: left">Sample load</h4>
-                            <div class="stack_legend">
+                            <div class="stack_legend_h4">
                                 <span class="limit_1_legend">1</span>
                                 &gt;6 weeks in prod
 
