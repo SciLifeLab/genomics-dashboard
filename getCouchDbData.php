@@ -35,6 +35,7 @@
     // get user:password from file. File should contain one line on the form username:password
     $fhandle = fopen("user_cred.txt", 'r');
     $user_password = fgets($fhandle);
+    $user_password = str_replace("\n", '', $user_password);// in case there is \n at the end of the line
     fclose($fhandle);
     
     // set up curl and call couchDb view
