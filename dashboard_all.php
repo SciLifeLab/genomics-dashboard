@@ -2,7 +2,7 @@
 <html lang="en">
 	<head>
 		<meta charset="utf-8">
-		<title>Genomics Production Dashboard</title>
+		<title>Genomics <?php echo (isset($_GET['ptype'])? $_GET['ptype'] : 'Production'); ?> Dashboard</title>
 		<script type="text/javascript" src="d3/d3.v3.js"></script>
         <script type="text/javascript" src="d3/box.js"></script>
 	    <script type="text/javascript" src="d3/colorbrewer.js"></script>
@@ -38,7 +38,7 @@
             
 			<!--Queue panels -->
 			<div id="queue">
-				<h2>Queue - Production (Queue date, but not started)</h2>
+				<h2>Queue - <?php echo (isset($_GET['ptype'])? $_GET['ptype']: 'Production'); ?> (Queue date, but not started)</h2>
 				<div id="load_charts">
 					<div id="queue_lp_load"> <!--was queue_sample_load - rename-->
 						<h3 style="float: left">Lib prep</h3>
@@ -76,7 +76,7 @@
 			</div>
             <!--Ongoing panels -> change to load-->
             <div id="ongoing">
-                <h2>Ongoing - Production (started, but not delivered)</h2>
+                <h2>Ongoing - <?php echo (isset($_GET['ptype'])? $_GET['ptype']: 'Production'); ?> (started, but not delivered)</h2>
                 <div id="ongoing_load_charts">
                     <div id="libprep_load">
                         <h3 style="float: left; margin-right: 22px">Lib prep</h3>
@@ -226,17 +226,26 @@
             /* 
             * Database server source
             */ 
-            var dbSource = "" // local, local_dev, dev or "" (=tools)
+            var dbSource = "" ;// local, local_dev, dev or "" (=tools)
             //var dbSource = "dev" // local, local_dev, dev or "" (=tools)
             //var dbSource = "local" // local, local_dev, dev or "" (=tools)
             //var dbSource = "local_dev" // local, local_dev, dev or "" (=tools)
-            
+            var ptype="Production";
+            <?php
+               // grabbing php paramters and shamelessly plugging them in js
+            if (isset ($_GET['dbsource'])){
+                echo 'dbSource = "'.$_GET['dbsource'].'";'; 
+            }
+           if (isset($_GET['ptype'])){
+                echo 'ptype = "'.$_GET['ptype'].'";'; 
+            }
+            ?> 
             /*
              * Get data for projects & draw
              */
             var dataUrl = "getCouchDbData.php?db=projects&design=genomics-dashboard&view=dates_and_load_per_sample&reduce=false&" + dbSource;
             d3.json(dataUrl, function(json){
-                drawProcessPanels(json, today, twelveWeeks, panelHeights, drawWidth);
+                drawProcessPanels(json, today, twelveWeeks, panelHeights, drawWidth, ptype);
             });
                     
             // Problem KPIs. Not shown at the moment

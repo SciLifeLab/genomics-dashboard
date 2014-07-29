@@ -291,14 +291,14 @@ function generateRecCtrlStackDataset(json, cmpDate) {
  * @param {Date} cmpDate	A Date object to specify load date
  * @returns {Array} An array of arrays of "layer" objects 
  */
-function generateQueueLaneLPStackDataset(json, cmpDate) {
+function generateQueueLaneLPStackDataset(json, cmpDate, ptype) {
     var dateFormat = d3.time.format("%Y-%m-%d");
     var cmpDateStr = dateFormat(cmpDate); // Turn cmp date into a string to compare to dates in data
-
     var dataArray = [];
     var rows = json["rows"];
     var pfBins = {};
     var projects = {};
+    ptype = typeof ptype !== 'undefined' ? ptype : "Production"; //Default is production, unless something else is given
     // loop through each sample and add upp lane load per project
     for (var i = 0; i < rows.length; i++) {
         //console.log("looping through json array: 1");
@@ -306,7 +306,7 @@ function generateQueueLaneLPStackDataset(json, cmpDate) {
         var pid = k[0];
         var type = k[1];
         var appl = k[2];
-        if (type != "Production") { continue; } // only Production of interest
+        if (type != ptype) { continue; } // only matching ptype projectsprojects  (Application or Production) will be returned.
         if (appl == "Finished library") { continue; } // need seq start date to be able to handle fin lib projects
 
         // Determine which platform
@@ -413,7 +413,7 @@ function generateQueueLaneLPStackDataset(json, cmpDate) {
  * @param {Date} cmpDate	A Date object to specify load date
  * @returns {Array} An array of arrays of "layer" objects 
  */
-function generateQueueLaneFLStackDataset(json, cmpDate) {
+function generateQueueLaneFLStackDataset(json, cmpDate, ptype) {
     var dateFormat = d3.time.format("%Y-%m-%d");
     var cmpDateStr = dateFormat(cmpDate); // Turn cmp date into a string to compare to dates in data
 
@@ -426,6 +426,7 @@ function generateQueueLaneFLStackDataset(json, cmpDate) {
     var rows = json["rows"];
     var pfBins = {};
     var projects = {};
+    ptype = typeof ptype !== 'undefined' ? ptype : "Production"; //Default is production, unless something else is given
     // loop through each sample and add upp lane load per project
     for (var i = 0; i < rows.length; i++) {
         //console.log("looping through json array: 1");
@@ -433,7 +434,7 @@ function generateQueueLaneFLStackDataset(json, cmpDate) {
         var pid = k[0];
         var type = k[1];
         var appl = k[2];
-        if (type != "Production") { continue; } // only Production of interest - is this true?? 
+        if (type != ptype){ continue; } // only ptype are of interest - is this true?? 
         if (appl != "Finished library") { continue; } // skip fin lib projects
 
         // Determine which platform
@@ -550,7 +551,7 @@ function generateQueueLaneFLStackDataset(json, cmpDate) {
  * @param {Date} cmpDate	A Date object to specify load date
  * @returns {Array} An array of arrays of "layer" objects 
  */
-function generateQueueSampleStackDataset(json, cmpDate) {
+function generateQueueSampleStackDataset(json, cmpDate, ptype) {
 
     var dateFormat = d3.time.format("%Y-%m-%d");
     var cmpDateStr = dateFormat(cmpDate); // Turn cmp date into a string to compare to dates in data
@@ -569,6 +570,7 @@ function generateQueueSampleStackDataset(json, cmpDate) {
         applBins[cat[i]] = {};
     }
     //console.log(applBins);
+    ptype = typeof ptype !== 'undefined' ? ptype : "Production"; //Default is production, unless something else is given
     
     // array to capture libprep start dates
     var libPrepStartDates = [];
@@ -582,7 +584,7 @@ function generateQueueSampleStackDataset(json, cmpDate) {
         var type = k[1];
         var appl = k[2];
         var sampleID = k[4];
-        if (type != "Production") { continue; } // only Production of interest
+        if (type != ptype){ continue; } // only ptype projects of interest
         if (appl == "Finished library") { continue; } // fin lib projects not of interest
         if(appl == null) { appl = "Other";}
         //console.log(sampleID);
@@ -736,7 +738,7 @@ function generateQueueSampleStackDataset(json, cmpDate) {
  * @param {Date} cmpDate	A Date object to specify load date
  * @returns {Array} An array of arrays of "layer" objects 
  */
-function generateLibprepSampleLoadDataset(json, cmpDate) {
+function generateLibprepSampleLoadDataset(json, cmpDate, ptype) {
 
     var dateFormat = d3.time.format("%Y-%m-%d");
     var cmpDateStr = dateFormat(cmpDate); // Turn cmp date into a string to compare to dates in data
@@ -755,6 +757,8 @@ function generateLibprepSampleLoadDataset(json, cmpDate) {
     }
     //console.log(applBins);
     
+    ptype = typeof ptype !== 'undefined' ? ptype : "Production"; //Default is production, unless something else is given
+    
     var projects = {};
     // loop through each sample and add upp lane load per project
     for (var i = 0; i < rows.length; i++) {
@@ -764,7 +768,7 @@ function generateLibprepSampleLoadDataset(json, cmpDate) {
         var appl = k[2];
         var sampleID = k[4];
         if (appl == "Finished library") { continue; } // fin lib projects not of interest
-        if (type != "Production") { continue; } // only Production of interest
+        if (type != ptype) { continue; } // only projects of ptype are of interest
         if(appl == null) { appl = "Other";}
 
         //console.log(sampleID);
@@ -885,7 +889,7 @@ function generateLibprepSampleLoadDataset(json, cmpDate) {
  * @param {Date} cmpDate	A Date object to specify load date
  * @returns {Array} An array of arrays of "layer" objects 
  */
-function generateLibprepLaneLoadDataset(json, cmpDate) {
+function generateLibprepLaneLoadDataset(json, cmpDate, ptype) {
     var dateFormat = d3.time.format("%Y-%m-%d");
     var cmpDateStr = dateFormat(cmpDate); // Turn cmp date into a string to compare to dates in data
 
@@ -893,13 +897,14 @@ function generateLibprepLaneLoadDataset(json, cmpDate) {
     var rows = json["rows"];
     var pfBins = {};
     var projects = {};
+    ptype = typeof ptype !== 'undefined' ? ptype : "Production"; //Default is production, unless something else is given
     for (var i = 0; i < rows.length; i++) {
         var k = rows[i]["key"];
         var pid = k[0];
         var type = k[1];
         var appl = k[2];
         if (appl == "Finished library") { continue; } // skip fin lib projects
-        if (type != "Production") { continue; } // only Production of interest
+        if (type != ptype) { continue; } // only ptype projects are of interest
 
         
         // Determine which platform
@@ -1004,7 +1009,7 @@ function generateLibprepLaneLoadDataset(json, cmpDate) {
  * @param {Date} cmpDate	A Date object to specify load date
  * @returns {Array} An array of arrays of "layer" objects 
  */
-function generateSeqLoadDataset(json, cmpDate) {
+function generateSeqLoadDataset(json, cmpDate, ptype) {
     var dateFormat = d3.time.format("%Y-%m-%d");
     var cmpDateStr = dateFormat(cmpDate); // Turn cmp date into a string to compare to dates in data
 
@@ -1012,6 +1017,7 @@ function generateSeqLoadDataset(json, cmpDate) {
     var timeLimit1 = 42; // to lable yellow
     var timeLimit2 = 63; // to lable red
 
+    ptype = typeof ptype !== 'undefined' ? ptype : "Production"; //Default is production, unless something else is given
     
     var dataArray = [];
     var rows = json["rows"];
@@ -1025,7 +1031,7 @@ function generateSeqLoadDataset(json, cmpDate) {
         var type = k[1];
         var appl = k[2];
         var sid = k[4];
-        if (type != "Production") { continue; } // only Production of interest
+        if (type != ptype) { continue; } // only ptype pptype projects aree of interest
 
         // Determine which platform
         var pf = k[3];
