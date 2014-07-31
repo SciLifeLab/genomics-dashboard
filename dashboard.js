@@ -229,12 +229,12 @@ function reduceToProject(jsonview) {
  * @param {Date} dateRangeStart	A Date object to specify start of date range to include
  * @param {Date} dateRangeEnd	A Date object to specify end of date range to include
  * @param {String} dateFromKey	A key to identify start date for diff calculation
- * @param {Boolean} onlyProduction	If true only include data where type == "Production"
+ * @param {String} ptype Which projects to display, 'Production' or 'Application'"
  * @param {String} filter	A key to identify records to be selected
  * @param {Boolean} inverseSelection If true look for absence of filter string
  * @returns {Array} 			An array [ order, pid, num_samples, date, daysX, daysY, ... ]. Times are in days
  */
-function generateRunchartDataset (jsonview, dateRangeStart, dateRangeEnd, dateFromKey, dateToKey, onlyProduction, filter, inverseSelection) {
+function generateRunchartDataset (jsonview, dateRangeStart, dateRangeEnd, dateFromKey, dateToKey, ptype, filter, inverseSelection) {
         var dataArray = [];
         var rows = jsonview["rows"];
         var projects = {};
@@ -262,7 +262,8 @@ function generateRunchartDataset (jsonview, dateRangeStart, dateRangeEnd, dateFr
             var appl = keys[2]; // application
             var pf = keys[3]; // platform
             //var sid = keys[4]; // sample id
-            if(onlyProduction && type != "Production") { continue; }
+            
+            if(type !== ptype) { continue; }// if current type is not expected type, skip
             
             
             if(filter) {
@@ -342,12 +343,12 @@ function generateRunchartDataset (jsonview, dateRangeStart, dateRangeEnd, dateFr
  * @param {Date} dateRangeStart	A Date object to specify start of date range to include
  * @param {Date} dateRangeEnd	A Date object to specify end of date range to include
  * @param {String} dateFromKey	A key to identify start date for diff calculation
- * @param {Boolean} onlyProduction	If true only include data where type == "Production"
+ * @param {String} ptype Which projects to display, 'Production' or 'Application'"
  * @param {String} filter	A key to identify records to be selected
  * @param {Boolean} inverseSelection If true look for absence of filter string
  * @returns {Array} 			An array [ order, pid, num_samples, date, daysX, daysY, ... ]. Times are in days
  */
-function addToRunchartDataset (jsonview, dataArray, dateRangeStart, dateRangeEnd, dateFromKey, dateToKey, onlyProduction, filter, inverseSelection) {
+function addToRunchartDataset (jsonview, dataArray, dateRangeStart, dateRangeEnd, dateFromKey, dateToKey, ptype, filter, inverseSelection) {
         var rows = jsonview["rows"];
         var projects = {};
 
@@ -365,7 +366,7 @@ function addToRunchartDataset (jsonview, dataArray, dateRangeStart, dateRangeEnd
             var appl = keys[2]; // application
             var pf = keys[3]; // platform
             //var sid = keys[4]; // sample id
-            if(onlyProduction && type != "Production") { continue; }
+            if(type != ptype) { continue; }
             
             
             if(filter) {
@@ -425,10 +426,16 @@ function addToRunchartDataset (jsonview, dataArray, dateRangeStart, dateRangeEnd
         //        projects[pid]["daydiff"]
         //    ]);
         //}
-        
+        var tmpID=0
+        var temDiff=0
         for (var j = 0; j < dataArray.length; j++) {
-            var tmpID = dataArray[j][1]; // pid
-            var tmpDiff = projects[tmpID]["daydiff"];
+            tmpID = dataArray[j][1]; // pid
+            if(projects.hasOwnProperty(tmpID)){
+                tmpDiff = projects[tmpID]["daydiff"];
+            }else{
+                console.log("did not find project "+tmpID)
+                tmpDiff=0
+            }
             //console.log(tmpID + ": " + tmpDiff);
             dataArray[j].push(tmpDiff);
         }
@@ -1105,55 +1112,55 @@ function drawProcessPanels(sample_json, plotDate, startDate, height, draw_width,
     */
     
     /* **** Total delivery times data sets **** */
-    var totalRcDataset = generateRunchartDataset(reduced, startDate, plotDate, total.startKey, total.endKey, true);
+    var totalRcDataset = generateRunchartDataset(reduced, startDate, plotDate, total.startKey, total.endKey, ptype);
     var totalBpDataset = generateGenericBoxDataset(totalRcDataset, 4);
         /* ** Subsets ** */
         // LibPrep projects
-    var totalRcLPDataset = generateRunchartDataset(reduced, startDate, plotDate, total.startKey, total.endKey, true, "Finished library", true);
+    var totalRcLPDataset = generateRunchartDataset(reduced, startDate, plotDate, total.startKey, total.endKey, ptype, "Finished library", true);
     var totalBpLPDataset = generateGenericBoxDataset(totalRcLPDataset, 4);
         // Finished library projects
-    var totalRcFLDataset = generateRunchartDataset(reduced, startDate, plotDate, total.startKey, total.endKey, true, "Finished library");   
+    var totalRcFLDataset = generateRunchartDataset(reduced, startDate, plotDate, total.startKey, total.endKey, ptype, "Finished library");   
     var totalBpFLDataset = generateGenericBoxDataset(totalRcFLDataset, 4);
         // MiSeq projects
-    var totalRcMiSeqDataset = generateRunchartDataset(reduced, startDate, plotDate, total.startKey, total.endKey, true, "MiSeq");
+    var totalRcMiSeqDataset = generateRunchartDataset(reduced, startDate, plotDate, total.startKey, total.endKey, ptype, "MiSeq");
     var totalBpMiSeqDataset = generateGenericBoxDataset(totalRcMiSeqDataset, 4);
         // HiSeq projects
-    var totalRcHiSeqDataset = generateRunchartDataset(reduced, startDate, plotDate, total.startKey, total.endKey, true, "HiSeq");
+    var totalRcHiSeqDataset = generateRunchartDataset(reduced, startDate, plotDate, total.startKey, total.endKey, ptype, "HiSeq");
     var totalBpHiSeqDataset = generateGenericBoxDataset(totalRcHiSeqDataset, 4);
     
 
     /* **** RecCtrl delivery times data sets **** */
-    var recCtrlDataset = generateRunchartDataset(reduced, startDate, plotDate, recCtrl.startKey, recCtrl.endKey, true);
+    var recCtrlDataset = generateRunchartDataset(reduced, startDate, plotDate, recCtrl.startKey, recCtrl.endKey, ptype);
     // add second time series
-    recCtrlDataset = addToRunchartDataset(reduced, recCtrlDataset, startDate, plotDate, recCtrl.startKey2, recCtrl.endKey, true);
+    recCtrlDataset = addToRunchartDataset(reduced, recCtrlDataset, startDate, plotDate, recCtrl.startKey2, recCtrl.endKey, ptype);
     var recCtrlBpDataset = generateGenericBoxDataset(recCtrlDataset, 4); // boxplot to use second time series
     var recCtrlBpDataset2 = generateGenericBoxDataset(recCtrlDataset, 5); // boxplot to use second time series
 
     /* **** Libprep delivery times data sets **** */
-    var libPrepDataset = generateRunchartDataset(reduced, startDate, plotDate, libPrep.startKey, libPrep.endKey, true, "Finished library", true); 
+    var libPrepDataset = generateRunchartDataset(reduced, startDate, plotDate, libPrep.startKey, libPrep.endKey, ptype, "Finished library", true); 
     // add second time series
-    libPrepDataset = addToRunchartDataset(reduced, libPrepDataset, startDate, plotDate, libPrep.startKey2, libPrep.endKey, true);
+    libPrepDataset = addToRunchartDataset(reduced, libPrepDataset, startDate, plotDate, libPrep.startKey2, libPrep.endKey, ptype);
     var libPrepBpDataset = generateGenericBoxDataset(libPrepDataset, 4);
     var libPrepBpDataset2 = generateGenericBoxDataset(libPrepDataset, 5);
     
     /* **** Seq datasets for all projects **** */
-    var seqDataset = generateRunchartDataset(reduced, startDate, plotDate, seq.startKey, seq.endKey, true); 
+    var seqDataset = generateRunchartDataset(reduced, startDate, plotDate, seq.startKey, seq.endKey, ptype); 
         // add second time series
-    seqDataset = addToRunchartDataset(reduced, seqDataset, startDate, plotDate, seq.startKey2, seq.endKey, true);
+    seqDataset = addToRunchartDataset(reduced, seqDataset, startDate, plotDate, seq.startKey2, seq.endKey, ptype);
     var seqBpDataset = generateGenericBoxDataset(seqDataset, 4);
     var seqBpDataset2 = generateGenericBoxDataset(seqDataset, 5);
 
         /* ** Subsets ** */
         // MiSeq projects
-    var seqMiSeqDataset = generateRunchartDataset(reduced, startDate, plotDate, seq.startKey, seq.endKey, true, "MiSeq"); 
+    var seqMiSeqDataset = generateRunchartDataset(reduced, startDate, plotDate, seq.startKey, seq.endKey, ptype, "MiSeq"); 
             // add second time series
-    seqMiSeqDataset = addToRunchartDataset(reduced, seqMiSeqDataset, startDate, plotDate, seq.startKey2, seq.endKey, true, "MiSeq");
+    seqMiSeqDataset = addToRunchartDataset(reduced, seqMiSeqDataset, startDate, plotDate, seq.startKey2, seq.endKey, ptype, "MiSeq");
     var seqBpMiSeqDataset = generateGenericBoxDataset(seqMiSeqDataset, 4);
     var seqBpMiSeqDataset2 = generateGenericBoxDataset(seqMiSeqDataset, 5);
         // HiSeq projects
-    var seqHiSeqDataset = generateRunchartDataset(reduced, startDate, plotDate, seq.startKey, seq.endKey, true, "HiSeq"); 
+    var seqHiSeqDataset = generateRunchartDataset(reduced, startDate, plotDate, seq.startKey, seq.endKey, ptype, "HiSeq"); 
             // add second time series
-    seqHiSeqDataset = addToRunchartDataset(reduced, seqHiSeqDataset, startDate, plotDate, seq.startKey2, seq.endKey, true, "HiSeq");
+    seqHiSeqDataset = addToRunchartDataset(reduced, seqHiSeqDataset, startDate, plotDate, seq.startKey2, seq.endKey, ptype, "HiSeq");
     var seqBpHiSeqDataset =generateGenericBoxDataset(seqHiSeqDataset, 4);
     var seqBpHiSeqDataset2 =generateGenericBoxDataset(seqHiSeqDataset, 5);
 
