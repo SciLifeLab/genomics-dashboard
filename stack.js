@@ -594,7 +594,9 @@ function generateQueueSampleStackDataset(json, cmpDate, ptype) {
         } else if (appl == "Amplicon" ||
                    appl == "de novo" ||
                    appl == "Metagenome" ||
-                   appl == "WG re-seq") {
+                   appl == "WG re-seq" || 
+                   appl == "WG re-seq (IGN)"
+                   ) {
             applCat = "DNA";
         } else if (appl == "RNA-seq (total RNA)") {
             applCat = "RNA";
