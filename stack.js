@@ -235,6 +235,8 @@ function generateRecCtrlStackDataset(json, cmpDate) {
         if (seqDoneDate != "0000-00-00") {
             continue;
         }
+        var rawDataDelivered = v["All raw data delivered"];
+        if (rawDataDelivered != "0000-00-00") { continue; }
             
 
         var arrDate = v["Arrival date"];
@@ -342,6 +344,8 @@ function generateQueueLaneLPStackDataset(json, cmpDate, ptype) {
         if (seqStartDate != "0000-00-00") { continue; }
         var seqFinishedDate = v["All samples sequenced"];
         if (seqFinishedDate != "0000-00-00") { continue; }
+        var rawDataDelivered = v["All raw data delivered"];
+        if (rawDataDelivered != "0000-00-00") { continue; }
         
         var queueDate = v["Queue date"];
         var prepStartDate = v["Lib prep start"];
@@ -451,7 +455,7 @@ function generateQueueLaneFLStackDataset(json, cmpDate, ptype) {
         // skip aborted projects
         var aborted_date = v["Aborted date"];
         if (aborted_date != "0000-00-00") {
-            //console.log("Skipping " + keys[0]);
+            //console.log("Skipping " + k[0]);
             continue;
         }
         // Skip aborted or finished *samples*
@@ -467,6 +471,8 @@ function generateQueueLaneFLStackDataset(json, cmpDate, ptype) {
         if (seqStartDate != "0000-00-00") { continue; }
         var seqFinishedDate = v["All samples sequenced"];
         if (seqFinishedDate != "0000-00-00") { continue; }
+        var rawDataDelivered = v["All raw data delivered"];
+        if (rawDataDelivered != "0000-00-00") { continue; }
 
         var queueDate = v["Queue date"];
         //var prepStartDate = v["Lib prep start"];
@@ -594,7 +600,9 @@ function generateQueueSampleStackDataset(json, cmpDate, ptype) {
         } else if (appl == "Amplicon" ||
                    appl == "de novo" ||
                    appl == "Metagenome" ||
-                   appl == "WG re-seq") {
+                   appl == "WG re-seq" || 
+                   appl == "WG re-seq (IGN)"
+                   ) {
             applCat = "DNA";
         } else if (appl == "RNA-seq (total RNA)") {
             applCat = "RNA";
@@ -625,6 +633,8 @@ function generateQueueSampleStackDataset(json, cmpDate, ptype) {
         if (seqStartDate != "0000-00-00") { continue; }
         var seqFinishedDate = v["All samples sequenced"];
         if (seqFinishedDate != "0000-00-00") { continue; }
+        var rawDataDelivered = v["All raw data delivered"];
+        if (rawDataDelivered != "0000-00-00") { continue; }
 
         var arrivalDate = v["Arrival date"];
         var queueDate = v["Queue date"];
@@ -807,6 +817,8 @@ function generateLibprepSampleLoadDataset(json, cmpDate, ptype) {
         if (seqStartDate != "0000-00-00") { continue; }
         var seqFinishedDate = v["All samples sequenced"];
         if (seqFinishedDate != "0000-00-00") { continue; }
+        var rawDataDelivered = v["All raw data delivered"];
+        if (rawDataDelivered != "0000-00-00") { continue; }
 
         var queueDate = v["Queue date"];
         var prepStartDate = v["Lib prep start"];
@@ -936,6 +948,8 @@ function generateLibprepLaneLoadDataset(json, cmpDate, ptype) {
         if (seqStartDate != "0000-00-00") { continue; }
         var seqFinishedDate = v["All samples sequenced"];
         if (seqFinishedDate != "0000-00-00") { continue; }
+        var rawDataDelivered = v["All raw data delivered"];
+        if (rawDataDelivered != "0000-00-00") { continue; }
         
         var queueDate = v["Queue date"];
         var prepStartDate = v["Lib prep start"];
@@ -1061,7 +1075,12 @@ function generateSeqLoadDataset(json, cmpDate, ptype) {
         var libQCDate = v["QC library finished"];
         var seqStartDate = v["Sequencing start"];
         var seqDoneDate = v["All samples sequenced"];
-
+        
+        //skip samples were there are missing dates in the LIMS
+        var rawDataDelivered = v["All raw data delivered"];
+        if (rawDataDelivered != "0000-00-00") { continue; }
+        
+        
         // The start date of the process step depends on if project is libprep or fin lib
         var stepStartDate = libQCDate;
         if(appl == "Finished library") {
