@@ -112,7 +112,7 @@ function reduceToProject(jsonview) {
     
     // switches for debugging 
     var debug = false;
-    var debugID = "P931";
+    var debugID = "P1267"; // Any changes here can be ignored
     
     // Loop through all samples
     for (var i = 0; i < rows.length; i++) {
@@ -282,6 +282,13 @@ function generateRunchartDataset (jsonview, dateRangeStart, dateRangeEnd, dateFr
                     if(keys[filter_field] == null || keys[filter_field].indexOf(filter) != -1 ) { continue; }
                 }
             }
+            
+            // Handle situation where application is "Finished library" and dateFromKey is "QC library finished",
+            // in which case dateFromKey should be "Queue date"
+            if (appl == "Finished library" && dateFromKey == "QC library finished") {
+                dateFromKey = "Queue date";
+            }
+            
             var sampleDateFrom = values[dateFromKey];
             var sampleDateTo = values[dateToKey];
             if(projects[pid] == undefined) {
@@ -1040,7 +1047,7 @@ function drawProcessPanels(sample_json, plotDate, startDate, height, draw_width,
         endKey: "QC library finished"
     };
     var seq = {
-        startKey: "QC library finished",
+        startKey: "QC library finished", // Note! For finished library projects, startKey should be "Queue date". This is handled in the generateRunchartDataset function
         startKey2: "Sequencing start",
         startKey3: "All samples sequenced", // start for bioinfo qc
         endKey: "All samples sequenced" // Change to All raw data delivered when this works
