@@ -835,6 +835,8 @@ function drawBoxPlot(dataset, divID, plotHeight, maxY, bottom_margin, timeseries
     var boxClass = "box";
     if (timeseries == 2) {
         boxClass = "box2"; // affects which class and css used for graph elements
+    } else if (timeseries === 3) {
+        boxClass = "box3";
     }
     
     var min = Infinity,
@@ -1033,7 +1035,8 @@ function drawProcessPanels(sample_json, plotDate, startDate, height, draw_width,
     // keys for time calculations
     var total = {
         startKey: "Queue date",
-        endKey: "All samples sequenced" // Change to All raw data delivered when this works
+        //endKey: "All samples sequenced" // Change to All raw data delivered when this works
+        endKey: "All raw data delivered" 
     };
     var recCtrl = {
         startKey: "Arrival date",
@@ -1052,7 +1055,10 @@ function drawProcessPanels(sample_json, plotDate, startDate, height, draw_width,
         startKey3: "All samples sequenced", // start for bioinfo qc
         endKey: "All samples sequenced" // Change to All raw data delivered when this works
     };
-    
+    var bioinfo = {
+        startKey: "All samples sequenced",
+        endKey: "All raw data delivered",
+    }
     
     /* 
      *  17 bars to draw over the width of the window in the upper half
@@ -1063,7 +1069,7 @@ function drawProcessPanels(sample_json, plotDate, startDate, height, draw_width,
      *  4 run chart panels on the lower half
      */ 
     //var rc_width = draw_width / 4; // 
-    var rc_width = draw_width / 4 - 20; // take away some width to fit in extra boxplots
+    var rc_width = draw_width / 4 - 31; // take away some width to fit in extra boxplots, incl 55px/4 for the Bioinfo QC bp
 
     /* Upper half panels 
      ***********************************************************
@@ -1170,7 +1176,10 @@ function drawProcessPanels(sample_json, plotDate, startDate, height, draw_width,
     seqHiSeqDataset = addToRunchartDataset(reduced, seqHiSeqDataset, startDate, plotDate, seq.startKey2, seq.endKey, ptype, "HiSeq");
     var seqBpHiSeqDataset =generateGenericBoxDataset(seqHiSeqDataset, 4);
     var seqBpHiSeqDataset2 =generateGenericBoxDataset(seqHiSeqDataset, 5);
-
+    
+    /* **** Bioinfo dataset for all projects **** */
+    var bioinfoDataset = generateRunchartDataset(reduced, startDate, plotDate, bioinfo.startKey, bioinfo.endKey, ptype);
+    var bioinfoBpDataset = generateGenericBoxDataset(bioinfoDataset, 4);
     
     // get highest value in the runchart data sets to set a common scale
     var maxTot = d3.max(totalRcDataset, function(d) {return d[4];});
@@ -1195,6 +1204,9 @@ function drawProcessPanels(sample_json, plotDate, startDate, height, draw_width,
     drawRunChart(seqDataset, "seq_rc", [3], rc_width, height, 30, maxStepY);
     drawBoxPlot(seqBpDataset, "seq_bp1", height, maxStepY, 30, 1);
     drawBoxPlot(seqBpDataset2, "seq_bp2", height, maxStepY, 30, 2); // force css for class box2
+    
+    drawBoxPlot(bioinfoBpDataset, "bi_bp1", height, maxStepY, 30, 3); // force css for class box3?
+    
     
     
 
