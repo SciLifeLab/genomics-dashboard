@@ -195,6 +195,7 @@ function reduceToProject(jsonview) {
             "All samples sequenced":projects[pid]["All samples sequenced"],
             "All raw data delivered":projects[pid]["All raw data delivered"],
             "Close date":projects[pid]["Close date"],
+            "Aborted date":projects[pid]["Aborted date"],
             "Samples":projects[pid]["Samples"],
             "Lanes":parseFloat(Math.round(projects[pid]["Lanes"]).toFixed(2))
         };
@@ -1035,7 +1036,6 @@ function drawProcessPanels(sample_json, plotDate, startDate, height, draw_width,
     // keys for time calculations
     var total = {
         startKey: "Queue date",
-        //endKey: "All samples sequenced" // Change to All raw data delivered when this works
         endKey: "All raw data delivered" 
     };
     var recCtrl = {
