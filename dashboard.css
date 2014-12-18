@@ -88,6 +88,9 @@ circle {
 .second_series_heading {
     color: #FFC447;
 }
+.third_series_heading {
+    color: #865BFF;
+}
 
 .axis path,
 .axis line {
@@ -183,6 +186,35 @@ circle {
 .box2 text {
     fill: #FFC447;
 }
+
+.box3 {
+    font: 10px sans-serif;
+    fill: #865BFF;
+}
+
+.box3 line,
+.box3 rect,
+.box3 circle {
+  fill: #fff;
+  stroke: #865BFF;
+  stroke-width: 1.5px;
+}
+
+.box3 .center {
+  stroke-dasharray: 3,3;
+}
+
+.box3 .outlier {
+  fill: none;
+  stroke: #ccc;
+}
+
+.box3 text {
+    fill: #865BFF;
+}
+
+
+/*add the remaining box3 styles*/
 
 /**/
 #header {

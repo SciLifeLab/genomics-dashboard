@@ -113,7 +113,7 @@
             <!--Delivery time run charts-->
             <div id="total_del_times" class="times_panel">
                 <h2>Total delivery times - <span id="total_legend">All projects</span></h2>
-                <h3>Days = from 'Queue date' to 'All samples sequenced'</h3>
+                <h3>Days = from 'Queue date' to 'All raw data delivered'</h3>
                 <h3 style="visibility: hidden">Hidden heading</h3> <!--To make drawing panels level with each other-->
                 <div id="total_rc">
                     <!--<h3>Run chart</h3>-->
@@ -169,6 +169,14 @@
                     <div id="seq_bp2" class="boxplot_panel"></div>
                 </div>
             </div>
+			<div id="bioinfo_del_times" class="times_panel">
+				<h2>Bioinfo</h2>
+				<h3 class="third_series_heading">QC</h3>
+                <h3 style="visibility: hidden">Hidden heading</h3> <!--To make drawing panels level with each other-->
+				<div id="bi_bp" class="boxplot_panel">
+					<div id="bi_bp1" class="boxplot_panel"></div>
+				</div>
+			</div>
             <br class="clear">
         </div>
         <!--"Problem panels"-->
