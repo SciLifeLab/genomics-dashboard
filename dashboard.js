@@ -1069,7 +1069,7 @@ function drawProcessPanels(sample_json, plotDate, startDate, height, draw_width,
      *  4 run chart panels on the lower half
      */ 
     //var rc_width = draw_width / 4; // 
-    var rc_width = draw_width / 4 - 31; // take away some width to fit in extra boxplots, incl 55px/4 for the Bioinfo QC bp
+    var rc_width = draw_width / 4 - 40; // take away some width to fit in extra boxplots, incl 55px/4 for the Bioinfo QC bp
 
     /* Upper half panels 
      ***********************************************************
