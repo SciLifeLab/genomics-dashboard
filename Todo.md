@@ -17,7 +17,7 @@
 - [x] **RecCtrl RC** Add boxplot for 1st time series
 - [x] **Lib prep RC** Add boxplot for 2nd time series
 - [x] **Sequencing RC** Add boxplot for 2nd time series
-- [ ] Total delivery time RC: change end date to *All raw data delivered*
-- [ ] Sequencing RC: change end date to *All raw data delivered*
+- [x] Total delivery time RC: change end date to *All raw data delivered*
+- [x] Sequencing RC: change end date to *All raw data delivered*
 - [x] Links to genomics status project page to use new url
 - [x] Tooltip width to cope with four-digit project IDs
